@@ -12,9 +12,10 @@ GITHUB_REPO: 'mac2u',
 GITHUB_BRANCH: 'main',
 
   // ---- Paths ພາຍໃນ Repository ----
-  PRODUCTS_PATH: 'data/products.json',
-  SETTINGS_PATH: 'data/settings.json',
-  IMAGES_PATH: 'images',
+// Paths ພາຍໃນ Repository
+PRODUCTS_PATH: 'products.json',
+SETTINGS_PATH: 'settings.json',
+IMAGES_DIR: 'images/',
 
   // ---- ຂໍ້ມູນຮ້ານ ----
   WHATSAPP_NUMBER: '22258416',
