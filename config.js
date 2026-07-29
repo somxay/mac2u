@@ -1,0 +1,40 @@
+/* =========================================================================
+   config.js
+   ບ່ອນດຽວທີ່ຕ້ອງແກ້ ເມື່ອທ່ານ Deploy ຄັ້ງທຳອິດ (ຫຼືປ່ຽນ Repository ໃໝ່).
+   ໜ້າ index.html ແລະ admin.html ຈະດຶງຄ່າຈາກໄຟລ໌ນີ້ຮ່ວມກັນ.
+   ບໍ່ມີ path/URL ໃດ hardcode ໄວ້ກັບໂດເມນເກົ່າ — ໃຊ້ໄດ້ທັນທີເມື່ອຜູກ Custom Domain.
+   ========================================================================= */
+
+const CONFIG = {
+  // ---- GitHub Repository ທີ່ໃຊ້ເກັບ data/products.json, data/settings.json, images/ ----
+  GITHUB_OWNER: 'YOUR_GITHUB_USERNAME',   // ex: 'macdjstore'
+  GITHUB_REPO: 'YOUR_REPO_NAME',          // ex: 'macdjstore-site'
+  GITHUB_BRANCH: 'main',
+
+  // ---- Paths ພາຍໃນ Repository ----
+  PRODUCTS_PATH: 'data/products.json',
+  SETTINGS_PATH: 'data/settings.json',
+  IMAGES_PATH: 'images',
+
+  // ---- ຂໍ້ມູນຮ້ານ ----
+  WHATSAPP_NUMBER: '22258416',
+  STORE_NAME: 'Mac & DJ Store',
+};
+
+/* ---------- URL helpers (ໃຊ້ຮ່ວມກັນລະຫວ່າງ index.html / admin.html) ---------- */
+
+// ອ່ານໄຟລ໌ແບບ public, ໄວ, ບໍ່ຕ້ອງມີ token — ໃຊ້ຢູ່ໜ້າຮ້ານ (read-only)
+// ໃສ່ ?t=timestamp ກັນ CDN cache ຂອງ raw.githubusercontent.com (ປົກກະຕິ cache ~5 ນາທີ)
+function ghRawUrl(path) {
+  return `https://raw.githubusercontent.com/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/${CONFIG.GITHUB_BRANCH}/${path}?t=${Date.now()}`;
+}
+
+// jsDelivr CDN — ໃຊ້ສະແດງຮູບພາບ (ໄວກວ່າ, CORS ດີກວ່າ, ແຕ່ cache ດົນກວ່າ raw ~ບໍ່ເກີນ 24 ຊມ / purge ໄດ້)
+function ghCdnUrl(path) {
+  return `https://cdn.jsdelivr.net/gh/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}@${CONFIG.GITHUB_BRANCH}/${path}`;
+}
+
+// GitHub Contents API — ໃຊ້ໂດຍ admin.js ເທົ່ານັ້ນ (ຕ້ອງມີ token, ໃຊ້ອ່ານ+ຂຽນ/commit)
+function ghApiContentsUrl(path) {
+  return `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${path}`;
+}

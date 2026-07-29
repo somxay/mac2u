@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ຫຼັງບ້ານ - Mac & DJ Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao+Looped:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    .rounded-2xl-custom { border-radius: 1.75rem; }
+    .rounded-3xl-custom { border-radius: 2.25rem; }
+  </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+  <!-- ໜ້າ Login: ຕ້ອງໃສ່ GitHub Personal Access Token ທີ່ມີສິດຂຽນເຂົ້າ Repository -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-5">
+    <div class="bg-white w-full max-w-sm p-7 rounded-3xl-custom border border-slate-100 shadow-xl">
+      <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md mb-4">
+        <i class="fas fa-lock"></i>
+      </div>
+      <h2 class="font-bold text-lg mb-1">ເຂົ້າສູ່ລະບົບຫຼັງບ້ານ</h2>
+      <p class="text-xs text-slate-400 mb-4">ໃສ່ GitHub Personal Access Token (ຂອງແອດມິນ) ເພື່ອຈັດການສິນຄ້າ</p>
+
+      <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">GitHub Token (ghp_... ຫຼື fine-grained)</label>
+      <input id="loginToken" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+             class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm mb-2 focus:outline-none focus:border-slate-400">
+
+      <label class="flex items-center gap-2 text-[11px] text-slate-500 mb-3 ml-1">
+        <input id="rememberToken" type="checkbox" class="rounded">
+        ຈື່ token ໄວ້ໃນ browser ນີ້ (localStorage — ໃຊ້ສະເພາະອຸປະກອນສ່ວນຕົວ)
+      </label>
+
+      <p id="loginError" class="text-xs text-rose-500 mb-2 hidden">Token ບໍ່ຖືກຕ້ອງ ຫຼື ບໍ່ມີສິດຂຽນເຂົ້າ Repository!</p>
+      <button onclick="doLogin()" class="w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-semibold">ເຂົ້າສູ່ລະບົບ</button>
+      <a href="index.html" class="block text-center text-xs text-slate-400 mt-4 hover:underline">← ກັບຄືນໜ້າຮ້ານ</a>
+
+      <div class="mt-4 pt-4 border-t border-slate-100 text-[10px] text-slate-400 leading-relaxed">
+        <i class="fas fa-circle-info mr-1"></i>
+        Token ຈະຖືກໃຊ້ຕິດຕໍ່ GitHub API ໂດຍກົງຈາກ browser ຂອງທ່ານເທົ່ານັ້ນ, ບໍ່ໄດ້ຖືກສົ່ງໄປບ່ອນອື່ນ.
+        ຕ້ອງເປັນ token ທີ່ມີສິດ <b>repo (contents: write)</b> ຕໍ່ Repository:
+        <code id="repoLabel" class="bg-slate-50 px-1 rounded font-semibold"></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ໜ້າຈັດການສິນຄ້າ (ສະແດງຫຼັງ Login ສຳເລັດ) -->
+  <div id="dashboard" class="hidden min-h-screen pb-20">
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 px-4 py-3">
+      <div class="max-w-6xl mx-auto flex justify-between items-center gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md">
+            <i class="fas fa-boxes-stacked"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-sm leading-tight">ລະບົບຈັດການຫຼັງບ້ານ</h1>
+            <p class="text-[11px] text-slate-400">Mac & DJ Store — Admin (GitHub)</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openEditModal(null)" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+            <i class="fas fa-plus"></i> ເພີ່ມສິນຄ້າ
+          </button>
+          <button onclick="doLogout()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">ອອກຈາກລະບົບ</button>
+          <a href="index.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">← ໜ້າຮ້ານ</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 space-y-4">
+      <div id="saveStatus" class="hidden bg-amber-50 border border-amber-200 text-amber-700 text-xs px-4 py-2.5 rounded-2xl"></div>
+
+      <!-- ຫ້ອງນ້ອຍໆ ອັບເດດອັດຕາແລກປ່ຽນ -->
+      <div class="bg-white p-4 rounded-3xl-custom border border-slate-100 shadow-sm flex flex-wrap items-end gap-3">
+        <div class="flex-1 min-w-[220px]">
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ອັດຕາ ກີບ → ບາດ (ກີບ ÷ ອັດຕານີ້ = ບາດ)</label>
+          <input id="settingRateLakToThb" type="number" min="1" placeholder="ຕົວຢ່າງ: 695" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+        </div>
+        <div class="flex-1 min-w-[220px]">
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ອັດຕາ ບາດ → ກີບ (ບາດ × ອັດຕານີ້ = ກີບ)</label>
+          <input id="settingRateThbToLak" type="number" min="1" placeholder="ຕົວຢ່າງ: 685" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+        </div>
+        <button onclick="saveExchangeRate()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition">ບັນທຶກອັດຕາ</button>
+      </div>
+
+      <!-- ຊ່ອງຄົ້ນຫາສິນຄ້າສຳລັບແອດມິນ -->
+      <div class="bg-white p-4 rounded-3xl-custom border border-slate-100 shadow-sm">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-3.5 text-slate-400 text-xs"></i>
+          <input type="text" id="adminSearch" oninput="renderAdminGrid()" placeholder="ຄົ້ນຫາຕາມຊື່, ລະຫັດ ຫຼື ໝວດໝູ່..."
+                 class="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-3 rounded-2xl text-xs focus:outline-none focus:border-slate-400">
+        </div>
+      </div>
+
+      <div id="adminLoading" class="text-center py-16 text-slate-400 text-xs">
+        <i class="fas fa-spinner fa-spin text-lg mb-2 block"></i> ກຳລັງໂຫຼດຂໍ້ມູນສິນຄ້າ...
+      </div>
+
+      <div id="adminGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+    </main>
+  </div>
+
+  <!-- Popup: ເພີ່ມ / ແກ້ໄຂສິນຄ້າ -->
+  <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl-custom shadow-2xl w-full max-w-2xl p-6 overflow-y-auto max-h-[92vh] relative">
+      <button onclick="closeEditModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 z-10"><i class="fas fa-times"></i></button>
+      <h3 id="editModalTitle" class="font-bold text-base mb-4">ເພີ່ມສິນຄ້າໃໝ່</h3>
+
+      <form onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລະຫັດສິນຄ້າ (ID)</label>
+          <input id="pId" type="text" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs" required>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ໝວດໝູ່</label>
+          <select id="pCategory" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+            <option value="Macbook">MacBook</option>
+            <option value="Accessories">ສາຍສາກ/ອຸປະກອນ</option>
+            <option value="DJ">ເຄື່ອງ DJ</option>
+            <option value="Software">ລົງໂປຣແກຣມ</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຊື່ສິນຄ້າ</label>
+          <input id="pTitle" type="text" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs" required>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລາຄາ (ກີບ)</label>
+          <input id="pPriceLAK" type="text" inputmode="numeric" placeholder="xxx,xxx,xxx" oninput="formatPriceInput(this)" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລາຄາເກົ່າ (ຂີດຄ່ອມ, ຖ້າມີ)</label>
+          <input id="pOldPriceLAK" type="text" inputmode="numeric" placeholder="xxx,xxx,xxx" oninput="formatPriceInput(this)" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລາຄາ (ບາດ) — ໃສ່ສະເພາະສິນຄ້າທີ່ຕັ້ງລາຄາເປັນບາດ</label>
+          <input id="pPriceTHB" type="text" inputmode="numeric" placeholder="xxx,xxx (ປ່ອຍວ່າງຖ້າໃຊ້ອັດຕາແປງອັດຕະໂນມັດ)" oninput="formatPriceInput(this)" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລາຄາເກົ່າ (ບາດ, ຂີດຄ່ອມ)</label>
+          <input id="pOldPriceTHB" type="text" inputmode="numeric" placeholder="xxx,xxx" oninput="formatPriceInput(this)" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">RAM (GB)</label>
+          <select id="pRam" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+            <option value="">-- ເລືອກ RAM --</option>
+            <option value="4">4 GB</option>
+            <option value="8">8 GB</option>
+            <option value="16">16 GB</option>
+            <option value="32">32 GB</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">SSD (GB)</label>
+          <select id="pSsd" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+            <option value="">-- ເລືອກ SSD --</option>
+            <option value="128">128 GB</option>
+            <option value="256">256 GB</option>
+            <option value="500">500 / 512 GB</option>
+            <option value="1000">1 TB (1000 GB)</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ປີຜະລິດ</label>
+          <select id="pYear" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+            <option value="">-- ເລືອກປີ --</option>
+            <option value="2012">2012</option>
+            <option value="2014">2014</option>
+            <option value="2015">2015</option>
+            <option value="2017">2017</option>
+            <option value="2018">2018</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຄີບອດ</label>
+          <select id="pKeyboard" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+            <option value="TH">TH</option>
+            <option value="EN">EN</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ແບັດ / ຮອບສາກ</label>
+          <input id="pBattery" type="text" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຂະໜາດໜ້າຈໍ</label>
+          <select id="pScreenSize" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+            <option value="">-- ເລືອກຂະໜາດ --</option>
+            <option value="11.6 ນິ້ວ">11.6 ນິ້ວ</option>
+            <option value="12 ນິ້ວ">12 ນິ້ວ</option>
+            <option value="13 ນິ້ວ">13 ນິ້ວ</option>
+            <option value="13.3 ນິ້ວ">13.3 ນິ້ວ</option>
+            <option value="14 ນິ້ວ">14 ນິ້ວ</option>
+            <option value="15 ນິ້ວ">15 ນິ້ວ</option>
+            <option value="15.4 ນິ້ວ">15.4 ນິ້ວ</option>
+            <option value="16 ນິ້ວ">16 ນິ້ວ</option>
+            <option value="16.2 ນິ້ວ">16.2 ນິ້ວ</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຈຳນວນວັນຮັບປະກັນ</label>
+          <input id="pWarrantyDays" type="number" min="0" step="1" placeholder="ຕົວຢ່າງ: 180" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+          <p class="text-[10px] text-slate-400 mt-1 ml-1">ນັບຈາກມື້ທີ່ປ່ຽນສະຖານະເປັນ "ຂາຍແລ້ວ" · ໃສ່ 0 = ບໍ່ມີປະກັນ</p>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ສະຖານະ</label>
+          <select id="pStatus" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+            <option value="Ready">ພ້ອມຂາຍ</option>
+            <option value="Reserved">ຈອງແລ້ວ</option>
+            <option value="Sold">ຂາຍແລ້ວ</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຮູບພາບສິນຄ້າ</label>
+          <div class="flex items-center gap-2 mb-2">
+            <label for="pImageFile" class="cursor-pointer bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 text-slate-500 rounded-xl px-4 py-2.5 text-xs font-semibold flex items-center gap-2 transition">
+              <i class="fas fa-cloud-arrow-up text-indigo-500"></i> ເລືອກຮູບພາບ (Commit ເຂົ້າ GitHub)
+            </label>
+            <input id="pImageFile" type="file" accept="image/*" onchange="uploadImage(this)" class="hidden">
+            <span id="uploadEmoji"></span>
+          </div>
+          <div id="imagePreviewList" class="flex gap-2 flex-wrap"></div>
+          <input type="hidden" id="pImageList" value="">
+        </div>
+
+        <div class="md:col-span-2 flex gap-2 mt-2">
+          <button type="submit" id="saveBtn" class="flex-1 bg-slate-900 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">ບັນທຶກສິນຄ້າໃໝ່</button>
+          <button type="button" onclick="closeEditModal()" class="px-5 bg-slate-100 text-slate-600 rounded-2xl text-xs font-semibold">ຍົກເລີກ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

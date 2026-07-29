@@ -1,0 +1,48 @@
+[
+  {
+    "id": "102938",
+    "title": "MacBook Air M1 2020",
+    "category": "Macbook",
+    "priceLAK": 4500000,
+    "oldPriceLAK": 4900000,
+    "priceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "8",
+    "ssd": "256",
+    "year": "2020",
+    "images": [
+      "https://cdn.jsdelivr.net/gh/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME@main/images/sample-macbook-1.jpg"
+    ],
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "keyboard": "TH",
+    "battery": "92% (120 ຮອບສາກ)",
+    "screenSize": "13.3 ນິ້ວ",
+    "warrantyDays": 180,
+    "repairHistory": "ບໍ່ມີປະຫວັດການສ້ອມແຊມ",
+    "soldDate": ""
+  },
+  {
+    "id": "204815",
+    "title": "Pioneer DDJ-FLX4",
+    "category": "DJ",
+    "priceLAK": 2100000,
+    "oldPriceLAK": 0,
+    "priceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "",
+    "ssd": "",
+    "year": "",
+    "images": [
+      "https://cdn.jsdelivr.net/gh/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME@main/images/sample-dj-1.jpg"
+    ],
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "keyboard": "",
+    "battery": "",
+    "screenSize": "",
+    "warrantyDays": 90,
+    "repairHistory": "ບໍ່ມີປະຫວັດການສ້ອມແຊມ",
+    "soldDate": ""
+  }
+]
