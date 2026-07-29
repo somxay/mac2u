@@ -7,19 +7,24 @@
 
 const CONFIG = {
   // ---- GitHub Repository ທີ່ໃຊ້ເກັບ data/products.json, data/settings.json, images/ ----
-GITHUB_OWNER: 'somxay',
-GITHUB_REPO: 'mac2u',
-GITHUB_BRANCH: 'main',
+  GITHUB_OWNER: 'YOUR_GITHUB_USERNAME',   // ex: 'macdjstore'
+  GITHUB_REPO: 'YOUR_REPO_NAME',          // ex: 'macdjstore-site'
+  GITHUB_BRANCH: 'main',
 
   // ---- Paths ພາຍໃນ Repository ----
-// Paths ພາຍໃນ Repository
-PRODUCTS_PATH: 'products.json',
-SETTINGS_PATH: 'settings.json',
-IMAGES_DIR: 'images/',
+  PRODUCTS_PATH: 'data/products.json',
+  SETTINGS_PATH: 'data/settings.json',
+  IMAGES_PATH: 'images',
 
   // ---- ຂໍ້ມູນຮ້ານ ----
   WHATSAPP_NUMBER: '22258416',
   STORE_NAME: 'Mac & DJ Store',
+
+  // ---- Facebook Messenger Share (ບໍ່ບັງຄັບ) ----
+  // ຖ້າຢາກໃຊ້ Facebook Send Dialog ແບບເຕັມຮູບແບບ (popup ຢູ່ desktop), ຕ້ອງສ້າງ Facebook App
+  // ຢູ່ https://developers.facebook.com/apps ແລ້ວໃສ່ App ID ຢູ່ນີ້. ຖ້າປ່ອຍວ່າງ, ປຸ່ມ Messenger
+  // ຈະໃຊ້ URL scheme ຂອງ Messenger ໂດຍກົງແທນ (ໃຊ້ໄດ້ດີເທິງມືຖືທີ່ລົງແອັບ Messenger ໄວ້).
+  FACEBOOK_APP_ID: '',
 };
 
 /* ---------- URL helpers (ໃຊ້ຮ່ວມກັນລະຫວ່າງ index.html / admin.html) ---------- */
