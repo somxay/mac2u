@@ -7,14 +7,14 @@
 
 const CONFIG = {
   // ---- GitHub Repository ທີ່ໃຊ້ເກັບ data/products.json, data/settings.json, images/ ----
-  GITHUB_OWNER: 'YOUR_GITHUB_USERNAME',   // ex: 'macdjstore'
-  GITHUB_REPO: 'YOUR_REPO_NAME',          // ex: 'macdjstore-site'
-  GITHUB_BRANCH: 'main',
-
+GITHUB_OWNER: 'somxay',
+GITHUB_REPO: 'mac2u',
+GITHUB_BRANCH: 'main',
   // ---- Paths ພາຍໃນ Repository ----
-  PRODUCTS_PATH: 'data/products.json',
-  SETTINGS_PATH: 'data/settings.json',
-  IMAGES_PATH: 'images',
+ // Paths ພາຍໃນ Repository
+PRODUCTS_PATH: 'products.json',
+SETTINGS_PATH: 'settings.json',
+IMAGES_DIR: 'images/',
 
   // ---- ຂໍ້ມູນຮ້ານ ----
   WHATSAPP_NUMBER: '22258416',
