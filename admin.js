@@ -211,7 +211,7 @@ function renderAdminGrid() {
         </div>
         <div class="p-3 flex-1 flex flex-col justify-between">
           <div>
-            <span class="text-[10px] font-bold text-slate-400 uppercase">${p.category}</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase">${p.category}${p.color ? ' · ' + p.color : ''}</span>
             <h3 class="font-bold text-slate-800 text-xs mt-0.5 line-clamp-2">${p.title}</h3>
             <p class="text-rose-600 font-bold text-xs mt-1">${p.priceLAK > 0 ? Number(p.priceLAK).toLocaleString() + ' ₭' : (p.priceTHB > 0 ? Number(p.priceTHB).toLocaleString() + ' ฿' : '-')}</p>
           </div>
@@ -268,6 +268,8 @@ function openEditModal(id) {
     document.getElementById('pSsd').value = p.ssd || '';
     document.getElementById('pYear').value = p.year || '';
     document.getElementById('pKeyboard').value = p.keyboard || 'TH';
+    document.getElementById('pColor').value = p.color || '';
+    document.getElementById('pCpu').value = p.cpu || '';
     document.getElementById('pBattery').value = p.battery || '';
     document.getElementById('pScreenSize').value = p.screenSize || '';
     document.getElementById('pWarrantyDays').value = p.warrantyDays || '';
@@ -369,6 +371,8 @@ async function handleFormSubmit(e) {
     ssd: document.getElementById('pSsd').value,
     year: document.getElementById('pYear').value,
     keyboard: document.getElementById('pKeyboard').value,
+    color: document.getElementById('pColor').value,
+    cpu: document.getElementById('pCpu').value,
     battery: document.getElementById('pBattery').value,
     screenSize: document.getElementById('pScreenSize').value,
     warrantyDays: Number(document.getElementById('pWarrantyDays').value) || 0,
