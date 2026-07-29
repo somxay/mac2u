@@ -10,18 +10,19 @@
     "ram": "8",
     "ssd": "256",
     "year": "2020",
+    "keyboard": "TH",
     "color": "Space Gray",
     "cpu": "Apple M1",
-    "images": [
-      "https://cdn.jsdelivr.net/gh/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME@main/images/sample-macbook-1.jpg"
-    ],
-    "whatsapp": "22258416",
-    "status": "Ready",
-    "keyboard": "TH",
     "battery": "92% (120 ຮອບສາກ)",
     "screenSize": "13.3 ນິ້ວ",
     "warrantyDays": 180,
     "repairHistory": "ບໍ່ມີປະຫວັດການສ້ອມແຊມ",
+    "images": [
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/undefined/1785345461723_116.png",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/undefined/1785345475142_780.png"
+    ],
+    "whatsapp": "22258416",
+    "status": "Ready",
     "soldDate": ""
   },
   {
