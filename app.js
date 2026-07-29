@@ -32,6 +32,7 @@ async function loadData() {
     if (loadingEl) loadingEl.style.display = 'none';
 
     applyFilters();
+    openDeepLinkedProductIfAny();
   } catch (err) {
     console.error('Error loading data:', err);
     const loadingEl = document.getElementById('loading');
@@ -194,9 +195,12 @@ function renderProducts(products) {
           </div>
           <div class="p-4">
             <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · KB ${p.keyboard || 'TH'}</span>
-            <h3 class="font-bold text-slate-800 text-sm mt-1 line-clamp-1">${p.title}</h3>
+            <div class="flex items-center gap-1.5 mt-1">
+              <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${p.title}</h3>
+              ${p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${p.color}</span>` : ''}
+            </div>
             ${p.category === 'Macbook' ? `
-              <p class="text-[11px] text-slate-400 font-medium mt-1.5">RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB · ${p.screenSize || '-'}</p>
+              <p class="text-[11px] text-slate-400 font-medium mt-1.5">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB · ${p.screenSize || '-'}</p>
             ` : ''}
           </div>
         </div>
@@ -259,15 +263,20 @@ function openProductModal(id) {
       </div>` : ''}
 
       <div>
-        <div class="flex items-center gap-1.5 mb-1.5">
+        <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
           <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-wider">${p.category}</span>
           ${p.category === 'Macbook' ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md uppercase tracking-wider">KB ${p.keyboard || 'TH'}</span>` : ''}
+          ${p.color ? `<span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md uppercase tracking-wider">${p.color}</span>` : ''}
         </div>
         <h3 class="font-bold text-slate-800 text-lg leading-snug">${p.title}</h3>
       </div>
 
       <div class="grid grid-cols-2 gap-2.5">
         ${p.category === 'Macbook' ? `
+          <div class="bg-slate-50 rounded-2xl p-3">
+            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-microchip"></i> CPU / Chip</span>
+            <p class="font-semibold text-xs text-slate-700 mt-1">${p.cpu || '-'}</p>
+          </div>
           <div class="bg-slate-50 rounded-2xl p-3">
             <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-memory"></i> RAM / SSD</span>
             <p class="font-semibold text-xs text-slate-700 mt-1">${p.ram || '-'} GB / ${p.ssd || '-'} GB</p>
@@ -298,11 +307,17 @@ function openProductModal(id) {
       </div>
 
       <div>
-        <a href="https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=ສົນໃຈສິນຄ້າລະຫັດ%20${p.id}:%20${encodeURIComponent(p.title)}" target="_blank"
-           class="btn-press w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3 pl-3 pr-5 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 transition flex items-center justify-center gap-2.5">
-          <span class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0"><i class="fab fa-whatsapp text-base"></i></span>
-          ສັ່ງຊື້ຜ່ານ WhatsApp
-        </a>
+        <div class="flex gap-2">
+          <a href="https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=ສົນໃຈສິນຄ້າລະຫັດ%20${p.id}:%20${encodeURIComponent(p.title)}" target="_blank"
+             class="btn-press flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3 pl-3 pr-5 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 transition flex items-center justify-center gap-2.5">
+            <span class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0"><i class="fab fa-whatsapp text-base"></i></span>
+            ສັ່ງຊື້ຜ່ານ WhatsApp
+          </a>
+          <button onclick="openShareModal('${p.id}')" title="ແຊຣ໌ສິນຄ້ານີ້"
+             class="btn-press shrink-0 w-12 h-12 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full flex items-center justify-center shadow-sm transition">
+            <i class="fas fa-share-nodes"></i>
+          </button>
+        </div>
         <p class="text-center text-[10px] text-slate-400 mt-2">ເບີແອດມິນ: ${CONFIG.WHATSAPP_NUMBER}</p>
       </div>
     </div>
@@ -369,4 +384,75 @@ function checkWarranty() {
       <p><b>ປະຫວັດການສ້ອມແຊມ:</b> ${p.repairHistory || 'ບໍ່ມີປະຫວັດການສ້ອມແຊມ'}</p>
     </div>
   `;
+}
+
+// ---------- Share Modal ----------
+let shareProductId = null;
+
+// ລິ້ງແບບ deep-link: ໜ້າຮ້ານດຽວກັນ + ?id=xxxxx ຈະເປີດ modal ສິນຄ້ານັ້ນອັດຕະໂນມັດເມື່ອໂຫຼດໜ້າ
+function productShareUrl(id) {
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('id', id);
+  return url.toString();
+}
+
+function openShareModal(id) {
+  shareProductId = id;
+  document.getElementById('shareCopiedMsg').classList.add('hidden');
+  document.getElementById('shareModal').classList.remove('hidden');
+}
+function closeShareModal() {
+  document.getElementById('shareModal').classList.add('hidden');
+}
+
+async function shareViaCopyLink() {
+  if (!shareProductId) return;
+  const url = productShareUrl(shareProductId);
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch (err) {
+    // Fallback ສຳລັບ browser ເກົ່າ ຫຼື ກໍລະນີ clipboard API ບໍ່ອະນຸຍາດ
+    const tmp = document.createElement('textarea');
+    tmp.value = url;
+    document.body.appendChild(tmp);
+    tmp.select();
+    document.execCommand('copy');
+    document.body.removeChild(tmp);
+  }
+  const msg = document.getElementById('shareCopiedMsg');
+  msg.classList.remove('hidden');
+  setTimeout(() => msg.classList.add('hidden'), 2500);
+}
+
+function shareViaWhatsApp() {
+  if (!shareProductId) return;
+  const p = allProducts.find(x => x.id.toString() === shareProductId.toString());
+  const url = productShareUrl(shareProductId);
+  const text = encodeURIComponent(`ສົນໃຈສິນຄ້າ: ${p ? p.title : ''}\n${url}`);
+  window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+function shareViaMessenger() {
+  if (!shareProductId) return;
+  const url = productShareUrl(shareProductId);
+  // ໜ້າຕ້ອງ deploy ຢູ່ domain ຈິງ (https) ແລະ ຕັ້ງ Facebook App ID ຈິງ ຈຶ່ງຈະໃຊ້ Send Dialog ໄດ້ເຕັມຮູບແບບ
+  const appId = CONFIG.FACEBOOK_APP_ID || '';
+  if (appId) {
+    const dialogUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(url)}&app_id=${appId}&redirect_uri=${encodeURIComponent(url)}`;
+    window.open(dialogUrl, '_blank', 'width=600,height=500');
+  } else {
+    // ບໍ່ມີ App ID ຕັ້ງໄວ້ -> ໃຊ້ URL scheme ຂອງ Messenger ໂດຍກົງ (ໃຊ້ໄດ້ດີເທິງມືຖື)
+    window.open(`fb-messenger://share/?link=${encodeURIComponent(url)}`, '_blank');
+  }
+}
+
+// ---------- Deep link: ຖ້າມີ ?id=xxxxx ໃນ URL ໃຫ້ເປີດ modal ສິນຄ້ານັ້ນອັດຕະໂນມັດ ----------
+function openDeepLinkedProductIfAny() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (id && allProducts.find(x => x.id.toString() === id.toString())) {
+    openProductModal(id);
+  }
 }
