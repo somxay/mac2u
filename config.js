@@ -9,7 +9,7 @@ const CONFIG = {
   // ---- GitHub Repository ທີ່ໃຊ້ເກັບ data/products.json, data/settings.json, images/ ----
 GITHUB_OWNER: 'somxay',
 GITHUB_REPO: 'mac2u',
-GITHUB_BRANCH: 'main',
+GITHUB_BRANCH: 'master',
   // ---- Paths ພາຍໃນ Repository ----
  // Paths ພາຍໃນ Repository
 PRODUCTS_PATH: 'products.json',
