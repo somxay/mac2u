@@ -7,9 +7,9 @@
 
 const CONFIG = {
   // ---- GitHub Repository ທີ່ໃຊ້ເກັບ data/products.json, data/settings.json, images/ ----
-  GITHUB_OWNER: 'YOUR_GITHUB_USERNAME',   // ex: 'macdjstore'
-  GITHUB_REPO: 'YOUR_REPO_NAME',          // ex: 'macdjstore-site'
-  GITHUB_BRANCH: 'main',
+GITHUB_OWNER: 'somxay',
+GITHUB_REPO: 'mac2u',
+GITHUB_BRANCH: 'main',
 
   // ---- Paths ພາຍໃນ Repository ----
   PRODUCTS_PATH: 'data/products.json',
