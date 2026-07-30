@@ -236,6 +236,50 @@ function parsePriceInput(id) {
   return raw ? Number(raw) : 0;
 }
 
+/* --------------------------------- Select + "Other" combo fields (Color, CPU) --------------------------------- */
+
+// ສະແດງ/ເຊື່ອງ ຊ່ອງພິມເອງ ເມື່ອເລືອກ "ອື່ນໆ (ພິມເອງ)" ຈາກ dropdown
+function toggleOtherInput(selectId, otherInputId) {
+  const select = document.getElementById(selectId);
+  const other = document.getElementById(otherInputId);
+  if (select.value === '__other__') {
+    other.classList.remove('hidden');
+    other.focus();
+  } else {
+    other.classList.add('hidden');
+    other.value = '';
+  }
+}
+
+// ຕັ້ງຄ່າ select+other ຈາກຄ່າທີ່ບັນທຶກໄວ້ໃນ product (ຖ້າຄ່າບໍ່ຢູ່ໃນລາຍການ ໃຫ້ໄປໃສ່ຊ່ອງ "ອື່ນໆ")
+function setSelectOrOtherValue(selectId, otherInputId, value) {
+  const select = document.getElementById(selectId);
+  const other = document.getElementById(otherInputId);
+  const optionExists = Array.from(select.options).some(opt => opt.value === value);
+  if (value && optionExists) {
+    select.value = value;
+    other.classList.add('hidden');
+    other.value = '';
+  } else if (value) {
+    select.value = '__other__';
+    other.classList.remove('hidden');
+    other.value = value;
+  } else {
+    select.value = '';
+    other.classList.add('hidden');
+    other.value = '';
+  }
+}
+
+// ດຶງຄ່າສຸດທ້າຍ (ຄ່າຈາກ dropdown ຫຼື ຈາກຊ່ອງພິມເອງຖ້າເລືອກ "ອື່ນໆ")
+function getSelectOrOtherValue(selectId, otherInputId) {
+  const select = document.getElementById(selectId);
+  if (select.value === '__other__') {
+    return document.getElementById(otherInputId).value.trim();
+  }
+  return select.value;
+}
+
 /* --------------------------------- Edit modal --------------------------------- */
 
 function openEditModal(id) {
@@ -250,6 +294,8 @@ function openEditModal(id) {
     document.getElementById('saveBtn').innerText = 'ບັນທຶກສິນຄ້າໃໝ່';
     document.getElementById('pId').value = Math.floor(100000 + Math.random() * 900000);
     document.getElementById('pId').readOnly = false;
+    setSelectOrOtherValue('pColorSelect', 'pColorOther', '');
+    setSelectOrOtherValue('pCpuSelect', 'pCpuOther', '');
   } else {
     const p = allProducts.find(x => x.id.toString() === id.toString());
     if (!p) return;
@@ -268,8 +314,8 @@ function openEditModal(id) {
     document.getElementById('pSsd').value = p.ssd || '';
     document.getElementById('pYear').value = p.year || '';
     document.getElementById('pKeyboard').value = p.keyboard || 'TH';
-    document.getElementById('pColor').value = p.color || '';
-    document.getElementById('pCpu').value = p.cpu || '';
+    setSelectOrOtherValue('pColorSelect', 'pColorOther', p.color || '');
+    setSelectOrOtherValue('pCpuSelect', 'pCpuOther', p.cpu || '');
     document.getElementById('pBattery').value = p.battery || '';
     document.getElementById('pScreenSize').value = p.screenSize || '';
     document.getElementById('pWarrantyDays').value = p.warrantyDays || '';
@@ -371,8 +417,8 @@ async function handleFormSubmit(e) {
     ssd: document.getElementById('pSsd').value,
     year: document.getElementById('pYear').value,
     keyboard: document.getElementById('pKeyboard').value,
-    color: document.getElementById('pColor').value,
-    cpu: document.getElementById('pCpu').value,
+    color: getSelectOrOtherValue('pColorSelect', 'pColorOther'),
+    cpu: getSelectOrOtherValue('pCpuSelect', 'pCpuOther'),
     battery: document.getElementById('pBattery').value,
     screenSize: document.getElementById('pScreenSize').value,
     warrantyDays: Number(document.getElementById('pWarrantyDays').value) || 0,
