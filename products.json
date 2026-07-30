@@ -36,18 +36,18 @@
     "ram": "",
     "ssd": "",
     "year": "",
-    "color": "Black",
-    "cpu": "",
+    "keyboard": "TH",
+    "color": "Silver",
+    "cpu": "Apple M2 Max",
+    "battery": "",
+    "screenSize": "",
+    "warrantyDays": 90,
+    "repairHistory": "ບໍ່ມີປະຫວັດການສ້ອມແຊມ",
     "images": [
       "https://cdn.jsdelivr.net/gh/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME@main/images/sample-dj-1.jpg"
     ],
     "whatsapp": "22258416",
     "status": "Ready",
-    "keyboard": "",
-    "battery": "",
-    "screenSize": "",
-    "warrantyDays": 90,
-    "repairHistory": "ບໍ່ມີປະຫວັດການສ້ອມແຊມ",
     "soldDate": ""
   }
 ]
