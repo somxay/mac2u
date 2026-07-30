@@ -1,221 +1,223 @@
 /* =========================================================================
-   app.js — ໜ້າຮ້ານ (index.html)
-   ດຶງຂໍ້ມູນສິນຄ້າ + ອັດຕາແລກປ່ຽນ ໂດຍກົງຈາກ GitHub Raw URL (read-only, ບໍ່ຕ້ອງ token)
+   admin.js — ໜ້າຫຼັງບ້ານ (admin.html)
+   ອ່ານ/ຂຽນ data/products.json ແລະ data/settings.json ໂດຍກົງຜ່ານ GitHub Contents API
+   ໂດຍໃຊ້ Personal Access Token (PAT) ຂອງແອດມິນ (ບໍ່ໄດ້ຖືກເກັບໄວ້ຢູ່ໃສນອກຈາກ browser ຂອງທ່ານ)
    ========================================================================= */
 
 let allProducts = [];
-let exchangeRate = 600;      // ກີບ ÷ exchangeRate = ບາດ
-let thbToLakRate = 600;      // ບາດ × thbToLakRate = ກີບ
-let currentCurrency = 'LAK';
-let currentLang = 'LO';
-let currentCategory = 'all';
+let githubToken = '';
+let currentEditId = null;
 
-window.onload = function () { loadData(); };
+document.getElementById('repoLabel').innerText = `${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}`;
 
-async function loadData() {
+/* ---------------------------- GitHub API helpers ---------------------------- */
+
+function ghHeaders() {
+  return {
+    'Authorization': `Bearer ${githubToken}`,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+}
+
+// UTF-8 safe base64 encode/decode (ຮອງຮັບໂຕໜັງສືລາວ)
+function b64EncodeUnicode(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(escape(atob(str)));
+}
+
+// ດຶງໄຟລ໌ + sha ປັດຈຸບັນ (ຕ້ອງໃຊ້ sha ເວລາຈະຂຽນທັບໄຟລ໌ເກົ່າ)
+async function ghGetFile(path) {
+  const res = await fetch(ghApiContentsUrl(path) + `?ref=${CONFIG.GITHUB_BRANCH}&_=${Date.now()}`, {
+    headers: ghHeaders()
+  });
+  if (res.status === 404) return { exists: false, sha: null, json: null };
+  if (!res.ok) throw new Error(`GitHub API error (${res.status}) ອ່ານ ${path} ບໍ່ໄດ້`);
+  const data = await res.json();
+  const text = b64DecodeUnicode(data.content.replace(/\n/g, ''));
+  return { exists: true, sha: data.sha, json: JSON.parse(text) };
+}
+
+// ຂຽນ/ອັບເດດໄຟລ໌ JSON ລົງ repo (commit ໂດຍກົງ)
+async function ghPutJson(path, obj, sha, message) {
+  const body = {
+    message,
+    content: b64EncodeUnicode(JSON.stringify(obj, null, 2)),
+    branch: CONFIG.GITHUB_BRANCH
+  };
+  if (sha) body.sha = sha;
+
+  const res = await fetch(ghApiContentsUrl(path), {
+    method: 'PUT',
+    headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(`Commit ${path} ບໍ່ສຳເລັດ (${res.status}): ${errBody.message || ''}`);
+  }
+  return res.json();
+}
+
+// ອັບໂຫຼດຮູບພາບ (binary) ຂຶ້ນ repo, ຄືນ URL ຜ່ານ jsDelivr CDN
+async function ghPutImage(path, base64Content, message) {
+  const res = await fetch(ghApiContentsUrl(path), {
+    method: 'PUT',
+    headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, content: base64Content, branch: CONFIG.GITHUB_BRANCH })
+  });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(`ອັບໂຫຼດຮູບບໍ່ສຳເລັດ (${res.status}): ${errBody.message || ''}`);
+  }
+  return res.json();
+}
+
+/* --------------------------------- Login --------------------------------- */
+
+function setSaveStatus(text, isError) {
+  const el = document.getElementById('saveStatus');
+  el.classList.remove('hidden');
+  el.className = `bg-${isError ? 'rose' : 'amber'}-50 border border-${isError ? 'rose' : 'amber'}-200 text-${isError ? 'rose' : 'amber'}-700 text-xs px-4 py-2.5 rounded-2xl`;
+  el.innerText = text;
+  if (!isError) setTimeout(() => el.classList.add('hidden'), 4000);
+}
+
+async function doLogin() {
+  const tokenInput = document.getElementById('loginToken').value.trim();
+  if (!tokenInput) return;
+  githubToken = tokenInput;
+
   try {
-    const [productsRes, settingsRes] = await Promise.all([
-      fetch(ghRawUrl(CONFIG.PRODUCTS_PATH)),
-      fetch(ghRawUrl(CONFIG.SETTINGS_PATH))
-    ]);
+    // ກວດວ່າ token ໃຊ້ໄດ້ ໂດຍລອງອ່ານໄຟລ໌ products.json
+    await ghGetFile(CONFIG.PRODUCTS_PATH);
 
-    if (!productsRes.ok) throw new Error('ไม่พบ ' + CONFIG.PRODUCTS_PATH);
-    allProducts = await productsRes.json();
-
-    if (settingsRes.ok) {
-      const settings = await settingsRes.json();
-      exchangeRate = Number(settings.exchangeRate) || 600;
-      thbToLakRate = Number(settings.thbToLakRate) || 600;
+    if (document.getElementById('rememberToken').checked) {
+      localStorage.setItem('macdj_admin_token', githubToken);
+    } else {
+      sessionStorage.setItem('macdj_admin_token', githubToken);
     }
 
-    const loadingEl = document.getElementById('loading');
-    if (loadingEl) loadingEl.style.display = 'none';
-
-    applyFilters();
-    openDeepLinkedProductIfAny();
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    document.getElementById('loginError').classList.add('hidden');
+    loadData();
   } catch (err) {
-    console.error('Error loading data:', err);
-    const loadingEl = document.getElementById('loading');
-    if (loadingEl) loadingEl.innerText = 'ເກີດຂໍ້ຜິດພາດໃນການໂຫຼດຂໍ້ມູນ (ກວດ config.js ວ່າຕັ້ງ GITHUB_OWNER/REPO ຖືກຕ້ອງບໍ່)';
+    console.error(err);
+    document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+document.getElementById('loginToken').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function doLogout() {
+  githubToken = '';
+  localStorage.removeItem('macdj_admin_token');
+  sessionStorage.removeItem('macdj_admin_token');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+// ຖ້າມີ token ຄ້າງໄວ້ຈາກຄັ້ງກ່ອນ (remember me) ໃຫ້ login ອັດຕະໂນມັດ
+(function autoLogin() {
+  const saved = localStorage.getItem('macdj_admin_token') || sessionStorage.getItem('macdj_admin_token');
+  if (saved) {
+    githubToken = saved;
+    ghGetFile(CONFIG.PRODUCTS_PATH).then(() => {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+      loadData();
+    }).catch(() => { githubToken = ''; });
+  }
+})();
+
+/* --------------------------------- Data load --------------------------------- */
+
+async function loadData() {
+  document.getElementById('adminLoading').style.display = 'block';
+  try {
+    const [productsFile, settingsFile] = await Promise.all([
+      ghGetFile(CONFIG.PRODUCTS_PATH),
+      ghGetFile(CONFIG.SETTINGS_PATH)
+    ]);
+    allProducts = productsFile.json || [];
+    const settings = settingsFile.json || { exchangeRate: 600, thbToLakRate: 600 };
+
+    document.getElementById('settingRateLakToThb').value = settings.exchangeRate || '';
+    document.getElementById('settingRateThbToLak').value = settings.thbToLakRate || '';
+    document.getElementById('adminLoading').style.display = 'none';
+    renderAdminGrid();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('adminLoading').innerText = 'ເກີດຂໍ້ຜິດພາດໃນການໂຫຼດຂໍ້ມູນ: ' + err.message;
   }
 }
 
-function toggleCurrency() {
-  currentCurrency = currentCurrency === 'LAK' ? 'THB' : 'LAK';
-  document.getElementById('currencyBtn').innerText = currentCurrency === 'LAK' ? '₭ LAK' : '฿ THB';
-  applyFilters();
-}
+/* --------------------------------- Settings --------------------------------- */
 
-function toggleLang() {
-  currentLang = currentLang === 'LO' ? 'EN' : 'LO';
-  document.getElementById('langBtn').innerText = currentLang === 'LO' ? 'EN' : 'ລາວ';
-  updateUIText();
-  applyFilters();
-}
-
-function updateUIText() {
-  if (currentLang === 'EN') {
-    document.getElementById('brandSub').innerText = 'Quality Secondhand & Service Hub';
-    document.getElementById('searchInput').placeholder = 'Search by name, model like M1, Air, Pro, Pioneer...';
-    document.getElementById('lblYear').innerText = 'Year';
-  } else {
-    document.getElementById('brandSub').innerText = 'ສິນຄ້າມືສອງຄຸນນະພາບ ມືໜຶ່ງຄຸ້ມຄ່າ';
-    document.getElementById('searchInput').placeholder = 'ຄົ້ນຫາຊື່ສິນຄ້າ, ລຸ້ນເຊັ່ນ M1, Air, Pro, Pioneer...';
-    document.getElementById('lblYear').innerText = 'YEAR (ປີຜະລິດ)';
+async function saveExchangeRate() {
+  const lakToThb = Number(document.getElementById('settingRateLakToThb').value);
+  const thbToLak = Number(document.getElementById('settingRateThbToLak').value);
+  if (!lakToThb || lakToThb <= 0 || !thbToLak || thbToLak <= 0) {
+    alert('ກະລຸນາໃສ່ຕົວເລກອັດຕາແລກປ່ຽນທັງສອງຊ່ອງໃຫ້ຖືກຕ້ອງ');
+    return;
+  }
+  try {
+    setSaveStatus('ກຳລັງບັນທຶກອັດຕາແລກປ່ຽນ...', false);
+    const current = await ghGetFile(CONFIG.SETTINGS_PATH);
+    await ghPutJson(CONFIG.SETTINGS_PATH, { exchangeRate: lakToThb, thbToLakRate: thbToLak }, current.sha,
+      'chore: update exchange rate via admin panel');
+    setSaveStatus('ອັບເດດອັດຕາແລກປ່ຽນສຳເລັດແລ້ວ!', false);
+  } catch (err) {
+    console.error(err);
+    setSaveStatus('ເກີດຂໍ້ຜິດພາດ: ' + err.message, true);
   }
 }
 
-// ຟັງຊັນຊ່ວຍ: ກວດຄຳສຳຄັນຈາກຫຼາຍ field (subType, type, title, spec, detail...)
-function matchField(p, keywords) {
-  if (!keywords || keywords.length === 0) return true;
-  const hay = ((p.subType || '') + ' ' + (p.type || '') + ' ' +
-               (p.title || '') + ' ' + (p.spec || '') + ' ' +
-               (p.detail || '') + ' ' + (p.desc || '')).toLowerCase();
-  return keywords.some(k => hay.includes(k.toLowerCase()));
-}
+/* --------------------------------- Products grid --------------------------------- */
 
-function filterCategory(cat, btnEl) {
-  currentCategory = cat;
-  document.querySelectorAll('.cat-btn').forEach(btn => {
-    btn.className = "cat-btn btn-press bg-white text-slate-600 hover:bg-slate-100 px-5 py-2.5 rounded-2xl text-xs font-semibold whitespace-nowrap border border-slate-100 shadow-sm transition";
-  });
-  if (btnEl) btnEl.className = "cat-btn btn-press bg-slate-900 text-white px-5 py-2.5 rounded-2xl text-xs font-semibold whitespace-nowrap shadow-md transition";
+function renderAdminGrid() {
+  const grid = document.getElementById('adminGrid');
+  const keyword = document.getElementById('adminSearch').value.toLowerCase().trim();
 
-  // ຣີເຊັດຄ່າ dropdown ທັງໝົດ
-  ['filterRam', 'filterSsd', 'filterYear', 'filterAccType', 'filterAccWatt', 'filterDjSize', 'filterSwType']
-    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-
-  // ສະແດງສະເພາະ dropdown ຂອງໝວດທີ່ເລືອກ
-  document.getElementById('macFilterSection').style.display = (cat === 'Macbook') ? 'grid' : 'none';
-  document.getElementById('accFilterSection').style.display = (cat === 'Accessories') ? 'grid' : 'none';
-  document.getElementById('djFilterSection').style.display = (cat === 'DJ') ? 'grid' : 'none';
-  document.getElementById('swFilterSection').style.display = (cat === 'Software') ? 'grid' : 'none';
-
-  applyFilters();
-}
-
-function applyFilters() {
-  let filtered = allProducts;
-  if (currentCategory !== 'all') filtered = filtered.filter(p => p.category === currentCategory);
-
-  const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-  if (keyword) filtered = filtered.filter(p =>
-    p.title.toLowerCase().includes(keyword) ||
-    p.category.toLowerCase().includes(keyword) ||
-    p.id.toLowerCase().includes(keyword));
-
-  // ---- MacBook ----
-  if (currentCategory === 'Macbook') {
-    const ram = document.getElementById('filterRam').value;
-    const ssd = document.getElementById('filterSsd').value;
-    const year = document.getElementById('filterYear').value;
-    if (ram) filtered = filtered.filter(p => (p.ram || '').toString().includes(ram));
-    if (ssd) filtered = filtered.filter(p => (p.ssd || '').toString().includes(ssd));
-    if (year) filtered = filtered.filter(p => (p.year || '').toString().includes(year));
+  let list = allProducts;
+  if (keyword) {
+    list = list.filter(p =>
+      p.title.toLowerCase().includes(keyword) ||
+      p.category.toLowerCase().includes(keyword) ||
+      p.id.toLowerCase().includes(keyword)
+    );
   }
 
-  // ---- ສາຍສາກ / ອຸປະກອນ ----
-  if (currentCategory === 'Accessories') {
-    const at = document.getElementById('filterAccType').value;
-    const aw = document.getElementById('filterAccWatt').value;
-    const typeKw = {
-      '2012down': ['2012', 'magsafe 1', 'magsafe1', 'ລົງມາ', 'ປີ 2012'],
-      '2013-2015': ['2013', '2014', '2015', 'magsafe 2', 'magsafe2'],
-      'usbc': ['usb-c', 'usbc', 'type-c', 'type c', '2016', '2017', '2018', '2019', '2020']
-    };
-    if (at) filtered = filtered.filter(p => matchField(p, typeKw[at] || [at]));
-    if (aw) filtered = filtered.filter(p => matchField(p, [aw + 'w', aw + ' w', aw + ' watt', aw]));
-  }
-
-  // ---- ເຄື່ອງ DJ ----
-  if (currentCategory === 'DJ') {
-    const ds = document.getElementById('filterDjSize').value;
-    const djKw = {
-      'big': ['ໃຫຍ່', 'ໃຫ່ຍ', 'big', 'large', 'xdj', 'opus', 'ddj-flx10', 'cdj'],
-      'small': ['ນ້ອຍ', 'small', 'mini', 'ddj-200', 'ddj-400', 'flx4']
-    };
-    if (ds) filtered = filtered.filter(p => matchField(p, djKw[ds] || [ds]));
-  }
-
-  // ---- ລົງໂປຮແກຣມ ----
-  if (currentCategory === 'Software') {
-    const st = document.getElementById('filterSwType').value;
-    const swKw = {
-      'macos': ['macos', 'mac os', 'os x', 'ລະບົບ', 'ระบบ', 'sonoma', 'ventura', 'sequoia'],
-      'office': ['office', 'word', 'excel', 'powerpoint', 'microsoft'],
-      'adobe': ['adobe', 'photoshop', 'premiere', 'illustrator', 'lightroom', 'after effect'],
-      'dj': ['serato', 'rekordbox', 'virtual dj', 'traktor'],
-      'music': ['logic', 'ableton', 'fl studio', 'cubase', 'ຕັດຕໍ່', 'ດົນຕີ'],
-      'other': ['other', 'ອື່ນ']
-    };
-    if (st) filtered = filtered.filter(p => matchField(p, swKw[st] || [st]));
-  }
-
-  // ຈັດຮຽງລາຄາ ຕ່ຳ -> ສູງ
-  filtered = filtered.slice().sort((a, b) => Number(a.priceLAK) - Number(b.priceLAK));
-
-  renderProducts(filtered);
-}
-
-function priceInCurrentCurrency(lakVal, thbVal) {
-  if (currentCurrency === 'THB') {
-    if (thbVal && thbVal > 0) return thbVal;
-    return Math.round((lakVal || 0) / exchangeRate);
-  }
-  if (lakVal && lakVal > 0) return lakVal;
-  return Math.round((thbVal || 0) * thbToLakRate);
-}
-
-function renderProducts(products) {
-  const grid = document.getElementById('productGrid');
-  if (products.length === 0) {
-    grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-400 text-xs">${currentLang === 'EN' ? 'No products found' : 'ບໍ່ພົບສິນຄ້າຕາມເງື່ອນໄຂທີ່ເລືອກ'}</div>`;
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-400 text-xs">ບໍ່ພົບສິນຄ້າ</div>`;
     return;
   }
 
-  grid.innerHTML = products.map((p, idx) => {
-    let isSold = p.status === 'Sold';
-    let priceVal = priceInCurrentCurrency(p.priceLAK, p.priceTHB);
-    let priceFormatted = Number(priceVal).toLocaleString();
-    let oldPriceVal = priceInCurrentCurrency(p.oldPriceLAK, p.oldPriceTHB);
-    let currencySymbol = currentCurrency === 'THB' ? '฿' : '₭';
-
-    const statusText = p.status === 'Ready' ? (currentLang === 'EN' ? 'Ready' : 'ພ້ອມຂາຍ') : (p.status === 'Reserved' ? (currentLang === 'EN' ? 'Reserved' : 'ຈອງແລ້ວ') : (currentLang === 'EN' ? 'Sold' : 'ຂາຍແລ້ວ'));
+  grid.innerHTML = list.map(p => {
+    const statusText = p.status === 'Ready' ? 'ພ້ອມຂາຍ' : (p.status === 'Reserved' ? 'ຈອງແລ້ວ' : 'ຂາຍແລ້ວ');
     const statusColor = p.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : (p.status === 'Reserved' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600');
-    let mainImg = (p.images && p.images.length > 0 && p.images[0]) ? p.images[0] : 'https://placehold.co/400x300?text=No+Image';
-    const delay = Math.min(idx, 11) * 45;
+    const mainImg = (p.images && p.images.length > 0 && p.images[0]) ? p.images[0] : 'https://placehold.co/300x220?text=No+Image';
 
     return `
-      <div class="product-card group bg-white rounded-3xl-custom shadow-sm overflow-hidden flex flex-col justify-between cursor-pointer" style="animation-delay:${delay}ms" onclick="openProductModal('${p.id}')">
-        <div>
-          <div class="relative h-44 bg-slate-100 overflow-hidden">
-            <img src="${mainImg}" alt="${p.title}" class="card-img w-full h-full object-cover">
-            <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 backdrop-blur-md">${statusText}</span>
-            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
-          </div>
-          <div class="p-4">
-            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · KB ${p.keyboard || 'TH'}</span>
-            <div class="flex items-center gap-1.5 mt-1">
-              <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${p.title}</h3>
-              ${p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${p.color}</span>` : ''}
-            </div>
-            ${p.category === 'Macbook' ? `
-              <p class="text-[11px] text-slate-400 font-medium mt-1.5">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB · ${p.screenSize || '-'}</p>
-            ` : ''}
-          </div>
+      <div class="bg-white rounded-3xl-custom border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+        <div class="relative h-36 bg-slate-100">
+          <img src="${mainImg}" class="w-full h-full object-cover">
+          <span class="absolute top-2 left-2 px-2.5 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 shadow-sm">${statusText}</span>
+          <span class="absolute top-2 right-2 px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-900/70 text-white">ID: ${p.id}</span>
         </div>
-        <div class="p-4 pt-3 border-t border-slate-50 flex items-center justify-between">
+        <div class="p-3 flex-1 flex flex-col justify-between">
           <div>
-            <span class="text-[10px] text-slate-400 block">${currentCurrency === 'THB' ? 'ລາຄາ (บาท)' : 'ລາຄາ (ກີບ)'}</span>
-            ${isSold ? `<span class="text-slate-400 font-bold text-sm italic">ສິນຄ້ານີ້ຂາຍແລ້ວ</span>` : `
-              <div class="flex items-baseline gap-2">
-                <span class="text-rose-600 font-bold text-lg">${priceFormatted} ${currencySymbol}</span>
-                ${oldPriceVal > 0 ? `<span class="text-slate-300 line-through text-xs">${Number(oldPriceVal).toLocaleString()}</span>` : ''}
-              </div>
-            `}
+            <span class="text-[10px] font-bold text-slate-400 uppercase">${p.category}${p.color ? ' · ' + p.color : ''}</span>
+            <h3 class="font-bold text-slate-800 text-xs mt-0.5 line-clamp-2">${p.title}</h3>
+            <p class="text-rose-600 font-bold text-xs mt-1">${p.priceLAK > 0 ? Number(p.priceLAK).toLocaleString() + ' ₭' : (p.priceTHB > 0 ? Number(p.priceTHB).toLocaleString() + ' ฿' : '-')}</p>
           </div>
-          <div class="w-9 h-9 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center transition-all duration-300 group-hover:bg-slate-900 group-hover:text-white group-hover:translate-x-0.5">
-            <i class="fas fa-arrow-right text-xs"></i>
+          <div class="flex gap-2 mt-2">
+            <button onclick="openEditModal('${p.id}')" title="ແກ້ໄຂ" class="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-2 rounded-xl text-sm">✏️</button>
+            <button onclick="removeProduct('${p.id}')" title="ລຶບ" class="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 py-2 rounded-xl text-sm">🗑️</button>
           </div>
         </div>
       </div>
@@ -223,232 +225,239 @@ function renderProducts(products) {
   }).join('');
 }
 
-// ---------- Modal ສະແດງລາຍລະອຽດ + Slider ຮູບ (ບໍ່ເປີດແທັບໃໝ່) ----------
-let activeImages = [];
-let currentSlideIdx = 0;
+/* --------------------------------- Price input helpers --------------------------------- */
 
-function openProductModal(id) {
-  const p = allProducts.find(x => x.id.toString() === id.toString());
-  if (!p) return;
-  activeImages = (p.images && p.images.length > 0) ? p.images : ['https://placehold.co/400x300?text=No+Image'];
-  currentSlideIdx = 0;
+function formatPriceInput(el) {
+  const raw = el.value.replace(/[^\d]/g, '');
+  el.value = raw ? Number(raw).toLocaleString('en-US') : '';
+}
+function parsePriceInput(id) {
+  const raw = document.getElementById(id).value.replace(/[^\d]/g, '');
+  return raw ? Number(raw) : 0;
+}
 
-  let priceVal = priceInCurrentCurrency(p.priceLAK, p.priceTHB);
-  let priceFormatted = Number(priceVal).toLocaleString();
-  let oldPriceVal = priceInCurrentCurrency(p.oldPriceLAK, p.oldPriceTHB);
-  let currencySymbol = currentCurrency === 'THB' ? '฿' : '₭';
+/* --------------------------------- Select + "Other" combo fields (Color, CPU) --------------------------------- */
 
-  const statusText = p.status === 'Ready' ? (currentLang === 'EN' ? 'Ready' : 'ພ້ອມຂາຍ') : (p.status === 'Reserved' ? (currentLang === 'EN' ? 'Reserved' : 'ຈອງແລ້ວ') : (currentLang === 'EN' ? 'Sold' : 'ຂາຍແລ້ວ'));
-  const statusColor = p.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : (p.status === 'Reserved' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600');
+// ສະແດງ/ເຊື່ອງ ຊ່ອງພິມເອງ ເມື່ອເລືອກ "ອື່ນໆ (ພິມເອງ)" ຈາກ dropdown
+function toggleOtherInput(selectId, otherInputId) {
+  const select = document.getElementById(selectId);
+  const other = document.getElementById(otherInputId);
+  if (select.value === '__other__') {
+    other.classList.remove('hidden');
+    other.focus();
+  } else {
+    other.classList.add('hidden');
+    other.value = '';
+  }
+}
 
-  let modalBody = document.getElementById('modalBody');
-  modalBody.innerHTML = `
-    <div class="space-y-4">
-      <div class="relative h-64 bg-slate-100 rounded-2xl overflow-hidden">
-        <img id="sliderImg" src="${activeImages[0]}" class="w-full h-full object-cover">
-        <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 backdrop-blur-md">${statusText}</span>
-        <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
-        ${activeImages.length > 1 ? `
-          <button onclick="prevSlide()" class="btn-press absolute left-2 top-1/2 -translate-y-1/2 bg-slate-900/60 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-900"><i class="fas fa-chevron-left text-xs"></i></button>
-          <button onclick="nextSlide()" class="btn-press absolute right-2 top-1/2 -translate-y-1/2 bg-slate-900/60 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-900"><i class="fas fa-chevron-right text-xs"></i></button>
-          <div class="absolute bottom-3 right-3 bg-slate-900/70 text-white px-2.5 py-1 rounded-full text-[10px]" id="slideCounter">1 / ${activeImages.length}</div>
-        ` : ''}
-      </div>
+// ຕັ້ງຄ່າ select+other ຈາກຄ່າທີ່ບັນທຶກໄວ້ໃນ product (ຖ້າຄ່າບໍ່ຢູ່ໃນລາຍການ ໃຫ້ໄປໃສ່ຊ່ອງ "ອື່ນໆ")
+function setSelectOrOtherValue(selectId, otherInputId, value) {
+  const select = document.getElementById(selectId);
+  const other = document.getElementById(otherInputId);
+  const optionExists = Array.from(select.options).some(opt => opt.value === value);
+  if (value && optionExists) {
+    select.value = value;
+    other.classList.add('hidden');
+    other.value = '';
+  } else if (value) {
+    select.value = '__other__';
+    other.classList.remove('hidden');
+    other.value = value;
+  } else {
+    select.value = '';
+    other.classList.add('hidden');
+    other.value = '';
+  }
+}
 
-      ${activeImages.length > 1 ? `
-      <div class="flex gap-2 overflow-x-auto pb-1">
-        ${activeImages.map((img, idx) => `
-          <img src="${img}" onclick="setSlide(${idx})" class="thumb-img w-14 h-14 object-cover rounded-xl cursor-pointer ring-2 transition ${idx === 0 ? 'ring-slate-900' : 'ring-transparent'} hover:ring-slate-300">
-        `).join('')}
-      </div>` : ''}
+// ດຶງຄ່າສຸດທ້າຍ (ຄ່າຈາກ dropdown ຫຼື ຈາກຊ່ອງພິມເອງຖ້າເລືອກ "ອື່ນໆ")
+function getSelectOrOtherValue(selectId, otherInputId) {
+  const select = document.getElementById(selectId);
+  if (select.value === '__other__') {
+    return document.getElementById(otherInputId).value.trim();
+  }
+  return select.value;
+}
 
-      <div>
-        <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
-          <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-wider">${p.category}</span>
-          ${p.category === 'Macbook' ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md uppercase tracking-wider">KB ${p.keyboard || 'TH'}</span>` : ''}
-          ${p.color ? `<span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md uppercase tracking-wider">${p.color}</span>` : ''}
-        </div>
-        <h3 class="font-bold text-slate-800 text-lg leading-snug">${p.title}</h3>
-      </div>
+/* --------------------------------- Edit modal --------------------------------- */
 
-      <div class="grid grid-cols-2 gap-2.5">
-        ${p.category === 'Macbook' ? `
-          <div class="bg-slate-50 rounded-2xl p-3">
-            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-memory"></i> CPU / RAM / SSD</span>
-            <p class="font-semibold text-xs text-slate-700 mt-1">${[p.cpu, (p.ram ? p.ram + ' GB' : ''), (p.ssd ? p.ssd + ' GB' : '')].filter(Boolean).join(' / ') || '-'}</p>
-          </div>
-          <div class="bg-slate-50 rounded-2xl p-3">
-            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-calendar-days"></i> ປີຜະລິດ</span>
-            <p class="font-semibold text-xs text-slate-700 mt-1">${p.year || '-'}</p>
-          </div>
-        ` : ''}
-        <div class="bg-slate-50 rounded-2xl p-3">
-          <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-display"></i> ຂະໜາດໜ້າຈໍ</span>
-          <p class="font-semibold text-xs text-slate-700 mt-1">${p.screenSize || '-'}</p>
-        </div>
-        <div class="bg-slate-50 rounded-2xl p-3">
-          <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-battery-half"></i> ແບັດ / ຮອບສາກ</span>
-          <p class="font-semibold text-xs text-slate-700 mt-1">${p.battery || '-'}</p>
-        </div>
-      </div>
+function openEditModal(id) {
+  const form = document.querySelector('#editModal form');
+  form.reset();
+  document.getElementById('imagePreviewList').innerHTML = '';
+  document.getElementById('pImageList').value = '';
 
-      <div class="bg-gradient-to-br from-rose-50 to-white rounded-2xl p-4">
-        <span class="text-[10px] text-slate-400 block">ລາຄາສິນຄ້າ</span>
-        ${p.status === 'Sold' ? `<span class="text-slate-400 font-bold text-sm italic">ສິນຄ້ານີ້ຂາຍແລ້ວ</span>` : `
-          <div class="flex items-baseline gap-2 mt-0.5">
-            <span class="text-rose-600 font-extrabold text-2xl">${priceFormatted} ${currencySymbol}</span>
-            ${oldPriceVal > 0 ? `<span class="text-slate-300 line-through text-sm">${Number(oldPriceVal).toLocaleString()}</span>` : ''}
-          </div>
-        `}
-      </div>
+  if (id === null) {
+    currentEditId = null;
+    document.getElementById('editModalTitle').innerText = 'ເພີ່ມສິນຄ້າໃໝ່';
+    document.getElementById('saveBtn').innerText = 'ບັນທຶກສິນຄ້າໃໝ່';
+    document.getElementById('pId').value = Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('pId').readOnly = false;
+    setSelectOrOtherValue('pColorSelect', 'pColorOther', '');
+    setSelectOrOtherValue('pCpuSelect', 'pCpuOther', '');
+  } else {
+    const p = allProducts.find(x => x.id.toString() === id.toString());
+    if (!p) return;
+    currentEditId = p.id;
+    document.getElementById('editModalTitle').innerText = 'ແກ້ໄຂສິນຄ້າ';
+    document.getElementById('saveBtn').innerText = 'ອັບເດດຂໍ້ມູນສິນຄ້າ';
+    document.getElementById('pId').value = p.id;
+    document.getElementById('pId').readOnly = true;
+    document.getElementById('pCategory').value = p.category;
+    document.getElementById('pTitle').value = p.title;
+    document.getElementById('pPriceLAK').value = p.priceLAK ? Number(p.priceLAK).toLocaleString('en-US') : '';
+    document.getElementById('pOldPriceLAK').value = p.oldPriceLAK ? Number(p.oldPriceLAK).toLocaleString('en-US') : '';
+    document.getElementById('pPriceTHB').value = p.priceTHB ? Number(p.priceTHB).toLocaleString('en-US') : '';
+    document.getElementById('pOldPriceTHB').value = p.oldPriceTHB ? Number(p.oldPriceTHB).toLocaleString('en-US') : '';
+    document.getElementById('pRam').value = p.ram || '';
+    document.getElementById('pSsd').value = p.ssd || '';
+    document.getElementById('pYear').value = p.year || '';
+    document.getElementById('pKeyboard').value = p.keyboard || 'TH';
+    setSelectOrOtherValue('pColorSelect', 'pColorOther', p.color || '');
+    setSelectOrOtherValue('pCpuSelect', 'pCpuOther', p.cpu || '');
+    document.getElementById('pBattery').value = p.battery || '';
+    document.getElementById('pScreenSize').value = p.screenSize || '';
+    document.getElementById('pWarrantyDays').value = p.warrantyDays || '';
+    document.getElementById('pStatus').value = p.status;
+    document.getElementById('pImageList').value = p.images ? p.images.join(',') : '';
+    renderImagePreviews();
+  }
 
-      <div>
-        <div class="flex gap-2">
-          <a href="https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=ສົນໃຈສິນຄ້າລະຫັດ%20${p.id}:%20${encodeURIComponent(p.title)}" target="_blank"
-             class="btn-press flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3 pl-3 pr-5 rounded-full text-sm font-bold shadow-lg shadow-emerald-500/30 transition flex items-center justify-center gap-2.5">
-            <span class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0"><i class="fab fa-whatsapp text-base"></i></span>
-            ສັ່ງຊື້ຜ່ານ WhatsApp
-          </a>
-          <button onclick="openShareModal('${p.id}')" title="ແຊຣ໌ສິນຄ້ານີ້"
-             class="btn-press shrink-0 w-12 h-12 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full flex items-center justify-center shadow-sm transition">
-            <i class="fas fa-share-nodes"></i>
-          </button>
-        </div>
-        <p class="text-center text-[10px] text-slate-400 mt-2">ເບີແອດມິນ: ${CONFIG.WHATSAPP_NUMBER}</p>
-      </div>
+  document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.add('hidden');
+}
+
+function renderImagePreviews() {
+  const list = document.getElementById('pImageList').value.split(',').filter(Boolean);
+  document.getElementById('imagePreviewList').innerHTML = list.map((url, idx) => `
+    <div class="relative">
+      <img src="${url}" class="w-14 h-14 object-cover rounded-xl border border-slate-200">
+      <button type="button" onclick="removeImageAt(${idx})" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] flex items-center justify-center">✕</button>
     </div>
-  `;
-  document.getElementById('productModal').classList.remove('hidden');
+  `).join('');
 }
 
-function closeProductModal() { document.getElementById('productModal').classList.add('hidden'); }
-
-function setSlide(idx) {
-  currentSlideIdx = idx;
-  document.getElementById('sliderImg').src = activeImages[currentSlideIdx];
-  document.getElementById('slideCounter').innerText = `${currentSlideIdx + 1} / ${activeImages.length}`;
-  document.querySelectorAll('.thumb-img').forEach((el, i) => {
-    el.classList.toggle('ring-slate-900', i === currentSlideIdx);
-    el.classList.toggle('ring-transparent', i !== currentSlideIdx);
-  });
-}
-function nextSlide() {
-  currentSlideIdx = (currentSlideIdx + 1) % activeImages.length;
-  setSlide(currentSlideIdx);
-}
-function prevSlide() {
-  currentSlideIdx = (currentSlideIdx - 1 + activeImages.length) % activeImages.length;
-  setSlide(currentSlideIdx);
+function removeImageAt(idx) {
+  const list = document.getElementById('pImageList').value.split(',').filter(Boolean);
+  list.splice(idx, 1);
+  document.getElementById('pImageList').value = list.join(',');
+  renderImagePreviews();
 }
 
-// ---------- Warranty Modal (ຄິດໄລ່ຝັ່ງ Client ຈາກຂໍ້ມູນສິນຄ້າໂດຍກົງ) ----------
-function openWarrantyModal() { document.getElementById('warrantyModal').classList.remove('hidden'); }
-function closeWarrantyModal() { document.getElementById('warrantyModal').classList.add('hidden'); }
+/* --------------------------------- Image upload --------------------------------- */
 
-function computeWarrantyText(status, soldDateVal, warrantyDays) {
-  if (status !== 'Sold') return 'ຍັງບໍ່ໄດ້ຂາຍ (ຍັງບໍ່ເລີ່ມນັບປະກັນ)';
-  if (!warrantyDays || warrantyDays <= 0) return 'ບໍ່ມີປະກັນ';
-  if (!soldDateVal) return 'ບໍ່ມີຂໍ້ມູນວັນທີ່ຂາຍ';
+function uploadImage(input) {
+  if (!(input.files && input.files[0])) return;
+  const file = input.files[0];
+  const emoji = document.getElementById('uploadEmoji');
+  emoji.innerHTML = '⏳';
 
-  const soldDate = new Date(soldDateVal);
-  const expiryDate = new Date(soldDate.getTime());
-  expiryDate.setDate(expiryDate.getDate() + Number(warrantyDays));
+  if (file.size > 2 * 1024 * 1024) {
+    alert('ຮູບພາບໃຫຍ່ເກີນ 2MB — ກະລຸນາຫຍໍ້ຂະໜາດຮູບກ່ອນອັບໂຫຼດ ເພື່ອຄວາມໄວຂອງເວັບໄຊ');
+  }
 
-  const expiryText = expiryDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
-  const isActive = expiryDate.getTime() >= new Date().getTime();
+  const reader = new FileReader();
+  reader.onload = async function (e) {
+    try {
+      const base64Data = e.target.result.split(',')[1];
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const fileName = `${CONFIG.IMAGES_PATH}/${Date.now()}_${Math.floor(Math.random() * 1000)}.${ext}`;
 
-  return expiryText + (isActive ? ' (ຍັງຢູ່ໃນໄລຍະປະກັນ)' : ' (ໝົດອາຍຸປະກັນແລ້ວ)');
+      await ghPutImage(fileName, base64Data, `feat: upload product image ${fileName}`);
+
+      const url = ghCdnUrl(fileName);
+      let current = document.getElementById('pImageList').value;
+      document.getElementById('pImageList').value = current ? current + ',' + url : url;
+      renderImagePreviews();
+      emoji.innerHTML = '✅';
+    } catch (err) {
+      console.error(err);
+      emoji.innerHTML = '❌';
+      alert('ອັບໂຫຼດຮູບບໍ່ສຳເລັດ: ' + err.message);
+    } finally {
+      setTimeout(() => { emoji.innerHTML = ''; }, 3000);
+    }
+  };
+  reader.readAsDataURL(file);
 }
 
-function checkWarranty() {
-  const code = document.getElementById('warrantyInputCode').value.trim();
-  const box = document.getElementById('warrantyResultBox');
-  if (!code) { alert('ກະລຸນາໃສ່ລະຫັດສິນຄ້າ'); return; }
+/* --------------------------------- Save / Delete product --------------------------------- */
 
-  const p = allProducts.find(x => x.id.toString().trim() === code);
-  if (!p) {
-    box.innerHTML = `<p class="text-xs text-rose-500 mt-2">ບໍ່ພົບເລກລະຫັດສິນຄ້ານີ້ໃນລະບົບ</p>`;
+async function handleFormSubmit(e) {
+  e.preventDefault();
+
+  const priceLAK = parsePriceInput('pPriceLAK');
+  const priceTHB = parsePriceInput('pPriceTHB');
+  if (priceLAK <= 0 && priceTHB <= 0) {
+    alert('ກະລຸນາໃສ່ລາຄາຢ່າງໜ້ອຍ 1 ຢ່າງ (ກີບ ຫຼື ບາດ)');
     return;
   }
 
-  const warrantyText = computeWarrantyText(p.status, p.soldDate, p.warrantyDays);
-  box.innerHTML = `
-    <div class="bg-indigo-50/60 p-3 rounded-2xl border border-indigo-100 text-xs space-y-1.5 mt-2">
-      <p><b>ລະຫັດ:</b> ${p.id} (${p.title})</p>
-      <p><b>ສະຖານະ:</b> <span class="text-emerald-600 font-semibold">${p.status}</span></p>
-      <p><b>ວັນໝົດປະກັນ:</b> <span class="text-indigo-600 font-semibold">${warrantyText}</span></p>
-      <p><b>ປະຫວັດການສ້ອມແຊມ:</b> ${p.repairHistory || 'ບໍ່ມີປະຫວັດການສ້ອມແຊມ'}</p>
-    </div>
-  `;
-}
+  const existing = currentEditId ? allProducts.find(x => x.id.toString() === currentEditId.toString()) : null;
+  const newStatus = document.getElementById('pStatus').value;
 
-// ---------- Share Modal ----------
-let shareProductId = null;
+  // ນັບ soldDate ອັດຕະໂນມັດ ເມື່ອປ່ຽນສະຖານະເປັນ "Sold" ຄັ້ງທຳອິດ
+  let soldDate = existing ? (existing.soldDate || '') : '';
+  if (newStatus === 'Sold' && !soldDate) soldDate = new Date().toISOString();
+  if (newStatus !== 'Sold') soldDate = existing ? existing.soldDate || '' : '';
 
-// ລິ້ງແບບ deep-link: ໜ້າຮ້ານດຽວກັນ + ?id=xxxxx ຈະເປີດ modal ສິນຄ້ານັ້ນອັດຕະໂນມັດເມື່ອໂຫຼດໜ້າ
-function productShareUrl(id) {
-  const url = new URL(window.location.href);
-  url.search = '';
-  url.hash = '';
-  url.searchParams.set('id', id);
-  return url.toString();
-}
+  const product = {
+    id: document.getElementById('pId').value,
+    title: document.getElementById('pTitle').value,
+    category: document.getElementById('pCategory').value,
+    priceLAK: priceLAK,
+    oldPriceLAK: parsePriceInput('pOldPriceLAK'),
+    priceTHB: priceTHB,
+    oldPriceTHB: parsePriceInput('pOldPriceTHB'),
+    ram: document.getElementById('pRam').value,
+    ssd: document.getElementById('pSsd').value,
+    year: document.getElementById('pYear').value,
+    keyboard: document.getElementById('pKeyboard').value,
+    color: getSelectOrOtherValue('pColorSelect', 'pColorOther'),
+    cpu: getSelectOrOtherValue('pCpuSelect', 'pCpuOther'),
+    battery: document.getElementById('pBattery').value,
+    screenSize: document.getElementById('pScreenSize').value,
+    warrantyDays: Number(document.getElementById('pWarrantyDays').value) || 0,
+    repairHistory: existing ? (existing.repairHistory || '') : '',
+    images: document.getElementById('pImageList').value.split(',').filter(Boolean),
+    whatsapp: CONFIG.WHATSAPP_NUMBER,
+    status: newStatus,
+    soldDate: soldDate
+  };
 
-function openShareModal(id) {
-  shareProductId = id;
-  document.getElementById('shareCopiedMsg').classList.add('hidden');
-  document.getElementById('shareModal').classList.remove('hidden');
-}
-function closeShareModal() {
-  document.getElementById('shareModal').classList.add('hidden');
-}
-
-async function shareViaCopyLink() {
-  if (!shareProductId) return;
-  const url = productShareUrl(shareProductId);
-  try {
-    await navigator.clipboard.writeText(url);
-  } catch (err) {
-    // Fallback ສຳລັບ browser ເກົ່າ ຫຼື ກໍລະນີ clipboard API ບໍ່ອະນຸຍາດ
-    const tmp = document.createElement('textarea');
-    tmp.value = url;
-    document.body.appendChild(tmp);
-    tmp.select();
-    document.execCommand('copy');
-    document.body.removeChild(tmp);
-  }
-  const msg = document.getElementById('shareCopiedMsg');
-  msg.classList.remove('hidden');
-  setTimeout(() => msg.classList.add('hidden'), 2500);
-}
-
-function shareViaWhatsApp() {
-  if (!shareProductId) return;
-  const p = allProducts.find(x => x.id.toString() === shareProductId.toString());
-  const url = productShareUrl(shareProductId);
-  const text = encodeURIComponent(`ສົນໃຈສິນຄ້າ: ${p ? p.title : ''}\n${url}`);
-  window.open(`https://wa.me/?text=${text}`, '_blank');
-}
-
-function shareViaMessenger() {
-  if (!shareProductId) return;
-  const url = productShareUrl(shareProductId);
-  // ໜ້າຕ້ອງ deploy ຢູ່ domain ຈິງ (https) ແລະ ຕັ້ງ Facebook App ID ຈິງ ຈຶ່ງຈະໃຊ້ Send Dialog ໄດ້ເຕັມຮູບແບບ
-  const appId = CONFIG.FACEBOOK_APP_ID || '';
-  if (appId) {
-    const dialogUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(url)}&app_id=${appId}&redirect_uri=${encodeURIComponent(url)}`;
-    window.open(dialogUrl, '_blank', 'width=600,height=500');
+  const idx = allProducts.findIndex(x => x.id.toString() === product.id.toString());
+  if (idx > -1) {
+    allProducts[idx] = product;
   } else {
-    // ບໍ່ມີ App ID ຕັ້ງໄວ້ -> ໃຊ້ URL scheme ຂອງ Messenger ໂດຍກົງ (ໃຊ້ໄດ້ດີເທິງມືຖື)
-    window.open(`fb-messenger://share/?link=${encodeURIComponent(url)}`, '_blank');
+    allProducts.push(product);
   }
+
+  await persistProducts(idx > -1 ? `chore: update product ${product.id}` : `feat: add product ${product.id}`);
+  closeEditModal();
+  renderAdminGrid();
 }
 
-// ---------- Deep link: ຖ້າມີ ?id=xxxxx ໃນ URL ໃຫ້ເປີດ modal ສິນຄ້ານັ້ນອັດຕະໂນມັດ ----------
-function openDeepLinkedProductIfAny() {
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get('id');
-  if (id && allProducts.find(x => x.id.toString() === id.toString())) {
-    openProductModal(id);
+async function removeProduct(id) {
+  if (!confirm('ຕ້ອງການລຶບສິນຄ້ານີ້ແທ້ບໍ?')) return;
+  allProducts = allProducts.filter(x => x.id.toString() !== id.toString());
+  await persistProducts(`chore: delete product ${id}`);
+  renderAdminGrid();
+}
+
+async function persistProducts(commitMessage) {
+  try {
+    setSaveStatus('ກຳລັງບັນທຶກ ແລະ commit ຂໍ້ມູນລົງ GitHub...', false);
+    // ດຶງ sha ຫລ້າສຸດກ່ອນຂຽນທັບ ເພື່ອປ້ອງກັນຂໍ້ມູນຂັດແຍ່ງກັນ (ກໍລະນີແກ້ໄຂຈາກຫລາຍອຸປະກອນ)
+    const current = await ghGetFile(CONFIG.PRODUCTS_PATH);
+    await ghPutJson(CONFIG.PRODUCTS_PATH, allProducts, current.sha, commitMessage);
+    setSaveStatus('ບັນທຶກຂໍ້ມູນສຳເລັດແລ້ວ! (Commit ໄປ GitHub ແລ້ວ)', false);
+  } catch (err) {
+    console.error(err);
+    setSaveStatus('ບັນທຶກບໍ່ສຳເລັດ: ' + err.message, true);
+    alert('ບັນທຶກບໍ່ສຳເລັດ: ' + err.message);
   }
 }
