@@ -191,11 +191,36 @@
         </div>
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ສີ (Color)</label>
-          <input id="pColor" type="text" placeholder="ຕົວຢ່າງ: Space Gray, Silver, Gold" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+          <input id="pColor" type="text" list="colorOptions" placeholder="ເລືອກ ຫຼື ພິມສີເອງ" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+          <datalist id="colorOptions">
+            <option value="Space Gray">
+            <option value="Silver">
+            <option value="Gold">
+            <option value="Rose Gold">
+            <option value="Midnight">
+            <option value="Starlight">
+            <option value="Sky Blue">
+            <option value="Black">
+            <option value="White">
+          </datalist>
         </div>
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">CPU / Specs</label>
-          <input id="pCpu" type="text" placeholder="ຕົວຢ່າງ: Apple M1, Apple M2, Intel i5" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+          <input id="pCpu" type="text" list="cpuOptions" placeholder="ເລືອກ ຫຼື ພິມ CPU ເອງ" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+          <datalist id="cpuOptions">
+            <option value="Apple M1">
+            <option value="Apple M1 Pro">
+            <option value="Apple M1 Max">
+            <option value="Apple M2">
+            <option value="Apple M2 Pro">
+            <option value="Apple M2 Max">
+            <option value="Apple M3">
+            <option value="Apple M3 Pro">
+            <option value="Apple M3 Max">
+            <option value="Intel i5">
+            <option value="Intel i7">
+            <option value="Intel i9">
+          </datalist>
         </div>
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ແບັດ / ຮອບສາກ</label>
