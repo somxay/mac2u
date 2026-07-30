@@ -274,12 +274,8 @@ function openProductModal(id) {
       <div class="grid grid-cols-2 gap-2.5">
         ${p.category === 'Macbook' ? `
           <div class="bg-slate-50 rounded-2xl p-3">
-            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-microchip"></i> CPU / Chip</span>
-            <p class="font-semibold text-xs text-slate-700 mt-1">${p.cpu || '-'}</p>
-          </div>
-          <div class="bg-slate-50 rounded-2xl p-3">
-            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-memory"></i> RAM / SSD</span>
-            <p class="font-semibold text-xs text-slate-700 mt-1">${p.ram || '-'} GB / ${p.ssd || '-'} GB</p>
+            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-memory"></i> CPU / RAM / SSD</span>
+            <p class="font-semibold text-xs text-slate-700 mt-1">${[p.cpu, (p.ram ? p.ram + ' GB' : ''), (p.ssd ? p.ssd + ' GB' : '')].filter(Boolean).join(' / ') || '-'}</p>
           </div>
           <div class="bg-slate-50 rounded-2xl p-3">
             <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-calendar-days"></i> ປີຜະລິດ</span>
