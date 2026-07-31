@@ -25,6 +25,18 @@ IMAGES_DIR: 'images/',
   // ຢູ່ https://developers.facebook.com/apps ແລ້ວໃສ່ App ID ຢູ່ນີ້. ຖ້າປ່ອຍວ່າງ, ປຸ່ມ Messenger
   // ຈະໃຊ້ URL scheme ຂອງ Messenger ໂດຍກົງແທນ (ໃຊ້ໄດ້ດີເທິງມືຖືທີ່ລົງແອັບ Messenger ໄວ້).
   FACEBOOK_APP_ID: '',
+
+  // ---- AI Assistant (Google Gemini) ----
+  // ໜ້າເວັບຈະສົ່ງຄຳຖາມໄປຫາ endpoint ນີ້ (ບໍ່ໄດ້ເອີ້ນ Gemini API ໂດຍກົງຈາກ browser
+  // ເພື່ອບໍ່ໃຫ້ API Key ຮົ່ວອອກສາທາລະນະ)
+  //
+  // ຖ້າ deploy ຢູ່ GitHub Pages (ບໍ່ຮອງຮັບ serverless function) — ໃຫ້ໃຊ້ Cloudflare Worker ແທນ:
+  // ໃສ່ URL ເຕັມຂອງ Worker ຢູ່ນີ້ ເຊັ່ນ 'https://gemini-chat.YOUR-SUBDOMAIN.workers.dev'
+  // (ເບິ່ງຂັ້ນຕອນສ້າງ Worker ໄດ້ທີ່ cloudflare-worker/gemini-chat-worker.js)
+  //
+  // ຖ້າ deploy ຢູ່ Vercel ໃຫ້ໃຊ້ '/api/gemini-chat' (relative path, ບໍ່ຕ້ອງແກ້)
+  // ຖ້າ deploy ຢູ່ Netlify ໃຫ້ໃຊ້ '/.netlify/functions/gemini-chat'
+  GEMINI_CHAT_ENDPOINT: 'https://throbbing-glitter-9c2b.somxay5914.workers.dev',
 };
 
 /* ---------- URL helpers (ໃຊ້ຮ່ວມກັນລະຫວ່າງ index.html / admin.html) ---------- */
