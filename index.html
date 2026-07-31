@@ -8,37 +8,88 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao+Looped:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    :root {
+      --brand-ink: #0f172a;
+      --brand-gold: #b8925a;
+      --brand-glass: rgba(255,255,255,.72);
+    }
+    body { font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 12% 0%, #f1f5fb 0%, #f8fafc 42%, #f8fafc 100%); }
     .rounded-2xl-custom { border-radius: 1.75rem; }
     .rounded-3xl-custom { border-radius: 2.25rem; }
 
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes modalPop { from { opacity: 0; transform: scale(.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes modalPop { from { opacity: 0; transform: scale(.94) translateY(14px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+    @keyframes gridFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulseSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 
-    .product-card { animation: fadeInUp .5s cubic-bezier(.16,.84,.44,1) both; transition: transform .3s ease, box-shadow .3s ease; }
-    .product-card:hover { transform: translateY(-5px); box-shadow: 0 16px 30px -14px rgba(15,23,42,.22); }
-    .card-img { transition: transform .6s cubic-bezier(.16,.84,.44,1); }
-    .product-card:hover .card-img { transform: scale(1.07); }
+    /* ---- Glass surfaces (Apple-store style: soft blur + hairline + long soft shadow) ---- */
+    .glass-header {
+      background: var(--brand-glass);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border-bottom: 1px solid rgba(15,23,42,.06);
+    }
+    .glass-card {
+      background: rgba(255,255,255,.86);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 20px 40px -28px rgba(15,23,42,.18);
+      border: 1px solid rgba(15,23,42,.04);
+    }
 
-    .modal-backdrop-fade { animation: fadeIn .2s ease both; }
-    .modal-pop { animation: modalPop .28s cubic-bezier(.16,.84,.44,1) both; }
+    .product-card { animation: fadeInUp .55s cubic-bezier(.16,.84,.44,1) both; transition: transform .38s cubic-bezier(.16,.84,.44,1), box-shadow .38s ease; will-change: transform; }
+    .product-card:hover { transform: translateY(-7px); box-shadow: 0 24px 44px -20px rgba(15,23,42,.28); }
+    .card-img { transition: transform .7s cubic-bezier(.16,.84,.44,1); }
+    .product-card:hover .card-img { transform: scale(1.08); }
+    #productGrid { animation: gridFade .4s ease both; }
 
-    .btn-press { transition: transform .15s ease; }
+    .modal-backdrop-fade { animation: fadeIn .22s ease both; backdrop-filter: blur(6px); }
+    .modal-pop { animation: modalPop .35s cubic-bezier(.16,.84,.44,1) both; }
+
+    .btn-press { transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, background-color .2s ease; }
     .btn-press:active { transform: scale(.94); }
+    .cat-btn { transition: all .3s cubic-bezier(.16,.84,.44,1); }
 
     .skeleton {
-      background: linear-gradient(90deg, #eef1f5 25%, #e4e8ee 37%, #eef1f5 63%);
+      background: linear-gradient(90deg, #eef1f5 25%, #e2e7ef 37%, #eef1f5 63%);
       background-size: 400px 100%;
-      animation: shimmer 1.4s ease infinite;
+      animation: shimmer 1.3s ease infinite;
     }
+
+    /* ---- Ripple micro-interaction (injected by ui.js) ---- */
+    .ripple-relative { position: relative; overflow: hidden; }
+    .btn-press, .ripple { position: relative; overflow: hidden; }
+    .ripple-effect {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.55);
+      transform: scale(0);
+      animation: rippleAnim .65s cubic-bezier(.16,.84,.44,1);
+      pointer-events: none;
+    }
+    @keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }
+
+    /* ---- Toast notifications ---- */
+    .toast-item { opacity: 0; transform: translateY(-16px) scale(.94); transition: opacity .3s cubic-bezier(.16,.84,.44,1), transform .3s cubic-bezier(.16,.84,.44,1); }
+    .toast-item.toast-show { opacity: 1; transform: translateY(0) scale(1); }
+    .toast-item.toast-hide { opacity: 0; transform: translateY(-10px) scale(.96); }
+
+    /* ---- Loading ring (spinner premium) ---- */
+    .loader-ring { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #e2e8f0; border-top-color: var(--brand-ink); animation: spin .7s linear infinite; }
+
+    /* ---- Currency / filter cross-fade ---- */
+    .fade-swap { transition: opacity .22s ease; }
+    .fade-swap.fading { opacity: 0; }
+
+    .price-pulse { animation: pulseSoft .5s ease; }
   </style>
 </head>
 
 <body class="text-slate-800 antialiased pb-24">
 
-  <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-100 px-4 py-3">
+  <header class="sticky top-0 z-40 glass-header px-4 py-3">
     <div class="max-w-5xl mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
         <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md">
@@ -63,17 +114,17 @@
   </header>
 
   <main class="max-w-5xl mx-auto p-4 space-y-4">
-    <div class="bg-white p-4 rounded-3xl-custom border border-slate-100 shadow-sm space-y-3">
+    <div class="glass-card p-4 rounded-3xl-custom space-y-3">
       <div class="relative">
         <i class="fas fa-search absolute left-4 top-3.5 text-slate-400 text-xs"></i>
         <input type="text" id="searchInput" oninput="applyFilters()" placeholder="ຄົ້ນຫາຊື່ສິນຄ້າ, ລຸ້ນເຊັ່ນ M1, Air, Pro, Pioneer..." class="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-3 rounded-2xl text-xs focus:outline-none focus:border-slate-400">
       </div>
 
       <!-- ຟິວເຕີ MacBook -->
-      <div id="macFilterSection" style="display:none" class="bg-white p-4 rounded-3xl-custom border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div id="macFilterSection" style="display:none" class="glass-card p-4 rounded-3xl-custom grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">RAM</label>
-          <select id="filterRam" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
+          <select id="filterRam" onchange="fadeSwapGrid(applyFilters)" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
             <option value="">ທັງໝົດ RAM</option>
             <option value="8">8 GB</option>
             <option value="16">16 GB</option>
@@ -82,7 +133,7 @@
         </div>
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">SSD STORAGE</label>
-          <select id="filterSsd" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
+          <select id="filterSsd" onchange="fadeSwapGrid(applyFilters)" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
             <option value="">ທັງໝົດ SSD</option>
             <option value="128">128 GB</option>
             <option value="256">256 GB</option>
@@ -92,7 +143,7 @@
         </div>
         <div>
           <label id="lblYear" class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">YEAR (ປີຜະລິດ)</label>
-          <select id="filterYear" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
+          <select id="filterYear" onchange="fadeSwapGrid(applyFilters)" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
             <option value="">ທັງໝົດ ປີ</option>
             <option value="2023">2023</option>
             <option value="2022">2022</option>
@@ -105,10 +156,10 @@
       </div>
 
       <!-- ຟິວເຕີ ສາຍສາກ / ອຸປະກອນ -->
-      <div id="accFilterSection" style="display:none" class="bg-white p-4 rounded-3xl-custom border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div id="accFilterSection" style="display:none" class="glass-card p-4 rounded-3xl-custom grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ປະເພດສາຍສາກ</label>
-          <select id="filterAccType" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
+          <select id="filterAccType" onchange="fadeSwapGrid(applyFilters)" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
             <option value="">ທັງໝົດ ປະເພດ</option>
             <option value="2012down">ສາຍສາກ ປີ 2012 ລົງມາ (MagSafe 1)</option>
             <option value="2013-2015">ສາຍສາກ ປີ 2013-2015 (MagSafe 2)</option>
@@ -117,7 +168,7 @@
         </div>
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຄວາມແຮງ (WATT)</label>
-          <select id="filterAccWatt" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
+          <select id="filterAccWatt" onchange="fadeSwapGrid(applyFilters)" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
             <option value="">ທັງໝົດ ວັດ</option>
             <option value="45">45W</option>
             <option value="60">60W</option>
@@ -128,10 +179,10 @@
       </div>
 
       <!-- ຟິວເຕີ ເຄື່ອງ DJ -->
-      <div id="djFilterSection" style="display:none" class="bg-white p-4 rounded-3xl-custom border border-slate-100 shadow-sm grid grid-cols-1 gap-3">
+      <div id="djFilterSection" style="display:none" class="glass-card p-4 rounded-3xl-custom grid grid-cols-1 gap-3">
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ປະເພດເຄື່ອງ DJ</label>
-          <select id="filterDjSize" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
+          <select id="filterDjSize" onchange="fadeSwapGrid(applyFilters)" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
             <option value="">ທັງໝົດ</option>
             <option value="big">ເຄື່ອງໃຫຍ່</option>
             <option value="small">ເຄື່ອງນ້ອຍ</option>
@@ -140,10 +191,10 @@
       </div>
 
       <!-- ຟິວເຕີ ລົງໂປຮແກຣມ -->
-      <div id="swFilterSection" style="display:none" class="bg-white p-4 rounded-3xl-custom border border-slate-100 shadow-sm grid grid-cols-1 gap-3">
+      <div id="swFilterSection" style="display:none" class="glass-card p-4 rounded-3xl-custom grid grid-cols-1 gap-3">
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ປະເພດຂອງໂປຮແກຣມ</label>
-          <select id="filterSwType" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
+          <select id="filterSwType" onchange="fadeSwapGrid(applyFilters)" class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-medium focus:outline-none">
             <option value="">ທັງໝົດ</option>
             <option value="macos">ລົງລະບົບ macOS</option>
             <option value="office">Microsoft Office</option>
@@ -178,7 +229,7 @@
 
   <!-- Modal: Product Details (Popup no new tab, multi image gallery) -->
   <div id="productModal" class="modal-backdrop-fade fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="modal-pop bg-white rounded-3xl-custom shadow-2xl w-full max-w-lg p-6 overflow-y-auto max-h-[90vh] relative">
+    <div class="modal-pop bg-white rounded-3xl-custom shadow-2xl ring-1 ring-slate-900/5 w-full max-w-lg p-6 overflow-y-auto max-h-[90vh] relative">
       <button onclick="closeProductModal()" class="btn-press absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 z-10"><i class="fas fa-times"></i></button>
       <div id="modalBody" class="space-y-4"></div>
     </div>
@@ -186,7 +237,7 @@
 
   <!-- Modal: Warranty Check -->
   <div id="warrantyModal" class="modal-backdrop-fade fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="modal-pop bg-white rounded-3xl-custom shadow-2xl w-full max-w-md p-6 relative">
+    <div class="modal-pop bg-white rounded-3xl-custom shadow-2xl ring-1 ring-slate-900/5 w-full max-w-md p-6 relative">
       <button onclick="closeWarrantyModal()" class="btn-press absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200"><i class="fas fa-times"></i></button>
       <h3 class="font-bold text-sm mb-2"><i class="fas fa-shield-alt text-indigo-600 mr-1"></i> ກວດສອບໄລຍະເວລາຮັບປະກັນ</h3>
       <p class="text-[11px] text-slate-400 mb-3">ໃສ່ລະຫັດສິນຄ້າ 6 ຫລັກ ເພື່ອກວດສອບປະກັນ ແລະ ປະຫວັດການສ້ອມແຊມ</p>
@@ -200,7 +251,7 @@
 
   <!-- Modal: Share Product -->
   <div id="shareModal" class="modal-backdrop-fade fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-    <div class="modal-pop bg-white rounded-3xl-custom shadow-2xl w-full max-w-xs p-6 relative">
+    <div class="modal-pop bg-white rounded-3xl-custom shadow-2xl ring-1 ring-slate-900/5 w-full max-w-xs p-6 relative">
       <button onclick="closeShareModal()" class="btn-press absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200"><i class="fas fa-times"></i></button>
       <h3 class="font-bold text-sm mb-4"><i class="fas fa-share-nodes text-indigo-600 mr-1"></i> ແຊຣ໌ສິນຄ້ານີ້</h3>
       <div class="space-y-2">
@@ -217,11 +268,11 @@
           Facebook Messenger
         </button>
       </div>
-      <p id="shareCopiedMsg" class="hidden text-center text-[11px] text-emerald-600 font-semibold mt-3"><i class="fas fa-check-circle mr-1"></i> ຄັດລອກລິ້ງແລ້ວ!</p>
     </div>
   </div>
 
   <script src="config.js"></script>
+  <script src="ui.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
