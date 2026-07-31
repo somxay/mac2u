@@ -84,6 +84,19 @@
     .fade-swap.fading { opacity: 0; }
 
     .price-pulse { animation: pulseSoft .5s ease; }
+
+    /* ---- AI Chat Widget ---- */
+    @keyframes bubbleIn { from { transform: scale(0) rotate(-20deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+    @keyframes bubblePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(79,70,229,.35); } 50% { box-shadow: 0 0 0 12px rgba(79,70,229,0); } }
+    @keyframes drawerPop { from { opacity: 0; transform: translateY(24px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes typingBounce { 0%, 80%, 100% { transform: translateY(0); opacity: .5; } 40% { transform: translateY(-5px); opacity: 1; } }
+
+    #aiChatBubble { animation: bubbleIn .5s cubic-bezier(.34,1.56,.64,1) both, bubblePulse 2.6s ease-in-out infinite 1s; }
+    .ai-drawer-pop { animation: drawerPop .3s cubic-bezier(.16,.84,.44,1) both; }
+    .chat-bubble-msg { animation: fadeInUp .35s cubic-bezier(.16,.84,.44,1) both; }
+    .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; display: inline-block; animation: typingBounce 1.2s infinite ease-in-out; }
+    .typing-dot:nth-child(2) { animation-delay: .15s; }
+    .typing-dot:nth-child(3) { animation-delay: .3s; }
   </style>
 </head>
 
@@ -271,8 +284,46 @@
     </div>
   </div>
 
+  <!-- AI Chat Bubble -->
+  <button id="aiChatBubble" onclick="toggleChatDrawer()"
+          class="btn-press fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 text-white shadow-2xl shadow-indigo-600/40 flex items-center justify-center text-xl">
+    <i class="fas fa-comment-dots"></i>
+    <span class="absolute -top-1 -right-1 bg-emerald-400 text-[8px] font-bold text-white w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-white">AI</span>
+  </button>
+
+  <!-- AI Chat Drawer -->
+  <div id="aiChatDrawer" class="fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-5 z-50 hidden">
+    <div class="sm:hidden fixed inset-0 bg-slate-900/40 modal-backdrop-fade" onclick="toggleChatDrawer()"></div>
+    <div class="ai-drawer-pop absolute bottom-0 sm:static left-0 right-0 sm:w-[380px] sm:h-[560px] h-[85vh] bg-white sm:rounded-3xl-custom rounded-t-3xl-custom shadow-2xl flex flex-col overflow-hidden ring-1 ring-slate-900/5">
+      <div class="bg-gradient-to-r from-slate-900 to-indigo-900 text-white px-4 py-3.5 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center"><i class="fas fa-robot text-sm"></i></div>
+          <div>
+            <p class="font-bold text-xs">ຜູ້ຊ່ວຍ AI ຮ້ານ</p>
+            <p class="text-[10px] text-white/60 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span> ພ້ອມຊ່ວຍເຫຼືອທ່ານ</p>
+          </div>
+        </div>
+        <button onclick="toggleChatDrawer()" class="btn-press w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"><i class="fas fa-times text-xs"></i></button>
+      </div>
+
+      <div id="chatMessages" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-slate-50"></div>
+
+      <div class="p-3 border-t border-slate-100 bg-white shrink-0">
+        <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex items-center gap-2">
+          <input id="chatInput" type="text" autocomplete="off" placeholder="ພິມຄຳຖາມ... ເຊັ່ນ M1 ກັບ M2 ຕ່າງກັນແນວໃດ?"
+                 class="flex-1 bg-slate-50 border border-slate-200 px-3.5 py-2.5 rounded-full text-xs focus:outline-none focus:border-indigo-400">
+          <button id="chatSendBtn" type="submit" class="btn-press w-10 h-10 shrink-0 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center disabled:opacity-60">
+            <i class="fas fa-paper-plane text-xs"></i>
+          </button>
+        </form>
+        <p class="text-center text-[9px] text-slate-300 mt-2">AI ອາດຕອບຜິດພາດໄດ້ · ກວດຂໍ້ມູນສຳຄັນຄືນຜ່ານ WhatsApp</p>
+      </div>
+    </div>
+  </div>
+
   <script src="config.js"></script>
   <script src="ui.js"></script>
   <script src="app.js"></script>
+  <script src="chat.js"></script>
 </body>
 </html>
