@@ -77,18 +77,14 @@ async function ghPutImage(path, base64Content, message) {
 
 /* --------------------------------- Login --------------------------------- */
 
-function setSaveStatus(text, isError) {
-  const el = document.getElementById('saveStatus');
-  el.classList.remove('hidden');
-  el.className = `bg-${isError ? 'rose' : 'amber'}-50 border border-${isError ? 'rose' : 'amber'}-200 text-${isError ? 'rose' : 'amber'}-700 text-xs px-4 py-2.5 rounded-2xl`;
-  el.innerText = text;
-  if (!isError) setTimeout(() => el.classList.add('hidden'), 4000);
-}
-
 async function doLogin() {
   const tokenInput = document.getElementById('loginToken').value.trim();
   if (!tokenInput) return;
   githubToken = tokenInput;
+  const btn = document.getElementById('loginBtn');
+  const originalBtnHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader-ring-sm"></span> ກຳລັງກວດສອບ Token...';
 
   try {
     // ກວດວ່າ token ໃຊ້ໄດ້ ໂດຍລອງອ່ານໄຟລ໌ products.json
@@ -103,10 +99,13 @@ async function doLogin() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('dashboard').classList.remove('hidden');
     document.getElementById('loginError').classList.add('hidden');
+    showToast('ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ, ຍິນດີຕ້ອນຮັບ!', 'success');
     loadData();
   } catch (err) {
     console.error(err);
     document.getElementById('loginError').classList.remove('hidden');
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHtml;
   }
 }
 document.getElementById('loginToken').addEventListener('keydown', e => {
@@ -137,7 +136,8 @@ function doLogout() {
 /* --------------------------------- Data load --------------------------------- */
 
 async function loadData() {
-  document.getElementById('adminLoading').style.display = 'block';
+  document.getElementById('adminLoading').style.display = 'grid';
+  document.getElementById('adminGrid').innerHTML = '';
   try {
     const [productsFile, settingsFile] = await Promise.all([
       ghGetFile(CONFIG.PRODUCTS_PATH),
@@ -152,7 +152,8 @@ async function loadData() {
     renderAdminGrid();
   } catch (err) {
     console.error(err);
-    document.getElementById('adminLoading').innerText = 'ເກີດຂໍ້ຜິດພາດໃນການໂຫຼດຂໍ້ມູນ: ' + err.message;
+    document.getElementById('adminLoading').style.display = 'none';
+    showToast('ໂຫຼດຂໍ້ມູນບໍ່ສຳເລັດ: ' + err.message, 'error', 5000);
   }
 }
 
@@ -162,18 +163,20 @@ async function saveExchangeRate() {
   const lakToThb = Number(document.getElementById('settingRateLakToThb').value);
   const thbToLak = Number(document.getElementById('settingRateThbToLak').value);
   if (!lakToThb || lakToThb <= 0 || !thbToLak || thbToLak <= 0) {
-    alert('ກະລຸນາໃສ່ຕົວເລກອັດຕາແລກປ່ຽນທັງສອງຊ່ອງໃຫ້ຖືກຕ້ອງ');
+    showToast('ກະລຸນາໃສ່ຕົວເລກອັດຕາແລກປ່ຽນທັງສອງຊ່ອງໃຫ້ຖືກຕ້ອງ', 'info');
     return;
   }
+  showLoadingOverlay('ກຳລັງບັນທຶກອັດຕາແລກປ່ຽນ...');
   try {
-    setSaveStatus('ກຳລັງບັນທຶກອັດຕາແລກປ່ຽນ...', false);
     const current = await ghGetFile(CONFIG.SETTINGS_PATH);
     await ghPutJson(CONFIG.SETTINGS_PATH, { exchangeRate: lakToThb, thbToLakRate: thbToLak }, current.sha,
       'chore: update exchange rate via admin panel');
-    setSaveStatus('ອັບເດດອັດຕາແລກປ່ຽນສຳເລັດແລ້ວ!', false);
+    hideLoadingOverlay();
+    showToast('ອັບເດດອັດຕາແລກປ່ຽນສຳເລັດແລ້ວ!', 'success');
   } catch (err) {
     console.error(err);
-    setSaveStatus('ເກີດຂໍ້ຜິດພາດ: ' + err.message, true);
+    hideLoadingOverlay();
+    showToast('ເກີດຂໍ້ຜິດພາດ: ' + err.message, 'error', 5000);
   }
 }
 
@@ -203,7 +206,7 @@ function renderAdminGrid() {
     const mainImg = (p.images && p.images.length > 0 && p.images[0]) ? p.images[0] : 'https://placehold.co/300x220?text=No+Image';
 
     return `
-      <div class="bg-white rounded-3xl-custom border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+      <div class="admin-card bg-white rounded-3xl-custom border border-slate-100 shadow-sm overflow-hidden flex flex-col">
         <div class="relative h-36 bg-slate-100">
           <img src="${mainImg}" class="w-full h-full object-cover">
           <span class="absolute top-2 left-2 px-2.5 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 shadow-sm">${statusText}</span>
@@ -216,8 +219,8 @@ function renderAdminGrid() {
             <p class="text-rose-600 font-bold text-xs mt-1">${p.priceLAK > 0 ? Number(p.priceLAK).toLocaleString() + ' ₭' : (p.priceTHB > 0 ? Number(p.priceTHB).toLocaleString() + ' ฿' : '-')}</p>
           </div>
           <div class="flex gap-2 mt-2">
-            <button onclick="openEditModal('${p.id}')" title="ແກ້ໄຂ" class="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-2 rounded-xl text-sm">✏️</button>
-            <button onclick="removeProduct('${p.id}')" title="ລຶບ" class="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 py-2 rounded-xl text-sm">🗑️</button>
+            <button onclick="openEditModal('${p.id}')" title="ແກ້ໄຂ" class="btn-press flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-2 rounded-xl text-sm">✏️</button>
+            <button onclick="removeProduct('${p.id}')" title="ລຶບ" class="btn-press flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 py-2 rounded-xl text-sm">🗑️</button>
           </div>
         </div>
       </div>
@@ -353,12 +356,11 @@ function removeImageAt(idx) {
 function uploadImage(input) {
   if (!(input.files && input.files[0])) return;
   const file = input.files[0];
-  const emoji = document.getElementById('uploadEmoji');
-  emoji.innerHTML = '⏳';
 
   if (file.size > 2 * 1024 * 1024) {
-    alert('ຮູບພາບໃຫຍ່ເກີນ 2MB — ກະລຸນາຫຍໍ້ຂະໜາດຮູບກ່ອນອັບໂຫຼດ ເພື່ອຄວາມໄວຂອງເວັບໄຊ');
+    showToast('ຮູບພາບໃຫຍ່ເກີນ 2MB — ຄວນຫຍໍ້ຂະໜາດຮູບກ່ອນອັບໂຫຼດ ເພື່ອຄວາມໄວຂອງເວັບໄຊ', 'info', 5000);
   }
+  showLoadingOverlay('ກຳລັງອັບໂຫຼດຮູບພາບຂຶ້ນ GitHub...');
 
   const reader = new FileReader();
   reader.onload = async function (e) {
@@ -373,13 +375,14 @@ function uploadImage(input) {
       let current = document.getElementById('pImageList').value;
       document.getElementById('pImageList').value = current ? current + ',' + url : url;
       renderImagePreviews();
-      emoji.innerHTML = '✅';
+      hideLoadingOverlay();
+      showToast('ອັບໂຫຼດຮູບພາບສຳເລັດແລ້ວ!', 'success');
     } catch (err) {
       console.error(err);
-      emoji.innerHTML = '❌';
-      alert('ອັບໂຫຼດຮູບບໍ່ສຳເລັດ: ' + err.message);
+      hideLoadingOverlay();
+      showToast('ອັບໂຫຼດຮູບບໍ່ສຳເລັດ: ' + err.message, 'error', 6000);
     } finally {
-      setTimeout(() => { emoji.innerHTML = ''; }, 3000);
+      input.value = '';
     }
   };
   reader.readAsDataURL(file);
@@ -436,28 +439,44 @@ async function handleFormSubmit(e) {
     allProducts.push(product);
   }
 
-  await persistProducts(idx > -1 ? `chore: update product ${product.id}` : `feat: add product ${product.id}`);
-  closeEditModal();
-  renderAdminGrid();
+  const saveBtn = document.getElementById('saveBtn');
+  const originalBtnText = saveBtn.innerText;
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<span class="loader-ring-sm"></span> ກຳລັງບັນທຶກ...';
+
+  const ok = await persistProducts(idx > -1 ? `chore: update product ${product.id}` : `feat: add product ${product.id}`);
+
+  saveBtn.disabled = false;
+  saveBtn.innerText = originalBtnText;
+
+  if (ok) {
+    closeEditModal();
+    renderAdminGrid();
+  }
 }
 
 async function removeProduct(id) {
   if (!confirm('ຕ້ອງການລຶບສິນຄ້ານີ້ແທ້ບໍ?')) return;
+  const backup = allProducts;
   allProducts = allProducts.filter(x => x.id.toString() !== id.toString());
-  await persistProducts(`chore: delete product ${id}`);
+  const ok = await persistProducts(`chore: delete product ${id}`);
+  if (!ok) { allProducts = backup; return; }
   renderAdminGrid();
 }
 
 async function persistProducts(commitMessage) {
+  showLoadingOverlay('ກຳລັງບັນທຶກ ແລະ commit ຂໍ້ມູນລົງ GitHub...');
   try {
-    setSaveStatus('ກຳລັງບັນທຶກ ແລະ commit ຂໍ້ມູນລົງ GitHub...', false);
     // ດຶງ sha ຫລ້າສຸດກ່ອນຂຽນທັບ ເພື່ອປ້ອງກັນຂໍ້ມູນຂັດແຍ່ງກັນ (ກໍລະນີແກ້ໄຂຈາກຫລາຍອຸປະກອນ)
     const current = await ghGetFile(CONFIG.PRODUCTS_PATH);
     await ghPutJson(CONFIG.PRODUCTS_PATH, allProducts, current.sha, commitMessage);
-    setSaveStatus('ບັນທຶກຂໍ້ມູນສຳເລັດແລ້ວ! (Commit ໄປ GitHub ແລ້ວ)', false);
+    hideLoadingOverlay();
+    showToast('ບັນທຶກຂໍ້ມູນສຳເລັດແລ້ວ! (Commit ໄປ GitHub ແລ້ວ)', 'success');
+    return true;
   } catch (err) {
     console.error(err);
-    setSaveStatus('ບັນທຶກບໍ່ສຳເລັດ: ' + err.message, true);
-    alert('ບັນທຶກບໍ່ສຳເລັດ: ' + err.message);
+    hideLoadingOverlay();
+    showToast('ບັນທຶກບໍ່ສຳເລັດ: ' + err.message, 'error', 6000);
+    return false;
   }
 }

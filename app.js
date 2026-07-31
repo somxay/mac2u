@@ -37,20 +37,35 @@ async function loadData() {
     console.error('Error loading data:', err);
     const loadingEl = document.getElementById('loading');
     if (loadingEl) loadingEl.innerText = 'ເກີດຂໍ້ຜິດພາດໃນການໂຫຼດຂໍ້ມູນ (ກວດ config.js ວ່າຕັ້ງ GITHUB_OWNER/REPO ຖືກຕ້ອງບໍ່)';
+    showToast('ໂຫຼດຂໍ້ມູນສິນຄ້າບໍ່ສຳເລັດ, ກະລຸນາລອງໃໝ່', 'error');
   }
 }
 
 function toggleCurrency() {
   currentCurrency = currentCurrency === 'LAK' ? 'THB' : 'LAK';
-  document.getElementById('currencyBtn').innerText = currentCurrency === 'LAK' ? '₭ LAK' : '฿ THB';
-  applyFilters();
+  const btn = document.getElementById('currencyBtn');
+  btn.innerText = currentCurrency === 'LAK' ? '₭ LAK' : '฿ THB';
+  btn.classList.remove('price-pulse');
+  void btn.offsetWidth; // ຣີສະຕາດ animation
+  btn.classList.add('price-pulse');
+  fadeSwapGrid(applyFilters);
 }
 
 function toggleLang() {
   currentLang = currentLang === 'LO' ? 'EN' : 'LO';
   document.getElementById('langBtn').innerText = currentLang === 'LO' ? 'EN' : 'ລາວ';
   updateUIText();
-  applyFilters();
+  fadeSwapGrid(applyFilters);
+}
+
+// ຄ່ອຍໆ fade grid ອອກ/ເຂົ້າ ເວລາປ່ຽນ ສະກຸນເງິນ/ພາສາ/ໝວດໝູ່ ໃຫ້ຮູ້ສຶກລື່ນໄຫຼ ບໍ່ໂດດ
+function fadeSwapGrid(updateFn) {
+  const grid = document.getElementById('productGrid');
+  grid.classList.add('fade-swap', 'fading');
+  setTimeout(() => {
+    updateFn();
+    grid.classList.remove('fading');
+  }, 150);
 }
 
 function updateUIText() {
@@ -91,7 +106,7 @@ function filterCategory(cat, btnEl) {
   document.getElementById('djFilterSection').style.display = (cat === 'DJ') ? 'grid' : 'none';
   document.getElementById('swFilterSection').style.display = (cat === 'Software') ? 'grid' : 'none';
 
-  applyFilters();
+  fadeSwapGrid(applyFilters);
 }
 
 function applyFilters() {
@@ -186,7 +201,7 @@ function renderProducts(products) {
     const delay = Math.min(idx, 11) * 45;
 
     return `
-      <div class="product-card group bg-white rounded-3xl-custom shadow-sm overflow-hidden flex flex-col justify-between cursor-pointer" style="animation-delay:${delay}ms" onclick="openProductModal('${p.id}')">
+      <div class="product-card group glass-card rounded-3xl-custom overflow-hidden flex flex-col justify-between cursor-pointer" style="animation-delay:${delay}ms" onclick="openProductModal('${p.id}')">
         <div>
           <div class="relative h-44 bg-slate-100 overflow-hidden">
             <img src="${mainImg}" alt="${p.title}" class="card-img w-full h-full object-cover">
@@ -363,7 +378,7 @@ function computeWarrantyText(status, soldDateVal, warrantyDays) {
 function checkWarranty() {
   const code = document.getElementById('warrantyInputCode').value.trim();
   const box = document.getElementById('warrantyResultBox');
-  if (!code) { alert('ກະລຸນາໃສ່ລະຫັດສິນຄ້າ'); return; }
+  if (!code) { showToast('ກະລຸນາໃສ່ລະຫັດສິນຄ້າ', 'info'); return; }
 
   const p = allProducts.find(x => x.id.toString().trim() === code);
   if (!p) {
@@ -396,7 +411,6 @@ function productShareUrl(id) {
 
 function openShareModal(id) {
   shareProductId = id;
-  document.getElementById('shareCopiedMsg').classList.add('hidden');
   document.getElementById('shareModal').classList.remove('hidden');
 }
 function closeShareModal() {
@@ -417,9 +431,8 @@ async function shareViaCopyLink() {
     document.execCommand('copy');
     document.body.removeChild(tmp);
   }
-  const msg = document.getElementById('shareCopiedMsg');
-  msg.classList.remove('hidden');
-  setTimeout(() => msg.classList.add('hidden'), 2500);
+  closeShareModal();
+  showToast('ຄັດລອກລິ້ງແລ້ວ!', 'success');
 }
 
 function shareViaWhatsApp() {

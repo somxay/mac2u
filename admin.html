@@ -8,9 +8,66 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao+Looped:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    :root {
+      --brand-ink: #0f172a;
+      --brand-glass: rgba(255,255,255,.72);
+    }
+    body { font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 12% 0%, #f1f5fb 0%, #f8fafc 42%, #f8fafc 100%); }
     .rounded-2xl-custom { border-radius: 1.75rem; }
     .rounded-3xl-custom { border-radius: 2.25rem; }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modalPop { from { opacity: 0; transform: scale(.94) translateY(14px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .glass-header {
+      background: var(--brand-glass);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border-bottom: 1px solid rgba(15,23,42,.06);
+    }
+    .glass-card {
+      background: rgba(255,255,255,.86);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 20px 40px -28px rgba(15,23,42,.18);
+      border: 1px solid rgba(15,23,42,.04);
+    }
+
+    .admin-card { animation: fadeInUp .45s cubic-bezier(.16,.84,.44,1) both; transition: transform .3s cubic-bezier(.16,.84,.44,1), box-shadow .3s ease; }
+    .admin-card:hover { transform: translateY(-4px); box-shadow: 0 20px 36px -20px rgba(15,23,42,.25); }
+
+    .modal-pop { animation: modalPop .32s cubic-bezier(.16,.84,.44,1) both; }
+    .fixed.bg-slate-900\/60 { animation: fadeIn .2s ease both; backdrop-filter: blur(6px); }
+
+    .btn-press { transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, background-color .2s ease; }
+    .btn-press:active { transform: scale(.94); }
+
+    .skeleton {
+      background: linear-gradient(90deg, #eef1f5 25%, #e2e7ef 37%, #eef1f5 63%);
+      background-size: 400px 100%;
+      animation: shimmer 1.3s ease infinite;
+    }
+
+    .ripple-relative { position: relative; overflow: hidden; }
+    .btn-press, .ripple { position: relative; overflow: hidden; }
+    .ripple-effect {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.55);
+      transform: scale(0);
+      animation: rippleAnim .65s cubic-bezier(.16,.84,.44,1);
+      pointer-events: none;
+    }
+    @keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }
+
+    .toast-item { opacity: 0; transform: translateY(-16px) scale(.94); transition: opacity .3s cubic-bezier(.16,.84,.44,1), transform .3s cubic-bezier(.16,.84,.44,1); }
+    .toast-item.toast-show { opacity: 1; transform: translateY(0) scale(1); }
+    .toast-item.toast-hide { opacity: 0; transform: translateY(-10px) scale(.96); }
+
+    .loader-ring { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #e2e8f0; border-top-color: var(--brand-ink); animation: spin .7s linear infinite; }
+    .loader-ring-sm { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: spin .6s linear infinite; display: inline-block; }
   </style>
 </head>
 <body class="text-slate-800 antialiased">
@@ -34,7 +91,7 @@
       </label>
 
       <p id="loginError" class="text-xs text-rose-500 mb-2 hidden">Token ບໍ່ຖືກຕ້ອງ ຫຼື ບໍ່ມີສິດຂຽນເຂົ້າ Repository!</p>
-      <button onclick="doLogin()" class="w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-semibold">ເຂົ້າສູ່ລະບົບ</button>
+      <button id="loginBtn" onclick="doLogin()" class="w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-70">ເຂົ້າສູ່ລະບົບ</button>
       <a href="index.html" class="block text-center text-xs text-slate-400 mt-4 hover:underline">← ກັບຄືນໜ້າຮ້ານ</a>
 
       <div class="mt-4 pt-4 border-t border-slate-100 text-[10px] text-slate-400 leading-relaxed">
@@ -48,7 +105,7 @@
 
   <!-- ໜ້າຈັດການສິນຄ້າ (ສະແດງຫຼັງ Login ສຳເລັດ) -->
   <div id="dashboard" class="hidden min-h-screen pb-20">
-    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 px-4 py-3">
+    <header class="sticky top-0 z-30 glass-header px-4 py-3">
       <div class="max-w-6xl mx-auto flex justify-between items-center gap-3">
         <div class="flex items-center gap-2.5">
           <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md">
@@ -60,20 +117,19 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="openEditModal(null)" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+          <button onclick="openEditModal(null)" class="btn-press bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">
             <i class="fas fa-plus"></i> ເພີ່ມສິນຄ້າ
           </button>
-          <button onclick="doLogout()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">ອອກຈາກລະບົບ</button>
+          <button onclick="doLogout()" class="btn-press bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">ອອກຈາກລະບົບ</button>
           <a href="index.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">← ໜ້າຮ້ານ</a>
         </div>
       </div>
     </header>
 
     <main class="max-w-6xl mx-auto p-4 space-y-4">
-      <div id="saveStatus" class="hidden bg-amber-50 border border-amber-200 text-amber-700 text-xs px-4 py-2.5 rounded-2xl"></div>
 
       <!-- ຫ້ອງນ້ອຍໆ ອັບເດດອັດຕາແລກປ່ຽນ -->
-      <div class="bg-white p-4 rounded-3xl-custom border border-slate-100 shadow-sm flex flex-wrap items-end gap-3">
+      <div class="glass-card p-4 rounded-3xl-custom flex flex-wrap items-end gap-3">
         <div class="flex-1 min-w-[220px]">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ອັດຕາ ກີບ → ບາດ (ກີບ ÷ ອັດຕານີ້ = ບາດ)</label>
           <input id="settingRateLakToThb" type="number" min="1" placeholder="ຕົວຢ່າງ: 695" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
@@ -82,11 +138,11 @@
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ອັດຕາ ບາດ → ກີບ (ບາດ × ອັດຕານີ້ = ກີບ)</label>
           <input id="settingRateThbToLak" type="number" min="1" placeholder="ຕົວຢ່າງ: 685" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
         </div>
-        <button onclick="saveExchangeRate()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition">ບັນທຶກອັດຕາ</button>
+        <button onclick="saveExchangeRate()" class="btn-press bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition">ບັນທຶກອັດຕາ</button>
       </div>
 
       <!-- ຊ່ອງຄົ້ນຫາສິນຄ້າສຳລັບແອດມິນ -->
-      <div class="bg-white p-4 rounded-3xl-custom border border-slate-100 shadow-sm">
+      <div class="glass-card p-4 rounded-3xl-custom">
         <div class="relative">
           <i class="fas fa-search absolute left-4 top-3.5 text-slate-400 text-xs"></i>
           <input type="text" id="adminSearch" oninput="renderAdminGrid()" placeholder="ຄົ້ນຫາຕາມຊື່, ລະຫັດ ຫຼື ໝວດໝູ່..."
@@ -94,8 +150,11 @@
         </div>
       </div>
 
-      <div id="adminLoading" class="text-center py-16 text-slate-400 text-xs">
-        <i class="fas fa-spinner fa-spin text-lg mb-2 block"></i> ກຳລັງໂຫຼດຂໍ້ມູນສິນຄ້າ...
+      <div id="adminLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div class="bg-white rounded-3xl-custom overflow-hidden shadow-sm"><div class="h-36 skeleton"></div><div class="p-3 space-y-2"><div class="h-2 w-1/3 rounded skeleton"></div><div class="h-3 w-2/3 rounded skeleton"></div><div class="h-2.5 w-1/2 rounded skeleton"></div></div></div>
+        <div class="bg-white rounded-3xl-custom overflow-hidden shadow-sm"><div class="h-36 skeleton"></div><div class="p-3 space-y-2"><div class="h-2 w-1/3 rounded skeleton"></div><div class="h-3 w-2/3 rounded skeleton"></div><div class="h-2.5 w-1/2 rounded skeleton"></div></div></div>
+        <div class="bg-white rounded-3xl-custom overflow-hidden shadow-sm hidden sm:block"><div class="h-36 skeleton"></div><div class="p-3 space-y-2"><div class="h-2 w-1/3 rounded skeleton"></div><div class="h-3 w-2/3 rounded skeleton"></div><div class="h-2.5 w-1/2 rounded skeleton"></div></div></div>
+        <div class="bg-white rounded-3xl-custom overflow-hidden shadow-sm hidden lg:block"><div class="h-36 skeleton"></div><div class="p-3 space-y-2"><div class="h-2 w-1/3 rounded skeleton"></div><div class="h-3 w-2/3 rounded skeleton"></div><div class="h-2.5 w-1/2 rounded skeleton"></div></div></div>
       </div>
 
       <div id="adminGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
@@ -105,7 +164,7 @@
   <!-- Popup: ເພີ່ມ / ແກ້ໄຂສິນຄ້າ -->
   <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl-custom shadow-2xl w-full max-w-2xl p-6 overflow-y-auto max-h-[92vh] relative">
-      <button onclick="closeEditModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 z-10"><i class="fas fa-times"></i></button>
+      <button onclick="closeEditModal()" class="btn-press absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 z-10"><i class="fas fa-times"></i></button>
       <h3 id="editModalTitle" class="font-bold text-base mb-4">ເພີ່ມສິນຄ້າໃໝ່</h3>
 
       <form onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -266,21 +325,21 @@
               <i class="fas fa-cloud-arrow-up text-indigo-500"></i> ເລືອກຮູບພາບ (Commit ເຂົ້າ GitHub)
             </label>
             <input id="pImageFile" type="file" accept="image/*" onchange="uploadImage(this)" class="hidden">
-            <span id="uploadEmoji"></span>
           </div>
           <div id="imagePreviewList" class="flex gap-2 flex-wrap"></div>
           <input type="hidden" id="pImageList" value="">
         </div>
 
         <div class="md:col-span-2 flex gap-2 mt-2">
-          <button type="submit" id="saveBtn" class="flex-1 bg-slate-900 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">ບັນທຶກສິນຄ້າໃໝ່</button>
-          <button type="button" onclick="closeEditModal()" class="px-5 bg-slate-100 text-slate-600 rounded-2xl text-xs font-semibold">ຍົກເລີກ</button>
+          <button type="submit" id="saveBtn" class="btn-press flex-1 bg-slate-900 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">ບັນທຶກສິນຄ້າໃໝ່</button>
+          <button type="button" onclick="closeEditModal()" class="btn-press px-5 bg-slate-100 text-slate-600 rounded-2xl text-xs font-semibold">ຍົກເລີກ</button>
         </div>
       </form>
     </div>
   </div>
 
   <script src="config.js"></script>
+  <script src="ui.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>
