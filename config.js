@@ -36,7 +36,7 @@ IMAGES_DIR: 'images/',
   //
   // ຖ້າ deploy ຢູ່ Vercel ໃຫ້ໃຊ້ '/api/gemini-chat' (relative path, ບໍ່ຕ້ອງແກ້)
   // ຖ້າ deploy ຢູ່ Netlify ໃຫ້ໃຊ້ '/.netlify/functions/gemini-chat'
-  GEMINI_CHAT_ENDPOINT: 'https://throbbing-glitter-9c2b.somxay5914.workers.dev',
+  GEMINI_CHAT_ENDPOINT: 'https://gemini-chat.YOUR-SUBDOMAIN.workers.dev',
 };
 
 /* ---------- URL helpers (ໃຊ້ຮ່ວມກັນລະຫວ່າງ index.html / admin.html) ---------- */
