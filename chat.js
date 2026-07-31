@@ -84,7 +84,7 @@ async function handleChatSubmit(e) {
   showTypingIndicator();
 
   try {
-    const res = await fetch(CONFIG.GEMINI_CHAT_ENDPOINT, {
+    const res = await fetch(GEMINI_CHAT_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
