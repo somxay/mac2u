@@ -287,7 +287,7 @@ function openProductModal(id) {
       <div>
         <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
           <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-wider">${p.category}</span>
-          ${p.category === 'Macbook' ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md uppercase tracking-wider">KB ${p.keyboard || 'TH'}</span>` : ''}
+          ${p.category === 'Macbook' ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md uppercase tracking-wider">ສູນ ${p.keyboard || 'TH'}</span>` : ''}
           ${p.color ? `<span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md uppercase tracking-wider">${p.color}</span>` : ''}
         </div>
         <h3 class="font-bold text-slate-800 text-lg leading-snug">${p.title}</h3>
