@@ -181,7 +181,7 @@ function applyFilters() {
 
 // ຄີບອດ → ສະແດງເປັນທຸງຊາດ emoji ແທນຕົວອັກສອນ
 function keyboardFlag(kb) {
-  const map = { 'TH': '🇹🇭', 'EN': '🇬🇧', 'US': '🇺🇸', 'LA': '🇱🇦' };
+  const map = { 'TH': '🇹🇭 TH', 'EN': '🇺🇸 EN', 'US': '🇺🇸 US', 'LA': '🇱🇦 LA' };
   return map[(kb || '').toUpperCase()] || kb || '';
 }
 
