@@ -21,5 +21,28 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
+  },
+  {
+    "id": "511851",
+    "title": "Macbook pro m1",
+    "category": "Macbook",
+    "priceLAK": 4500000,
+    "oldPriceLAK": 4900000,
+    "priceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "4",
+    "ssd": "128",
+    "year": "2012",
+    "keyboard": "ໄທ",
+    "color": "ສີເທົາ",
+    "cpu": "Apple M1 Pro",
+    "battery": "516",
+    "screenSize": "13.3 ນິ້ວ",
+    "warrantyDays": 0,
+    "repairHistory": "",
+    "images": [],
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
   }
 ]
