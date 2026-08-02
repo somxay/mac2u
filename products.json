@@ -1,28 +1,5 @@
 [
   {
-    "id": "810738",
-    "title": "Macbook pro m1",
-    "category": "Macbook",
-    "priceLAK": 4500000,
-    "oldPriceLAK": 4900000,
-    "priceTHB": 0,
-    "oldPriceTHB": 0,
-    "ram": "4",
-    "ssd": "128",
-    "year": "2012",
-    "keyboard": "ໄທ",
-    "color": "ສີເທົາ",
-    "cpu": "Apple M3 Max",
-    "battery": "516",
-    "screenSize": "",
-    "warrantyDays": 30,
-    "repairHistory": "",
-    "images": [],
-    "whatsapp": "22258416",
-    "status": "Ready",
-    "soldDate": ""
-  },
-  {
     "id": "511851",
     "title": "Macbook pro m1",
     "category": "Macbook",
