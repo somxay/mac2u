@@ -179,9 +179,9 @@ function applyFilters() {
   renderProducts(filtered);
 }
 
-// ຄີບອດ → ສະແດງເປັນທຸງຊາດ emoji ແທນຕົວອັກສອນ
+// ຄີບອດ → ສະແດງເປັນຂໍ້ຄວາມ (ແທນທຸງຊາດ emoji)
 function keyboardFlag(kb) {
-  const map = { 'TH': '🇹🇭 TH', 'EN': '🇺🇸 EN', 'US': '🇺🇸 US', 'LA': '🇱🇦 LA' };
+  const map = { 'TH': 'ສູນໄທ TH', 'EN': 'ສູນໄທອັງກິດ EN', 'US': 'ສູນໄທອັງກິດ US', 'LA': 'ສູນລາວ LA' };
   return map[(kb || '').toUpperCase()] || kb || '';
 }
 
