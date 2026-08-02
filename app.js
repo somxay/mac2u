@@ -216,7 +216,7 @@ function renderProducts(products) {
             <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
           </div>
           <div class="p-4">
-            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · KB ${p.keyboard || 'TH'}</span>
+            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ສູນ ${p.keyboard || 'TH'}</span>
             <div class="flex items-center gap-1.5 mt-1">
               <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${p.title}</h3>
               ${p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${p.color}</span>` : ''}
