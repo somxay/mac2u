@@ -1,1 +1,25 @@
-[]
+[
+  {
+    "id": "192624",
+    "title": "Macbook pro m1",
+    "category": "Macbook",
+    "priceLAK": 4500000,
+    "oldPriceLAK": 0,
+    "priceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "8",
+    "ssd": "",
+    "year": "",
+    "keyboard": "ໄທ",
+    "color": "",
+    "cpu": "",
+    "battery": "",
+    "screenSize": "",
+    "warrantyDays": 0,
+    "repairHistory": "",
+    "images": [],
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
+  }
+]
