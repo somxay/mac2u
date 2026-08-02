@@ -91,10 +91,17 @@ function matchField(p, keywords) {
 
 function filterCategory(cat, btnEl) {
   currentCategory = cat;
+  const activeClasses = ['bg-slate-900', 'text-white', 'shadow-md'];
+  const inactiveClasses = ['bg-white', 'text-slate-600', 'hover:bg-slate-100', 'border', 'border-slate-100', 'shadow-sm'];
+
   document.querySelectorAll('.cat-btn').forEach(btn => {
-    btn.className = "cat-btn btn-press bg-white text-slate-600 hover:bg-slate-100 px-5 py-2.5 rounded-2xl text-xs font-semibold whitespace-nowrap border border-slate-100 shadow-sm transition";
+    btn.classList.remove(...activeClasses);
+    btn.classList.add(...inactiveClasses);
   });
-  if (btnEl) btnEl.className = "cat-btn btn-press bg-slate-900 text-white px-5 py-2.5 rounded-2xl text-xs font-semibold whitespace-nowrap shadow-md transition";
+  if (btnEl) {
+    btnEl.classList.remove(...inactiveClasses);
+    btnEl.classList.add(...activeClasses);
+  }
 
   // ຣີເຊັດຄ່າ dropdown ທັງໝົດ
   ['filterRam', 'filterSsd', 'filterYear', 'filterAccType', 'filterAccWatt', 'filterDjSize', 'filterSwType']
