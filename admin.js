@@ -182,6 +182,24 @@ async function saveExchangeRate() {
 
 /* --------------------------------- Products grid --------------------------------- */
 
+/* --------------------------------- Display label helpers (ຄືກັນກັບ app.js) --------------------------------- */
+
+// ຊື່ສີ (ພາສາອັງກິດ) → ແປເປັນພາສາລາວ ສຳລັບສີທີ່ຮູ້ຈັກ, ຖ້າບໍ່ຮູ້ຈັກໃຫ້ສະແດງຄືເດີມ
+function colorLabelLao(color) {
+  const map = {
+    'Space Gray': 'ສີເທົາອາວະກາດ',
+    'Silver': 'ສີເງິນ',
+    'Gold': 'ສີຄຳ',
+    'Rose Gold': 'ສີຄຳກຸຫຼາບ',
+    'Midnight': 'ສີດຳຄ່ຳຄືນ',
+    'Starlight': 'ສີແສງດາວ',
+    'Sky Blue': 'ສີຟ້າ',
+    'Black': 'ສີດຳ',
+    'White': 'ສີຂາວ'
+  };
+  return map[color] || color || '';
+}
+
 function renderAdminGrid() {
   const grid = document.getElementById('adminGrid');
   const keyword = document.getElementById('adminSearch').value.toLowerCase().trim();
@@ -214,7 +232,7 @@ function renderAdminGrid() {
         </div>
         <div class="p-3 flex-1 flex flex-col justify-between">
           <div>
-            <span class="text-[10px] font-bold text-slate-400 uppercase">${p.category}${p.color ? ' · ' + p.color : ''}</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase">${p.category}${p.color ? ' · ' + colorLabelLao(p.color) : ''}</span>
             <h3 class="font-bold text-slate-800 text-xs mt-0.5 line-clamp-2">${p.title}</h3>
             <p class="text-rose-600 font-bold text-xs mt-1">${p.priceLAK > 0 ? Number(p.priceLAK).toLocaleString() + ' ₭' : (p.priceTHB > 0 ? Number(p.priceTHB).toLocaleString() + ' ฿' : '-')}</p>
           </div>
