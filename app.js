@@ -179,6 +179,28 @@ function applyFilters() {
   renderProducts(filtered);
 }
 
+// ຄີບອດ → ສະແດງເປັນທຸງຊາດ emoji ແທນຕົວອັກສອນ
+function keyboardFlag(kb) {
+  const map = { 'TH': '🇹🇭', 'EN': '🇬🇧', 'US': '🇺🇸', 'LA': '🇱🇦' };
+  return map[(kb || '').toUpperCase()] || kb || '';
+}
+
+// ຊື່ສີ (ພາສາອັງກິດ) → ແປເປັນພາສາລາວ ສຳລັບສີທີ່ຮູ້ຈັກ, ຖ້າບໍ່ຮູ້ຈັກໃຫ້ສະແດງຄືເດີມ
+function colorLabelLao(color) {
+  const map = {
+    'Space Gray': 'ສີເທົາອາວະກາດ',
+    'Silver': 'ສີເງິນ',
+    'Gold': 'ສີຄຳ',
+    'Rose Gold': 'ສີຄຳກຸຫຼາບ',
+    'Midnight': 'ສີດຳຄ່ຳຄືນ',
+    'Starlight': 'ສີແສງດາວ',
+    'Sky Blue': 'ສີຟ້າ',
+    'Black': 'ສີດຳ',
+    'White': 'ສີຂາວ'
+  };
+  return map[color] || color || '';
+}
+
 function priceInCurrentCurrency(lakVal, thbVal) {
   if (currentCurrency === 'THB') {
     if (thbVal && thbVal > 0) return thbVal;
@@ -216,10 +238,10 @@ function renderProducts(products) {
             <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
           </div>
           <div class="p-4">
-            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ສູນ ${p.keyboard || 'TH'}</span>
+            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ${keyboardFlag(p.keyboard || 'TH')}</span>
             <div class="flex items-center gap-1.5 mt-1">
               <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${p.title}</h3>
-              ${p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${p.color}</span>` : ''}
+              ${p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${colorLabelLao(p.color)}</span>` : ''}
             </div>
             ${p.category === 'Macbook' ? `
               <p class="text-[11px] text-slate-400 font-medium mt-1.5">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB · ${p.screenSize || '-'}</p>
@@ -287,8 +309,8 @@ function openProductModal(id) {
       <div>
         <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
           <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-wider">${p.category}</span>
-          ${p.category === 'Macbook' ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md uppercase tracking-wider">ສູນ ${p.keyboard || 'TH'}</span>` : ''}
-          ${p.color ? `<span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md uppercase tracking-wider">${p.color}</span>` : ''}
+          ${p.category === 'Macbook' ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md uppercase tracking-wider">${keyboardFlag(p.keyboard || 'TH')}</span>` : ''}
+          ${p.color ? `<span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md uppercase tracking-wider">${colorLabelLao(p.color)}</span>` : ''}
         </div>
         <h3 class="font-bold text-slate-800 text-lg leading-snug">${p.title}</h3>
       </div>
