@@ -120,6 +120,9 @@
           <button onclick="openEditModal(null)" class="btn-press bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">
             <i class="fas fa-plus"></i> ເພີ່ມສິນຄ້າ
           </button>
+          <button onclick="openAgentModal()" class="btn-press bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+            <i class="fas fa-tags"></i> ລາຄາສົ່ງ
+          </button>
           <button onclick="doLogout()" class="btn-press bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">ອອກຈາກລະບົບ</button>
           <a href="index.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">← ໜ້າຮ້ານ</a>
         </div>
@@ -335,6 +338,29 @@
           <button type="button" onclick="closeEditModal()" class="btn-press px-5 bg-slate-100 text-slate-600 rounded-2xl text-xs font-semibold">ຍົກເລີກ</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Popup: ຈັດການລາຄາສົ່ງ (ຂໍ້ມູນແຍກຕ່າງຫາກຈາກ products.json → agent_products.json) -->
+  <div id="agentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl-custom shadow-2xl w-full max-w-3xl p-6 overflow-y-auto max-h-[92vh] relative">
+      <button onclick="closeAgentModal()" class="btn-press absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 z-10"><i class="fas fa-times"></i></button>
+      <h3 class="font-bold text-base mb-1">ຈັດການລາຄາສົ່ງ (ຕົວແທນ)</h3>
+      <p class="text-[11px] text-slate-400 mb-4">ຂໍ້ມູນນີ້ບັນທຶກແຍກຢູ່ໄຟລ໌ <code class="bg-slate-50 px-1 rounded">agent_products.json</code> ຄົນລະໄຟລ໌ກັບລາຄາຂາຍປົກກະຕິ, ໜ້າຮ້ານທົ່ວໄປ (index.html) ຈະບໍ່ດຶງໄຟລ໌ນີ້ໄປໃຊ້ຈັກເທື່ອ</p>
+
+      <div class="flex items-center gap-2 mb-3">
+        <select id="addAgentProductSelect" class="flex-1 bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+          <option value="">-- ເລືອກສິນຄ້າຈາກລາຍການປົກກະຕິ ເພື່ອເພີ່ມເຂົ້າລາຄາສົ່ງ --</option>
+        </select>
+        <button onclick="addAgentProductFromSelect()" class="btn-press bg-slate-900 text-white px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap">+ ເພີ່ມ</button>
+      </div>
+
+      <div id="agentProductList" class="space-y-2 mb-4"></div>
+
+      <div class="flex gap-2">
+        <button onclick="saveAgentProducts()" id="agentSaveBtn" class="btn-press flex-1 bg-slate-900 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">ບັນທຶກລາຄາສົ່ງທັງໝົດ</button>
+        <button onclick="closeAgentModal()" class="btn-press px-5 bg-slate-100 text-slate-600 rounded-2xl text-xs font-semibold">ປິດ</button>
+      </div>
     </div>
   </div>
 

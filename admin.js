@@ -498,3 +498,116 @@ async function persistProducts(commitMessage) {
     return false;
   }
 }
+
+/* =========================================================================
+   ຈັດການລາຄາສົ່ງ (agent_products.json) — ຂໍ້ມູນແຍກຕ່າງຫາກຈາກ products.json
+   ========================================================================= */
+
+let agentProducts = [];
+
+async function openAgentModal() {
+  document.getElementById('agentModal').classList.remove('hidden');
+  document.getElementById('agentProductList').innerHTML = '<p class="text-xs text-slate-400 text-center py-6"><i class="fas fa-spinner fa-spin"></i> ກຳລັງໂຫຼດ...</p>';
+
+  // ຕົວເລືອກສິນຄ້າ (ດຶງຈາກລາຍການປົກກະຕິທີ່ໂຫຼດໄວ້ຢູ່ແລ້ວ)
+  const select = document.getElementById('addAgentProductSelect');
+  select.innerHTML = '<option value="">-- ເລືອກສິນຄ້າຈາກລາຍການປົກກະຕິ ເພື່ອເພີ່ມເຂົ້າລາຄາສົ່ງ --</option>' +
+    allProducts.map(p => `<option value="${p.id}">${p.id} — ${p.title}</option>`).join('');
+
+  try {
+    const file = await ghGetFile(CONFIG.AGENT_PRODUCTS_PATH);
+    agentProducts = file.json || [];
+    renderAgentProductList();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('agentProductList').innerHTML = '<p class="text-xs text-rose-500 text-center py-6">ໂຫຼດ agent_products.json ບໍ່ສຳເລັດ: ' + err.message + '</p>';
+  }
+}
+
+function closeAgentModal() {
+  document.getElementById('agentModal').classList.add('hidden');
+}
+
+function renderAgentProductList() {
+  const box = document.getElementById('agentProductList');
+  if (agentProducts.length === 0) {
+    box.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">ຍັງບໍ່ມີສິນຄ້າໃນລາຄາສົ່ງ, ເລືອກສິນຄ້າຈາກ dropdown ຂ້າງເທິງເພື່ອເພີ່ມ</p>';
+    return;
+  }
+
+  box.innerHTML = agentProducts.map((p, idx) => `
+    <div class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-3">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold text-slate-700 truncate">${p.title}</p>
+        <p class="text-[10px] text-slate-400">ID ${p.id} · ${p.category || ''}</p>
+      </div>
+      <div class="w-40 shrink-0">
+        <label class="text-[9px] text-slate-400 block mb-0.5">ລາຄາສົ່ງ (ກີບ)</label>
+        <input type="number" min="0" value="${p.wholesalePriceLAK || 0}"
+               oninput="updateAgentPrice(${idx}, this.value)"
+               class="w-full bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs">
+      </div>
+      <button onclick="removeAgentProductRow(${idx})" title="ລຶບ" class="btn-press shrink-0 w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-sm">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function updateAgentPrice(idx, value) {
+  agentProducts[idx].wholesalePriceLAK = Number(value) || 0;
+}
+
+function removeAgentProductRow(idx) {
+  agentProducts.splice(idx, 1);
+  renderAgentProductList();
+}
+
+function addAgentProductFromSelect() {
+  const select = document.getElementById('addAgentProductSelect');
+  const id = select.value;
+  if (!id) return;
+
+  if (agentProducts.find(p => p.id.toString() === id.toString())) {
+    showToast('ສິນຄ້ານີ້ຢູ່ໃນລາຄາສົ່ງແລ້ວ', 'info');
+    return;
+  }
+
+  const source = allProducts.find(p => p.id.toString() === id.toString());
+  if (!source) return;
+
+  agentProducts.push({
+    id: source.id,
+    title: source.title,
+    category: source.category,
+    wholesalePriceLAK: 0,
+    wholesalePriceTHB: 0,
+    ram: source.ram || '',
+    ssd: source.ssd || '',
+    cpu: source.cpu || '',
+    color: source.color || '',
+    moq: 1
+  });
+  select.value = '';
+  renderAgentProductList();
+}
+
+async function saveAgentProducts() {
+  const btn = document.getElementById('agentSaveBtn');
+  const originalText = btn.innerText;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader-ring-sm"></span> ກຳລັງບັນທຶກ...';
+
+  showLoadingOverlay('ກຳລັງບັນທຶກລາຄາສົ່ງລົງ GitHub...');
+  try {
+    const current = await ghGetFile(CONFIG.AGENT_PRODUCTS_PATH);
+    await ghPutJson(CONFIG.AGENT_PRODUCTS_PATH, agentProducts, current.sha, 'chore: update agent wholesale prices');
+    hideLoadingOverlay();
+    showToast('ບັນທຶກລາຄາສົ່ງສຳເລັດແລ້ວ!', 'success');
+  } catch (err) {
+    console.error(err);
+    hideLoadingOverlay();
+    showToast('ບັນທຶກບໍ່ສຳເລັດ: ' + err.message, 'error', 6000);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = originalText;
+  }
+}

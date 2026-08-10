@@ -1,0 +1,26 @@
+[
+  {
+    "id": "102938",
+    "title": "MacBook Air M1 2020",
+    "category": "Macbook",
+    "wholesalePriceLAK": 4100000,
+    "wholesalePriceTHB": 0,
+    "ram": "8",
+    "ssd": "256",
+    "cpu": "Apple M1",
+    "color": "Space Gray",
+    "moq": 1
+  },
+  {
+    "id": "810738",
+    "title": "Macbook pro m1",
+    "category": "Macbook",
+    "wholesalePriceLAK": 4100000,
+    "wholesalePriceTHB": 0,
+    "ram": "4",
+    "ssd": "128",
+    "cpu": "Apple M3 Max",
+    "color": "Silver",
+    "moq": 1
+  }
+]
