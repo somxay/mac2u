@@ -1,110 +1,613 @@
 /* =========================================================================
-   agent.js — ໜ້າລາຄາສົ່ງ (agent.html)
-   ຄວາມປອດໄພ: ນີ້ເປັນ static site, ດັ່ງນັ້ນການກວດລະຫັດເກີດຂຶ້ນຝັ່ງ browser (client-side)
-   ລະຫັດຖືກເກັບເປັນ SHA-256 hash (ບໍ່ແມ່ນ plain text) ເພື່ອບໍ່ໃຫ້ເຫັນຄ່າຕົງໆຈາກ view-source
-   ແຕ່ນີ້ຍັງເປັນພຽງ "ອຸປະສັກເບື້ອງຕົ້ນ" (obscurity) ບໍ່ແມ່ນກຳແພງຄວາມປອດໄພແທ້ — ຄົນທີ່ຮູ້ວິທີເທັກນິກ
-   ຍັງສາມາດຫາ URL ຂອງ agent_products.json ໂດຍກົງໄດ້ຢູ່ດີ ຖ້າ repo ເປັນ public (ອ່ານລາຍລະອຽດໃນ DEPLOY.md)
+   admin.js — ໜ້າຫຼັງບ້ານ (admin.html)
+   ອ່ານ/ຂຽນ data/products.json ແລະ data/settings.json ໂດຍກົງຜ່ານ GitHub Contents API
+   ໂດຍໃຊ້ Personal Access Token (PAT) ຂອງແອດມິນ (ບໍ່ໄດ້ຖືກເກັບໄວ້ຢູ່ໃສນອກຈາກ browser ຂອງທ່ານ)
    ========================================================================= */
 
-const AGENT_SESSION_KEY = 'agent_authed';
-let agentProducts = [];
+let allProducts = [];
+let githubToken = '';
+let currentEditId = null;
 
-// ---------- SHA-256 hash (ໃຊ້ Web Crypto API ທີ່ browser ມີໃຫ້ໃນຕົວ) ----------
-async function hashAgentCode(text) {
-  const enc = new TextEncoder().encode(text);
-  const buf = await crypto.subtle.digest('SHA-256', enc);
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+document.getElementById('repoLabel').innerText = `${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}`;
+
+/* ---------------------------- GitHub API helpers ---------------------------- */
+
+function ghHeaders() {
+  return {
+    'Authorization': `Bearer ${githubToken}`,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
 }
 
-async function checkAgentCode() {
-  const input = document.getElementById('agentCodeInput');
-  const code = input.value.trim();
-  const btn = document.getElementById('gateSubmitBtn');
-  if (!code) return;
+// UTF-8 safe base64 encode/decode (ຮອງຮັບໂຕໜັງສືລາວ)
+function b64EncodeUnicode(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(escape(atob(str)));
+}
 
-  btn.disabled = true;
-  const hash = await hashAgentCode(code);
+// ດຶງໄຟລ໌ + sha ປັດຈຸບັນ (ຕ້ອງໃຊ້ sha ເວລາຈະຂຽນທັບໄຟລ໌ເກົ່າ)
+async function ghGetFile(path) {
+  const res = await fetch(ghApiContentsUrl(path) + `?ref=${CONFIG.GITHUB_BRANCH}&_=${Date.now()}`, {
+    headers: ghHeaders()
+  });
+  if (res.status === 404) return { exists: false, sha: null, json: null };
+  if (!res.ok) throw new Error(`GitHub API error (${res.status}) ອ່ານ ${path} ບໍ່ໄດ້`);
+  const data = await res.json();
+  const text = b64DecodeUnicode(data.content.replace(/\n/g, ''));
+  return { exists: true, sha: data.sha, json: JSON.parse(text) };
+}
 
-  if (hash === CONFIG.AGENT_CODE_HASH) {
-    sessionStorage.setItem(AGENT_SESSION_KEY, '1');
-    unlockAgentPage();
-  } else {
-    document.getElementById('gateError').classList.remove('hidden');
-    input.value = '';
-    input.focus();
+// ຂຽນ/ອັບເດດໄຟລ໌ JSON ລົງ repo (commit ໂດຍກົງ)
+async function ghPutJson(path, obj, sha, message) {
+  const body = {
+    message,
+    content: b64EncodeUnicode(JSON.stringify(obj, null, 2)),
+    branch: CONFIG.GITHUB_BRANCH
+  };
+  if (sha) body.sha = sha;
+
+  const res = await fetch(ghApiContentsUrl(path), {
+    method: 'PUT',
+    headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(`Commit ${path} ບໍ່ສຳເລັດ (${res.status}): ${errBody.message || ''}`);
   }
-  btn.disabled = false;
+  return res.json();
 }
 
-document.getElementById('agentCodeInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkAgentCode();
+// ອັບໂຫຼດຮູບພາບ (binary) ຂຶ້ນ repo, ຄືນ URL ຜ່ານ jsDelivr CDN
+async function ghPutImage(path, base64Content, message) {
+  const res = await fetch(ghApiContentsUrl(path), {
+    method: 'PUT',
+    headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, content: base64Content, branch: CONFIG.GITHUB_BRANCH })
+  });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(`ອັບໂຫຼດຮູບບໍ່ສຳເລັດ (${res.status}): ${errBody.message || ''}`);
+  }
+  return res.json();
+}
+
+/* --------------------------------- Login --------------------------------- */
+
+async function doLogin() {
+  const tokenInput = document.getElementById('loginToken').value.trim();
+  if (!tokenInput) return;
+  githubToken = tokenInput;
+  const btn = document.getElementById('loginBtn');
+  const originalBtnHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader-ring-sm"></span> ກຳລັງກວດສອບ Token...';
+
+  try {
+    // ກວດວ່າ token ໃຊ້ໄດ້ ໂດຍລອງອ່ານໄຟລ໌ products.json
+    await ghGetFile(CONFIG.PRODUCTS_PATH);
+
+    if (document.getElementById('rememberToken').checked) {
+      localStorage.setItem('macdj_admin_token', githubToken);
+    } else {
+      sessionStorage.setItem('macdj_admin_token', githubToken);
+    }
+
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    document.getElementById('loginError').classList.add('hidden');
+    showToast('ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ, ຍິນດີຕ້ອນຮັບ!', 'success');
+    loadData();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loginError').classList.remove('hidden');
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHtml;
+  }
+}
+document.getElementById('loginToken').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
 });
 
-function agentLogout() {
-  sessionStorage.removeItem(AGENT_SESSION_KEY);
-  document.getElementById('agentContent').classList.add('hidden');
-  document.getElementById('gateScreen').classList.remove('hidden');
-  document.getElementById('agentCodeInput').value = '';
+function doLogout() {
+  githubToken = '';
+  localStorage.removeItem('macdj_admin_token');
+  sessionStorage.removeItem('macdj_admin_token');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
 }
 
-function unlockAgentPage() {
-  document.getElementById('gateScreen').classList.add('hidden');
-  document.getElementById('agentContent').classList.remove('hidden');
-  loadAgentProducts();
-}
-
-// ຖ້າ session ຍັງມີຢູ່ (ຍັງບໍ່ໄດ້ປິດແທັບ/ browser) ໃຫ້ຂ້າມໜ້າຖາມລະຫັດ
-(function autoUnlock() {
-  if (sessionStorage.getItem(AGENT_SESSION_KEY) === '1') {
-    unlockAgentPage();
+// ຖ້າມີ token ຄ້າງໄວ້ຈາກຄັ້ງກ່ອນ (remember me) ໃຫ້ login ອັດຕະໂນມັດ
+(function autoLogin() {
+  const saved = localStorage.getItem('macdj_admin_token') || sessionStorage.getItem('macdj_admin_token');
+  if (saved) {
+    githubToken = saved;
+    ghGetFile(CONFIG.PRODUCTS_PATH).then(() => {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+      loadData();
+    }).catch(() => { githubToken = ''; });
   }
 })();
 
-// ---------- ດຶງຂໍ້ມູນລາຄາສົ່ງ ----------
-async function loadAgentProducts() {
+/* --------------------------------- Data load --------------------------------- */
+
+async function loadData() {
+  document.getElementById('adminLoading').style.display = 'grid';
+  document.getElementById('adminGrid').innerHTML = '';
   try {
-    const res = await fetch(ghRawUrl(CONFIG.AGENT_PRODUCTS_PATH));
-    if (!res.ok) throw new Error('ไม่พบ ' + CONFIG.AGENT_PRODUCTS_PATH);
-    agentProducts = await res.json();
-    document.getElementById('agentLoading').style.display = 'none';
-    renderAgentGrid();
+    const [productsFile, settingsFile] = await Promise.all([
+      ghGetFile(CONFIG.PRODUCTS_PATH),
+      ghGetFile(CONFIG.SETTINGS_PATH)
+    ]);
+    allProducts = productsFile.json || [];
+    const settings = settingsFile.json || { exchangeRate: 600, thbToLakRate: 600 };
+
+    document.getElementById('settingRateLakToThb').value = settings.exchangeRate || '';
+    document.getElementById('settingRateThbToLak').value = settings.thbToLakRate || '';
+    document.getElementById('adminLoading').style.display = 'none';
+    renderAdminGrid();
   } catch (err) {
     console.error(err);
-    document.getElementById('agentLoading').innerHTML =
-      '<p class="col-span-full text-center text-xs text-rose-500 py-10">ໂຫຼດຂໍ້ມູນລາຄາສົ່ງບໍ່ສຳເລັດ, ລອງໃໝ່ພາຍຫຼັງ</p>';
+    document.getElementById('adminLoading').style.display = 'none';
+    showToast('ໂຫຼດຂໍ້ມູນບໍ່ສຳເລັດ: ' + err.message, 'error', 5000);
   }
 }
 
-// ---------- ຈັດຮູບແບບເງິນກີບ (Intl.NumberFormat) ----------
-const lakFormatter = new Intl.NumberFormat('en-US');
-function formatLak(amount) {
-  return lakFormatter.format(Number(amount) || 0) + ' ₭';
+/* --------------------------------- Settings --------------------------------- */
+
+async function saveExchangeRate() {
+  const lakToThb = Number(document.getElementById('settingRateLakToThb').value);
+  const thbToLak = Number(document.getElementById('settingRateThbToLak').value);
+  if (!lakToThb || lakToThb <= 0 || !thbToLak || thbToLak <= 0) {
+    showToast('ກະລຸນາໃສ່ຕົວເລກອັດຕາແລກປ່ຽນທັງສອງຊ່ອງໃຫ້ຖືກຕ້ອງ', 'info');
+    return;
+  }
+  showLoadingOverlay('ກຳລັງບັນທຶກອັດຕາແລກປ່ຽນ...');
+  try {
+    const current = await ghGetFile(CONFIG.SETTINGS_PATH);
+    await ghPutJson(CONFIG.SETTINGS_PATH, { exchangeRate: lakToThb, thbToLakRate: thbToLak }, current.sha,
+      'chore: update exchange rate via admin panel');
+    hideLoadingOverlay();
+    showToast('ອັບເດດອັດຕາແລກປ່ຽນສຳເລັດແລ້ວ!', 'success');
+  } catch (err) {
+    console.error(err);
+    hideLoadingOverlay();
+    showToast('ເກີດຂໍ້ຜິດພາດ: ' + err.message, 'error', 5000);
+  }
 }
 
-function renderAgentGrid() {
-  const grid = document.getElementById('agentGrid');
-  if (agentProducts.length === 0) {
-    grid.innerHTML = '<p class="col-span-full text-center text-xs text-slate-400 py-10">ຍັງບໍ່ມີລາຍການລາຄາສົ່ງ</p>';
+/* --------------------------------- Products grid --------------------------------- */
+
+/* --------------------------------- Display label helpers (ຄືກັນກັບ app.js) --------------------------------- */
+
+// ຊື່ສີ (ພາສາອັງກິດ) → ແປເປັນພາສາລາວ ສຳລັບສີທີ່ຮູ້ຈັກ, ຖ້າບໍ່ຮູ້ຈັກໃຫ້ສະແດງຄືເດີມ
+function colorLabelLao(color) {
+  const map = {
+    'Space Gray': 'ສີເທົາອາວະກາດ',
+    'Silver': 'ສີເງິນ',
+    'Gold': 'ສີຄຳ',
+    'Rose Gold': 'ສີຄຳກຸຫຼາບ',
+    'Midnight': 'ສີດຳຄ່ຳຄືນ',
+    'Starlight': 'ສີແສງດາວ',
+    'Sky Blue': 'ສີຟ້າ',
+    'Black': 'ສີດຳ',
+    'White': 'ສີຂາວ'
+  };
+  return map[color] || color || '';
+}
+
+function renderAdminGrid() {
+  const grid = document.getElementById('adminGrid');
+  const keyword = document.getElementById('adminSearch').value.toLowerCase().trim();
+
+  let list = allProducts;
+  if (keyword) {
+    list = list.filter(p =>
+      p.title.toLowerCase().includes(keyword) ||
+      p.category.toLowerCase().includes(keyword) ||
+      p.id.toLowerCase().includes(keyword)
+    );
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-400 text-xs">ບໍ່ພົບສິນຄ້າ</div>`;
     return;
   }
 
-  grid.innerHTML = agentProducts.map(p => `
-    <div class="product-card glass-card rounded-3xl-custom p-4">
-      <div class="flex items-start justify-between gap-2 mb-2">
-        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category || ''}</span>
-        <span class="text-[10px] font-bold bg-slate-900/5 text-slate-500 px-2 py-0.5 rounded-full">ID ${p.id}</span>
-      </div>
-      <h3 class="font-bold text-slate-800 text-sm mb-1">${p.title}</h3>
-      <p class="text-[11px] text-slate-400 mb-3">
-        ${[p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.color].filter(Boolean).join(' · ') || '-'}
-      </p>
-      <div class="flex items-baseline justify-between border-t border-slate-100 pt-3">
-        <div>
-          <span class="text-[10px] text-slate-400 block">ລາຄາສົ່ງ</span>
-          <span class="text-rose-600 font-extrabold text-lg">${formatLak(p.wholesalePriceLAK)}</span>
+  grid.innerHTML = list.map(p => {
+    const statusText = p.status === 'Ready' ? 'ພ້ອມຂາຍ' : (p.status === 'Reserved' ? 'ຈອງແລ້ວ' : 'ຂາຍແລ້ວ');
+    const statusColor = p.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : (p.status === 'Reserved' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600');
+    const mainImg = (p.images && p.images.length > 0 && p.images[0]) ? p.images[0] : 'https://placehold.co/300x220?text=No+Image';
+
+    return `
+      <div class="admin-card bg-white rounded-3xl-custom border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+        <div class="relative h-36 bg-slate-100">
+          <img src="${mainImg}" class="w-full h-full object-cover">
+          <span class="absolute top-2 left-2 px-2.5 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 shadow-sm">${statusText}</span>
+          <span class="absolute top-2 right-2 px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-900/70 text-white">ID: ${p.id}</span>
         </div>
-        ${p.moq ? `<span class="text-[10px] text-slate-400">ຂັ້ນຕ່ຳ ${p.moq} ເຄື່ອງ</span>` : ''}
+        <div class="p-3 flex-1 flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase">${p.category}${p.color ? ' · ' + colorLabelLao(p.color) : ''}</span>
+            <h3 class="font-bold text-slate-800 text-xs mt-0.5 line-clamp-2">${p.title}</h3>
+            <p class="text-rose-600 font-bold text-xs mt-1">${p.priceLAK > 0 ? Number(p.priceLAK).toLocaleString() + ' ₭' : (p.priceTHB > 0 ? Number(p.priceTHB).toLocaleString() + ' ฿' : '-')}</p>
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button onclick="openEditModal('${p.id}')" title="ແກ້ໄຂ" class="btn-press flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-2 rounded-xl text-sm">✏️</button>
+            <button onclick="removeProduct('${p.id}')" title="ລຶບ" class="btn-press flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 py-2 rounded-xl text-sm">🗑️</button>
+          </div>
+        </div>
       </div>
+    `;
+  }).join('');
+}
+
+/* --------------------------------- Price input helpers --------------------------------- */
+
+function formatPriceInput(el) {
+  const raw = el.value.replace(/[^\d]/g, '');
+  el.value = raw ? Number(raw).toLocaleString('en-US') : '';
+}
+function parsePriceInput(id) {
+  const raw = document.getElementById(id).value.replace(/[^\d]/g, '');
+  return raw ? Number(raw) : 0;
+}
+
+/* --------------------------------- Select + "Other" combo fields (Color, CPU) --------------------------------- */
+
+// ສະແດງ/ເຊື່ອງ ຊ່ອງພິມເອງ ເມື່ອເລືອກ "ອື່ນໆ (ພິມເອງ)" ຈາກ dropdown
+function toggleOtherInput(selectId, otherInputId) {
+  const select = document.getElementById(selectId);
+  const other = document.getElementById(otherInputId);
+  if (select.value === '__other__') {
+    other.classList.remove('hidden');
+    other.focus();
+  } else {
+    other.classList.add('hidden');
+    other.value = '';
+  }
+}
+
+// ຕັ້ງຄ່າ select+other ຈາກຄ່າທີ່ບັນທຶກໄວ້ໃນ product (ຖ້າຄ່າບໍ່ຢູ່ໃນລາຍການ ໃຫ້ໄປໃສ່ຊ່ອງ "ອື່ນໆ")
+function setSelectOrOtherValue(selectId, otherInputId, value) {
+  const select = document.getElementById(selectId);
+  const other = document.getElementById(otherInputId);
+  const optionExists = Array.from(select.options).some(opt => opt.value === value);
+  if (value && optionExists) {
+    select.value = value;
+    other.classList.add('hidden');
+    other.value = '';
+  } else if (value) {
+    select.value = '__other__';
+    other.classList.remove('hidden');
+    other.value = value;
+  } else {
+    select.value = '';
+    other.classList.add('hidden');
+    other.value = '';
+  }
+}
+
+// ດຶງຄ່າສຸດທ້າຍ (ຄ່າຈາກ dropdown ຫຼື ຈາກຊ່ອງພິມເອງຖ້າເລືອກ "ອື່ນໆ")
+function getSelectOrOtherValue(selectId, otherInputId) {
+  const select = document.getElementById(selectId);
+  if (select.value === '__other__') {
+    return document.getElementById(otherInputId).value.trim();
+  }
+  return select.value;
+}
+
+/* --------------------------------- Edit modal --------------------------------- */
+
+function openEditModal(id) {
+  const form = document.querySelector('#editModal form');
+  form.reset();
+  document.getElementById('imagePreviewList').innerHTML = '';
+  document.getElementById('pImageList').value = '';
+
+  if (id === null) {
+    currentEditId = null;
+    document.getElementById('editModalTitle').innerText = 'ເພີ່ມສິນຄ້າໃໝ່';
+    document.getElementById('saveBtn').innerText = 'ບັນທຶກສິນຄ້າໃໝ່';
+    document.getElementById('pId').value = Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('pId').readOnly = false;
+    setSelectOrOtherValue('pColorSelect', 'pColorOther', '');
+    setSelectOrOtherValue('pCpuSelect', 'pCpuOther', '');
+  } else {
+    const p = allProducts.find(x => x.id.toString() === id.toString());
+    if (!p) return;
+    currentEditId = p.id;
+    document.getElementById('editModalTitle').innerText = 'ແກ້ໄຂສິນຄ້າ';
+    document.getElementById('saveBtn').innerText = 'ອັບເດດຂໍ້ມູນສິນຄ້າ';
+    document.getElementById('pId').value = p.id;
+    document.getElementById('pId').readOnly = true;
+    document.getElementById('pCategory').value = p.category;
+    document.getElementById('pTitle').value = p.title;
+    document.getElementById('pPriceLAK').value = p.priceLAK ? Number(p.priceLAK).toLocaleString('en-US') : '';
+    document.getElementById('pOldPriceLAK').value = p.oldPriceLAK ? Number(p.oldPriceLAK).toLocaleString('en-US') : '';
+    document.getElementById('pPriceTHB').value = p.priceTHB ? Number(p.priceTHB).toLocaleString('en-US') : '';
+    document.getElementById('pOldPriceTHB').value = p.oldPriceTHB ? Number(p.oldPriceTHB).toLocaleString('en-US') : '';
+    document.getElementById('pRam').value = p.ram || '';
+    document.getElementById('pSsd').value = p.ssd || '';
+    document.getElementById('pYear').value = p.year || '';
+    document.getElementById('pKeyboard').value = p.keyboard || 'TH';
+    setSelectOrOtherValue('pColorSelect', 'pColorOther', p.color || '');
+    setSelectOrOtherValue('pCpuSelect', 'pCpuOther', p.cpu || '');
+    document.getElementById('pBattery').value = p.battery || '';
+    document.getElementById('pScreenSize').value = p.screenSize || '';
+    document.getElementById('pWarrantyDays').value = p.warrantyDays || '';
+    document.getElementById('pStatus').value = p.status;
+    document.getElementById('pImageList').value = p.images ? p.images.join(',') : '';
+    renderImagePreviews();
+  }
+
+  document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.add('hidden');
+}
+
+function renderImagePreviews() {
+  const list = document.getElementById('pImageList').value.split(',').filter(Boolean);
+  document.getElementById('imagePreviewList').innerHTML = list.map((url, idx) => `
+    <div class="relative">
+      <img src="${url}" class="w-14 h-14 object-cover rounded-xl border border-slate-200">
+      <button type="button" onclick="removeImageAt(${idx})" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] flex items-center justify-center">✕</button>
     </div>
   `).join('');
+}
+
+function removeImageAt(idx) {
+  const list = document.getElementById('pImageList').value.split(',').filter(Boolean);
+  list.splice(idx, 1);
+  document.getElementById('pImageList').value = list.join(',');
+  renderImagePreviews();
+}
+
+/* --------------------------------- Image upload --------------------------------- */
+
+function uploadImage(input) {
+  if (!(input.files && input.files[0])) return;
+  const file = input.files[0];
+
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('ຮູບພາບໃຫຍ່ເກີນ 2MB — ຄວນຫຍໍ້ຂະໜາດຮູບກ່ອນອັບໂຫຼດ ເພື່ອຄວາມໄວຂອງເວັບໄຊ', 'info', 5000);
+  }
+  showLoadingOverlay('ກຳລັງອັບໂຫຼດຮູບພາບຂຶ້ນ GitHub...');
+
+  const reader = new FileReader();
+  reader.onload = async function (e) {
+    try {
+      const base64Data = e.target.result.split(',')[1];
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const fileName = `${CONFIG.IMAGES_PATH}/${Date.now()}_${Math.floor(Math.random() * 1000)}.${ext}`;
+
+      await ghPutImage(fileName, base64Data, `feat: upload product image ${fileName}`);
+
+      const url = ghCdnUrl(fileName);
+      let current = document.getElementById('pImageList').value;
+      document.getElementById('pImageList').value = current ? current + ',' + url : url;
+      renderImagePreviews();
+      hideLoadingOverlay();
+      showToast('ອັບໂຫຼດຮູບພາບສຳເລັດແລ້ວ!', 'success');
+    } catch (err) {
+      console.error(err);
+      hideLoadingOverlay();
+      showToast('ອັບໂຫຼດຮູບບໍ່ສຳເລັດ: ' + err.message, 'error', 6000);
+    } finally {
+      input.value = '';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+/* --------------------------------- Save / Delete product --------------------------------- */
+
+async function handleFormSubmit(e) {
+  e.preventDefault();
+
+  const priceLAK = parsePriceInput('pPriceLAK');
+  const priceTHB = parsePriceInput('pPriceTHB');
+  if (priceLAK <= 0 && priceTHB <= 0) {
+    alert('ກະລຸນາໃສ່ລາຄາຢ່າງໜ້ອຍ 1 ຢ່າງ (ກີບ ຫຼື ບາດ)');
+    return;
+  }
+
+  const existing = currentEditId ? allProducts.find(x => x.id.toString() === currentEditId.toString()) : null;
+  const newStatus = document.getElementById('pStatus').value;
+
+  // ນັບ soldDate ອັດຕະໂນມັດ ເມື່ອປ່ຽນສະຖານະເປັນ "Sold" ຄັ້ງທຳອິດ
+  let soldDate = existing ? (existing.soldDate || '') : '';
+  if (newStatus === 'Sold' && !soldDate) soldDate = new Date().toISOString();
+  if (newStatus !== 'Sold') soldDate = existing ? existing.soldDate || '' : '';
+
+  const product = {
+    id: document.getElementById('pId').value,
+    title: document.getElementById('pTitle').value,
+    category: document.getElementById('pCategory').value,
+    priceLAK: priceLAK,
+    oldPriceLAK: parsePriceInput('pOldPriceLAK'),
+    priceTHB: priceTHB,
+    oldPriceTHB: parsePriceInput('pOldPriceTHB'),
+    ram: document.getElementById('pRam').value,
+    ssd: document.getElementById('pSsd').value,
+    year: document.getElementById('pYear').value,
+    keyboard: document.getElementById('pKeyboard').value,
+    color: getSelectOrOtherValue('pColorSelect', 'pColorOther'),
+    cpu: getSelectOrOtherValue('pCpuSelect', 'pCpuOther'),
+    battery: document.getElementById('pBattery').value,
+    screenSize: document.getElementById('pScreenSize').value,
+    warrantyDays: Number(document.getElementById('pWarrantyDays').value) || 0,
+    repairHistory: existing ? (existing.repairHistory || '') : '',
+    images: document.getElementById('pImageList').value.split(',').filter(Boolean),
+    whatsapp: CONFIG.WHATSAPP_NUMBER,
+    status: newStatus,
+    soldDate: soldDate
+  };
+
+  const idx = allProducts.findIndex(x => x.id.toString() === product.id.toString());
+  if (idx > -1) {
+    allProducts[idx] = product;
+  } else {
+    allProducts.push(product);
+  }
+
+  const saveBtn = document.getElementById('saveBtn');
+  const originalBtnText = saveBtn.innerText;
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<span class="loader-ring-sm"></span> ກຳລັງບັນທຶກ...';
+
+  const ok = await persistProducts(idx > -1 ? `chore: update product ${product.id}` : `feat: add product ${product.id}`);
+
+  saveBtn.disabled = false;
+  saveBtn.innerText = originalBtnText;
+
+  if (ok) {
+    closeEditModal();
+    renderAdminGrid();
+  }
+}
+
+async function removeProduct(id) {
+  if (!confirm('ຕ້ອງການລຶບສິນຄ້ານີ້ແທ້ບໍ?')) return;
+  const backup = allProducts;
+  allProducts = allProducts.filter(x => x.id.toString() !== id.toString());
+  const ok = await persistProducts(`chore: delete product ${id}`);
+  if (!ok) { allProducts = backup; return; }
+  renderAdminGrid();
+}
+
+async function persistProducts(commitMessage) {
+  showLoadingOverlay('ກຳລັງບັນທຶກ ແລະ commit ຂໍ້ມູນລົງ GitHub...');
+  try {
+    // ດຶງ sha ຫລ້າສຸດກ່ອນຂຽນທັບ ເພື່ອປ້ອງກັນຂໍ້ມູນຂັດແຍ່ງກັນ (ກໍລະນີແກ້ໄຂຈາກຫລາຍອຸປະກອນ)
+    const current = await ghGetFile(CONFIG.PRODUCTS_PATH);
+    await ghPutJson(CONFIG.PRODUCTS_PATH, allProducts, current.sha, commitMessage);
+    hideLoadingOverlay();
+    showToast('ບັນທຶກຂໍ້ມູນສຳເລັດແລ້ວ! (Commit ໄປ GitHub ແລ້ວ)', 'success');
+    return true;
+  } catch (err) {
+    console.error(err);
+    hideLoadingOverlay();
+    showToast('ບັນທຶກບໍ່ສຳເລັດ: ' + err.message, 'error', 6000);
+    return false;
+  }
+}
+
+/* =========================================================================
+   ຈັດການລາຄາສົ່ງ (agent_products.json) — ຂໍ້ມູນແຍກຕ່າງຫາກຈາກ products.json
+   ========================================================================= */
+
+let agentProducts = [];
+
+async function openAgentModal() {
+  document.getElementById('agentModal').classList.remove('hidden');
+  document.getElementById('agentProductList').innerHTML = '<p class="text-xs text-slate-400 text-center py-6"><i class="fas fa-spinner fa-spin"></i> ກຳລັງໂຫຼດ...</p>';
+
+  // ຕົວເລືອກສິນຄ້າ (ດຶງຈາກລາຍການປົກກະຕິທີ່ໂຫຼດໄວ້ຢູ່ແລ້ວ)
+  const select = document.getElementById('addAgentProductSelect');
+  select.innerHTML = '<option value="">-- ເລືອກສິນຄ້າຈາກລາຍການປົກກະຕິ ເພື່ອເພີ່ມເຂົ້າລາຄາສົ່ງ --</option>' +
+    allProducts.map(p => `<option value="${p.id}">${p.id} — ${p.title}</option>`).join('');
+
+  try {
+    const file = await ghGetFile(CONFIG.AGENT_PRODUCTS_PATH);
+    agentProducts = file.json || [];
+    renderAgentProductList();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('agentProductList').innerHTML = '<p class="text-xs text-rose-500 text-center py-6">ໂຫຼດ agent_products.json ບໍ່ສຳເລັດ: ' + err.message + '</p>';
+  }
+}
+
+function closeAgentModal() {
+  document.getElementById('agentModal').classList.add('hidden');
+}
+
+function renderAgentProductList() {
+  const box = document.getElementById('agentProductList');
+  if (agentProducts.length === 0) {
+    box.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">ຍັງບໍ່ມີສິນຄ້າໃນລາຄາສົ່ງ, ເລືອກສິນຄ້າຈາກ dropdown ຂ້າງເທິງເພື່ອເພີ່ມ</p>';
+    return;
+  }
+
+  box.innerHTML = agentProducts.map((p, idx) => `
+    <div class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-3">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold text-slate-700 truncate">${p.title}</p>
+        <p class="text-[10px] text-slate-400">ID ${p.id} · ${p.category || ''}</p>
+      </div>
+      <div class="w-40 shrink-0">
+        <label class="text-[9px] text-slate-400 block mb-0.5">ລາຄາສົ່ງ (ກີບ)</label>
+        <input type="number" min="0" value="${p.wholesalePriceLAK || 0}"
+               oninput="updateAgentPrice(${idx}, this.value)"
+               class="w-full bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs">
+      </div>
+      <button onclick="removeAgentProductRow(${idx})" title="ລຶບ" class="btn-press shrink-0 w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-sm">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function updateAgentPrice(idx, value) {
+  agentProducts[idx].wholesalePriceLAK = Number(value) || 0;
+}
+
+function removeAgentProductRow(idx) {
+  agentProducts.splice(idx, 1);
+  renderAgentProductList();
+}
+
+function addAgentProductFromSelect() {
+  const select = document.getElementById('addAgentProductSelect');
+  const id = select.value;
+  if (!id) return;
+
+  if (agentProducts.find(p => p.id.toString() === id.toString())) {
+    showToast('ສິນຄ້ານີ້ຢູ່ໃນລາຄາສົ່ງແລ້ວ', 'info');
+    return;
+  }
+
+  const source = allProducts.find(p => p.id.toString() === id.toString());
+  if (!source) return;
+
+  agentProducts.push({
+    id: source.id,
+    title: source.title,
+    category: source.category,
+    wholesalePriceLAK: 0,
+    wholesalePriceTHB: 0,
+    ram: source.ram || '',
+    ssd: source.ssd || '',
+    cpu: source.cpu || '',
+    color: source.color || '',
+    moq: 1
+  });
+  select.value = '';
+  renderAgentProductList();
+}
+
+async function saveAgentProducts() {
+  const btn = document.getElementById('agentSaveBtn');
+  const originalText = btn.innerText;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader-ring-sm"></span> ກຳລັງບັນທຶກ...';
+
+  showLoadingOverlay('ກຳລັງບັນທຶກລາຄາສົ່ງລົງ GitHub...');
+  try {
+    const current = await ghGetFile(CONFIG.AGENT_PRODUCTS_PATH);
+    await ghPutJson(CONFIG.AGENT_PRODUCTS_PATH, agentProducts, current.sha, 'chore: update agent wholesale prices');
+    hideLoadingOverlay();
+    showToast('ບັນທຶກລາຄາສົ່ງສຳເລັດແລ້ວ!', 'success');
+  } catch (err) {
+    console.error(err);
+    hideLoadingOverlay();
+    showToast('ບັນທຶກບໍ່ສຳເລັດ: ' + err.message, 'error', 6000);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = originalText;
+  }
 }
