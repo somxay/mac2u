@@ -22,5 +22,17 @@
     "cpu": "Apple M3 Max",
     "color": "Midnight",
     "moq": 1
+  },
+  {
+    "id": "392709",
+    "title": "macbook",
+    "category": "Macbook",
+    "wholesalePriceLAK": 900000,
+    "wholesalePriceTHB": 0,
+    "ram": "8",
+    "ssd": "500",
+    "cpu": "Apple M1 Max",
+    "color": "Gold",
+    "moq": 1
   }
 ]
