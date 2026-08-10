@@ -34,7 +34,7 @@ IMAGES_DIR: 'images/',
   // ຄ່າຂ້າງລຸ່ມນີ້ແມ່ນ hash ຂອງລະຫັດຕົວຢ່າງ "1234" — ຕ້ອງປ່ຽນເປັນລະຫັດຈິງຂອງທ່ານ (ເບິ່ງວິທີສ້າງ hash
   // ໄດ້ໃນ DEPLOY.md ຂໍ້ 6, ຫຼືເປີດ agent.html → Console (F12) → ໃຊ້ຟັງຊັນ hashAgentCode('ລະຫັດຂອງທ່ານ')
   // ໝາຍເຫດ: ອັນນີ້ເປັນພຽງອຸປະສັກເບື້ອງຕົ້ນ (obscurity) ບໍ່ແມ່ນຄວາມປອດໄພແທ້ (ອ່ານລາຍລະອຽດຂໍ້ຈຳກັດໃນ DEPLOY.md)
-  AGENT_CODE_HASH: '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
+  AGENT_CODE_HASH: '1b3e54e14c235b0c063a4e34ea671367a3b07965b5aeb8d01e59f16533e13b68',
 };
 
 /* ---------- URL helpers (ໃຊ້ຮ່ວມກັນລະຫວ່າງ index.html / admin.html) ---------- */
