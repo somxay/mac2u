@@ -1,17 +1,5 @@
 [
   {
-    "id": "810738",
-    "title": "Macbook pro m1",
-    "category": "Macbook",
-    "wholesalePriceLAK": 2000000,
-    "wholesalePriceTHB": 0,
-    "ram": "4",
-    "ssd": "128",
-    "cpu": "Apple M3 Max",
-    "color": "Silver",
-    "moq": 1
-  },
-  {
     "id": "192624",
     "title": "Macbook pro m1 m1",
     "category": "Macbook",
