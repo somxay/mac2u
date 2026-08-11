@@ -24,28 +24,5 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
-  },
-  {
-    "id": "392709",
-    "title": "macbook",
-    "category": "Macbook",
-    "priceLAK": 434,
-    "oldPriceLAK": 35435,
-    "priceTHB": 535435,
-    "oldPriceTHB": 53543543,
-    "ram": "8",
-    "ssd": "500",
-    "year": "2014",
-    "keyboard": "TH",
-    "color": "Space Gray",
-    "cpu": "Apple M1 Max",
-    "battery": "444",
-    "screenSize": "13.3 ນິ້ວ",
-    "warrantyDays": 0,
-    "repairHistory": "",
-    "images": [],
-    "whatsapp": "22258416",
-    "status": "Ready",
-    "soldDate": ""
   }
 ]
