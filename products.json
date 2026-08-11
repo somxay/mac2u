@@ -48,7 +48,9 @@
     "warrantyDays": 0,
     "repairHistory": "",
     "images": [],
-    "colorStock": {},
+    "colorStock": {
+      "ສີເທົາ": 10
+    },
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
