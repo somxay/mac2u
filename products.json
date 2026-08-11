@@ -166,5 +166,33 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
+  },
+  {
+    "id": "866025",
+    "title": "Pro 2020",
+    "category": "Macbook",
+    "priceLAK": 13900000,
+    "wholesalePriceLAK": 12000000,
+    "oldPriceLAK": 0,
+    "priceTHB": 0,
+    "wholesalePriceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "8",
+    "ssd": "256",
+    "year": "2020",
+    "keyboard": "TH",
+    "color": "Space Gray",
+    "cpu": "Apple M1",
+    "battery": "80-90",
+    "screenSize": "13.3 ນິ້ວ",
+    "warrantyDays": 30,
+    "repairHistory": "",
+    "images": [],
+    "colorStock": {
+      "ສີເທົາ": 2
+    },
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
   }
 ]
