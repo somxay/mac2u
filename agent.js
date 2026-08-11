@@ -81,6 +81,17 @@ function formatLak(amount) {
   return lakFormatter.format(Number(amount) || 0) + ' ₭';
 }
 
+// ຄີບອດ → ແປງລະຫັດ (TH/EN ฯลฯ) ໃຫ້ເປັນຂໍ້ຄວາມທີ່ອ່ານເຂົ້າໃຈງ່າຍ (ຄັດລອກມາຈາກ app.js — ຢູ່ຄົນລະ script scope)
+function formatKeyboard(kb) {
+  const map = {
+    'TH': 'ຄີບອດໄທ',
+    'EN': 'ຄີບອດອັງກິດ',
+    'US': 'ຄີບອດອັງກິດ',
+    'LA': 'ຄີບອດລາວ'
+  };
+  return map[(kb || '').toUpperCase()] || kb || '';
+}
+
 function agentColorLabel(color) {
   const map = {
     'Space Gray': 'ສີເທົາອາວະກາດ', 'Silver': 'ສີເງິນ', 'Gold': 'ສີຄຳ', 'Rose Gold': 'ສີຄຳກຸຫຼາບ',
@@ -99,7 +110,7 @@ function renderAgentList() {
 
   box.innerHTML = agentProducts.map(p => {
     const hasColorStock = p.colorStock && typeof p.colorStock === 'object' && Object.keys(p.colorStock).length > 0;
-    const specs = [p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.year, p.screenSize, p.battery, p.keyboard ? 'KB ' + p.keyboard : '']
+    const specs = [p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.year, p.screenSize, p.battery, p.keyboard ? formatKeyboard(p.keyboard) : '']
       .filter(Boolean).join(' · ');
 
     return `

@@ -179,9 +179,16 @@ function applyFilters() {
   renderProducts(filtered);
 }
 
-// ຄີບອດ → ສະແດງເປັນຂໍ້ຄວາມ (ແທນທຸງຊາດ emoji)
-function keyboardFlag(kb) {
-  const map = { 'TH': 'ສູນໄທ TH', 'EN': 'ສູນໄທອັງກິດ EN', 'US': 'ສູນໄທອັງກິດ US', 'LA': 'ສູນລາວ LA' };
+// ຄີບອດ → ແປງລະຫັດ (TH/EN ฯลฯ) ໃຫ້ເປັນຂໍ້ຄວາມທີ່ອ່ານເຂົ້າໃຈງ່າຍ
+// ໃຊ້ໄດ້ທັງ index.html (app.js) ແລະ agent.html (agent.js) — ຄັດລອກຟັງຊັນນີ້ໄປໃສ່ agent.js ນຳ
+// ຖ້າຢາກປັບ mapping ໃໝ່, ແກ້ບ່ອນດຽວນີ້ (ແລ້ວແກ້ agent.js ໃຫ້ຄືກັນ)
+function formatKeyboard(kb) {
+  const map = {
+    'TH': 'ຄີບອດໄທ',
+    'EN': 'ຄີບອດອັງກິດ',
+    'US': 'ຄີບອດອັງກິດ',
+    'LA': 'ຄີບອດລາວ'
+  };
   return map[(kb || '').toUpperCase()] || kb || '';
 }
 
@@ -255,7 +262,7 @@ function renderProducts(products) {
             <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
           </div>
           <div class="p-4">
-            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ${keyboardFlag(p.keyboard || 'TH')}</span>
+            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ${formatKeyboard(p.keyboard || 'TH')}</span>
             <div class="flex items-center gap-1.5 mt-1">
               <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${p.title}</h3>
               ${hasColorStock(p)
@@ -333,7 +340,7 @@ function openProductModal(id) {
       <div>
         <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
           <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-wider">${p.category}</span>
-          ${p.category === 'Macbook' ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md uppercase tracking-wider">${keyboardFlag(p.keyboard || 'TH')}</span>` : ''}
+          ${p.category === 'Macbook' ? `<span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md uppercase tracking-wider">${formatKeyboard(p.keyboard || 'TH')}</span>` : ''}
           ${p.color ? `<span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md uppercase tracking-wider">${colorLabelLao(p.color)}</span>` : ''}
         </div>
         <h3 class="font-bold text-slate-800 text-lg leading-snug">${p.title}</h3>
