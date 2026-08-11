@@ -54,5 +54,33 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
+  },
+  {
+    "id": "612838",
+    "title": "Pro 2018",
+    "category": "Macbook",
+    "priceLAK": 9800000,
+    "wholesalePriceLAK": 8500000,
+    "oldPriceLAK": 0,
+    "priceTHB": 0,
+    "wholesalePriceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "16",
+    "ssd": "256",
+    "year": "2018",
+    "keyboard": "TH",
+    "color": "Space Gray",
+    "cpu": "Intel i7",
+    "battery": "80-90",
+    "screenSize": "13.3 ນິ້ວ",
+    "warrantyDays": 33,
+    "repairHistory": "",
+    "images": [],
+    "colorStock": {
+      "ສີເທົາ": 10
+    },
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
   }
 ]
