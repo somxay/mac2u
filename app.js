@@ -179,6 +179,9 @@ function applyFilters() {
   renderProducts(filtered);
 }
 
+// ຂໍ້ຄວາມ "ຂອງແຖມ" ສະແດງສະເພາະສິນຄ້າໝວດ Macbook ຢູ່ໜ້າ Modal ລາຍລະອຽດສິນຄ້າ
+const MACBOOK_FREEBIE_TEXT = 'ສາຍສາກ ສະຕິກເກີ້ພາສາລາວ ລົງໂປຣແກຣມດີເຈຂອງແທ້ Rekordbox Serato Pro ໂປຣແກຣມເຮັດເພງແທ້ ແຖມເພງດີເຈເຕັມເຄື່ອງ';
+
 // ຄີບອດ → ແປງລະຫັດ (TH/EN ฯลฯ) ໃຫ້ເປັນຂໍ້ຄວາມທີ່ອ່ານເຂົ້າໃຈງ່າຍ
 // ໃຊ້ໄດ້ທັງ index.html (app.js) ແລະ agent.html (agent.js) — ຄັດລອກຟັງຊັນນີ້ໄປໃສ່ agent.js ນຳ
 // ຖ້າຢາກປັບ mapping ໃໝ່, ແກ້ບ່ອນດຽວນີ້ (ແລ້ວແກ້ agent.js ໃຫ້ຄືກັນ)
@@ -366,6 +369,13 @@ function openProductModal(id) {
           <p class="font-semibold text-xs text-slate-700 mt-1">${p.battery || '-'}</p>
         </div>
       </div>
+
+      ${p.category === 'Macbook' ? `
+      <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+        <span class="text-[10px] font-bold text-emerald-600 flex items-center gap-1.5 mb-1.5"><i class="fas fa-gift"></i> ຂອງແຖມ</span>
+        <p class="text-xs text-slate-600 leading-relaxed">${MACBOOK_FREEBIE_TEXT}</p>
+      </div>
+      ` : ''}
 
       ${hasColorStock(p) ? `
       <div class="bg-slate-50 rounded-2xl p-4">
