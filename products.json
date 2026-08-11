@@ -24,5 +24,31 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
+  },
+  {
+    "id": "961462",
+    "title": "Pro 2017 ທັດບາ",
+    "category": "Macbook",
+    "priceLAK": 7800000,
+    "wholesalePriceLAK": 0,
+    "oldPriceLAK": 0,
+    "priceTHB": 0,
+    "wholesalePriceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "",
+    "ssd": "",
+    "year": "",
+    "keyboard": "TH",
+    "color": "",
+    "cpu": "",
+    "battery": "",
+    "screenSize": "",
+    "warrantyDays": 0,
+    "repairHistory": "",
+    "images": [],
+    "colorStock": {},
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
   }
 ]
