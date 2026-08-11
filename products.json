@@ -82,5 +82,33 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
+  },
+  {
+    "id": "149608",
+    "title": "Pro 2019",
+    "category": "Macbook",
+    "priceLAK": 10500000,
+    "wholesalePriceLAK": 9000000,
+    "oldPriceLAK": 0,
+    "priceTHB": 0,
+    "wholesalePriceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "16",
+    "ssd": "256",
+    "year": "2019",
+    "keyboard": "TH",
+    "color": "Space Gray",
+    "cpu": "Intel i7",
+    "battery": "",
+    "screenSize": "13.3 ນິ້ວ",
+    "warrantyDays": 30,
+    "repairHistory": "",
+    "images": [],
+    "colorStock": {
+      "ສີເທົາ": 15
+    },
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
   }
 ]
