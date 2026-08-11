@@ -514,6 +514,15 @@ async function persistProducts(commitMessage) {
    ຈຳນວນສະຕັອກແຍກຕາມສີ (colorStock) — ບັນທຶກຢູ່ໃນ product ດຽວກັນ (products.json)
    ========================================================================= */
 
+// ລາຍການສີທີ່ອະນຸຍາດໃນ "ຈຳນວນສະຕັອກແຍກຕາມສີ" (ຄົງທີ່ 5 ສີ ຕາມທີ່ຮ້ານກຳນົດ)
+const COLOR_STOCK_OPTIONS = [
+  { value: 'Space Gray', label: 'Space Gray (ສີເທົາ)' },
+  { value: 'Silver', label: 'Silver (ສີເງິນ)' },
+  { value: 'Rose Gold', label: 'Rose Gold (ສີຄຳກຸຫຼາບທອງ)' },
+  { value: 'Midnight', label: 'Midnight (ສີດຳກາງຄືນ)' },
+  { value: 'Starlight', label: 'Starlight (ສີແສງດາວ)' }
+];
+
 function addColorStockRow(color, qty) {
   color = color || '';
   qty = (qty === undefined || qty === null) ? '' : qty;
@@ -522,8 +531,14 @@ function addColorStockRow(color, qty) {
   const div = document.createElement('div');
   div.className = 'flex items-center gap-2';
   div.id = rowId;
+  const optionsHtml = COLOR_STOCK_OPTIONS.map(o =>
+    `<option value="${o.value}" ${o.value === color ? 'selected' : ''}>${o.label}</option>`
+  ).join('');
   div.innerHTML = `
-    <input type="text" value="${color}" placeholder="ຊື່ສີ ເຊັ່ນ Space Gray / Silver" class="cs-color flex-1 bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+    <select class="cs-color flex-1 bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+      <option value="">-- ເລືອກສີ --</option>
+      ${optionsHtml}
+    </select>
     <input type="number" min="0" value="${qty}" placeholder="ຈຳນວນ" class="cs-qty w-28 bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
     <button type="button" onclick="document.getElementById('${rowId}').remove()" title="ລຶບ" class="btn-press shrink-0 w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-sm">🗑️</button>
   `;
