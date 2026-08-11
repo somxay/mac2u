@@ -3,7 +3,7 @@
    ຄວາມປອດໄພ: ນີ້ເປັນ static site, ດັ່ງນັ້ນການກວດລະຫັດເກີດຂຶ້ນຝັ່ງ browser (client-side)
    ລະຫັດຖືກເກັບເປັນ SHA-256 hash (ບໍ່ແມ່ນ plain text) ເພື່ອບໍ່ໃຫ້ເຫັນຄ່າຕົງໆຈາກ view-source
    ແຕ່ນີ້ຍັງເປັນພຽງ "ອຸປະສັກເບື້ອງຕົ້ນ" (obscurity) ບໍ່ແມ່ນກຳແພງຄວາມປອດໄພແທ້ — ຄົນທີ່ຮູ້ວິທີເທັກນິກ
-   ຍັງສາມາດຫາ URL ຂອງ agent_products.json ໂດຍກົງໄດ້ຢູ່ດີ ຖ້າ repo ເປັນ public (ອ່ານລາຍລະອຽດໃນ DEPLOY.md)
+   ຍັງສາມາດເປີດ products.json ໂດຍກົງໄດ້ຢູ່ດີ ຖ້າ repo ເປັນ public (ອ່ານລາຍລະອຽດໃນ DEPLOY.md ຂໍ້ 6)
    ========================================================================= */
 
 const AGENT_SESSION_KEY = 'agent_authed';
@@ -60,18 +60,18 @@ function unlockAgentPage() {
   }
 })();
 
-// ---------- ດຶງຂໍ້ມູນລາຄາສົ່ງ ----------
+// ---------- ດຶງຂໍ້ມູນສິນຄ້າ (ຊຸດດຽວກັບໜ້າຮ້ານ products.json — ລາຄາສົ່ງເປັນ field ໃນສິນຄ້ານັ້ນເລີຍ) ----------
 async function loadAgentProducts() {
   try {
-    const res = await fetch(ghRawUrl(CONFIG.AGENT_PRODUCTS_PATH));
-    if (!res.ok) throw new Error('ไม่พบ ' + CONFIG.AGENT_PRODUCTS_PATH);
+    const res = await fetch(ghRawUrl(CONFIG.PRODUCTS_PATH));
+    if (!res.ok) throw new Error('ไม่พบ ' + CONFIG.PRODUCTS_PATH);
     agentProducts = await res.json();
     document.getElementById('agentLoading').style.display = 'none';
-    renderAgentGrid();
+    renderAgentList();
   } catch (err) {
     console.error(err);
     document.getElementById('agentLoading').innerHTML =
-      '<p class="col-span-full text-center text-xs text-rose-500 py-10">ໂຫຼດຂໍ້ມູນລາຄາສົ່ງບໍ່ສຳເລັດ, ລອງໃໝ່ພາຍຫຼັງ</p>';
+      '<p class="text-center text-xs text-rose-500 py-10">ໂຫຼດຂໍ້ມູນສິນຄ້າບໍ່ສຳເລັດ, ລອງໃໝ່ພາຍຫຼັງ</p>';
   }
 }
 
@@ -81,30 +81,56 @@ function formatLak(amount) {
   return lakFormatter.format(Number(amount) || 0) + ' ₭';
 }
 
-function renderAgentGrid() {
-  const grid = document.getElementById('agentGrid');
+function agentColorLabel(color) {
+  const map = {
+    'Space Gray': 'ສີເທົາອາວະກາດ', 'Silver': 'ສີເງິນ', 'Gold': 'ສີຄຳ', 'Rose Gold': 'ສີຄຳກຸຫຼາບ',
+    'Midnight': 'ສີດຳຄ່ຳຄືນ', 'Starlight': 'ສີແສງດາວ', 'Sky Blue': 'ສີຟ້າ', 'Black': 'ສີດຳ', 'White': 'ສີຂາວ'
+  };
+  return map[color] || color || '';
+}
+
+// ---------- ສະແດງແບບ Minimalist List (ແຖວລົງມາ, ບໍ່ແມ່ນ card grid) ----------
+function renderAgentList() {
+  const box = document.getElementById('agentList');
   if (agentProducts.length === 0) {
-    grid.innerHTML = '<p class="col-span-full text-center text-xs text-slate-400 py-10">ຍັງບໍ່ມີລາຍການລາຄາສົ່ງ</p>';
+    box.innerHTML = '<p class="text-center text-xs text-slate-400 py-10">ຍັງບໍ່ມີສິນຄ້າ</p>';
     return;
   }
 
-  grid.innerHTML = agentProducts.map(p => `
-    <div class="product-card glass-card rounded-3xl-custom p-4">
-      <div class="flex items-start justify-between gap-2 mb-2">
-        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category || ''}</span>
-        <span class="text-[10px] font-bold bg-slate-900/5 text-slate-500 px-2 py-0.5 rounded-full">ID ${p.id}</span>
-      </div>
-      <h3 class="font-bold text-slate-800 text-sm mb-1">${p.title}</h3>
-      <p class="text-[11px] text-slate-400 mb-3">
-        ${[p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.color].filter(Boolean).join(' · ') || '-'}
-      </p>
-      <div class="flex items-baseline justify-between border-t border-slate-100 pt-3">
-        <div>
-          <span class="text-[10px] text-slate-400 block">ລາຄາສົ່ງ</span>
-          <span class="text-rose-600 font-extrabold text-lg">${formatLak(p.wholesalePriceLAK)}</span>
+  box.innerHTML = agentProducts.map(p => {
+    const hasColorStock = p.colorStock && typeof p.colorStock === 'object' && Object.keys(p.colorStock).length > 0;
+    const specs = [p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.year, p.screenSize, p.battery, p.keyboard ? 'KB ' + p.keyboard : '']
+      .filter(Boolean).join(' · ');
+
+    return `
+      <div class="p-4 hover:bg-slate-50/60 transition">
+        <div class="flex items-start justify-between gap-3 mb-1">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-bold text-slate-800 text-sm">${p.title}</h3>
+              <span class="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">ID ${p.id}</span>
+              <span class="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase">${p.category || ''}</span>
+              ${!hasColorStock && p.color ? `<span class="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">${agentColorLabel(p.color)}</span>` : ''}
+            </div>
+            ${specs ? `<p class="text-[11px] text-slate-400 mt-1">${specs}</p>` : ''}
+          </div>
+          <div class="text-right shrink-0">
+            <span class="text-[9px] text-slate-400 block">ລາຄາສົ່ງ</span>
+            <span class="text-rose-600 font-extrabold text-base">${formatLak(p.wholesalePriceLAK)}</span>
+            ${p.priceLAK ? `<p class="text-[9px] text-slate-300">ຂາຍ ${formatLak(p.priceLAK)}</p>` : ''}
+          </div>
         </div>
-        ${p.moq ? `<span class="text-[10px] text-slate-400">ຂັ້ນຕ່ຳ ${p.moq} ເຄື່ອງ</span>` : ''}
+
+        ${hasColorStock ? `
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            ${Object.entries(p.colorStock).map(([color, qty]) => `
+              <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full ${Number(qty) > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-400 line-through'}">
+                ${agentColorLabel(color)}: ${Number(qty) > 0 ? qty + ' ເຄື່ອງ' : 'ໝົດ'}
+              </span>
+            `).join('')}
+          </div>
+        ` : ''}
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }

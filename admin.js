@@ -234,7 +234,11 @@ function renderAdminGrid() {
           <div>
             <span class="text-[10px] font-bold text-slate-400 uppercase">${p.category}${p.color ? ' · ' + colorLabelLao(p.color) : ''}</span>
             <h3 class="font-bold text-slate-800 text-xs mt-0.5 line-clamp-2">${p.title}</h3>
-            <p class="text-rose-600 font-bold text-xs mt-1">${p.priceLAK > 0 ? Number(p.priceLAK).toLocaleString() + ' ₭' : (p.priceTHB > 0 ? Number(p.priceTHB).toLocaleString() + ' ฿' : '-')}</p>
+            <div class="flex items-center justify-between mt-1">
+              <p class="text-rose-600 font-bold text-xs">${p.priceLAK > 0 ? Number(p.priceLAK).toLocaleString() + ' ₭' : (p.priceTHB > 0 ? Number(p.priceTHB).toLocaleString() + ' ฿' : '-')}</p>
+              ${p.wholesalePriceLAK > 0 ? `<p class="text-amber-600 font-semibold text-[10px] flex items-center gap-0.5"><i class="fas fa-tags"></i> ${Number(p.wholesalePriceLAK).toLocaleString()} ₭</p>` : ''}
+            </div>
+            ${p.colorStock && Object.keys(p.colorStock).length > 0 ? `<p class="text-[9px] text-indigo-500 font-semibold mt-0.5"><i class="fas fa-palette"></i> ${Object.keys(p.colorStock).length} ສີ · ${Object.values(p.colorStock).reduce((a,b)=>a+(Number(b)||0),0)} ເຄື່ອງ</p>` : ''}
           </div>
           <div class="flex gap-2 mt-2">
             <button onclick="openEditModal('${p.id}')" title="ແກ້ໄຂ" class="btn-press flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-2 rounded-xl text-sm">✏️</button>
@@ -317,6 +321,7 @@ function openEditModal(id) {
     document.getElementById('pId').readOnly = false;
     setSelectOrOtherValue('pColorSelect', 'pColorOther', '');
     setSelectOrOtherValue('pCpuSelect', 'pCpuOther', '');
+    setColorStockToForm(null);
   } else {
     const p = allProducts.find(x => x.id.toString() === id.toString());
     if (!p) return;
@@ -328,7 +333,9 @@ function openEditModal(id) {
     document.getElementById('pCategory').value = p.category;
     document.getElementById('pTitle').value = p.title;
     document.getElementById('pPriceLAK').value = p.priceLAK ? Number(p.priceLAK).toLocaleString('en-US') : '';
+    document.getElementById('pWholesalePriceLAK').value = p.wholesalePriceLAK ? Number(p.wholesalePriceLAK).toLocaleString('en-US') : '';
     document.getElementById('pOldPriceLAK').value = p.oldPriceLAK ? Number(p.oldPriceLAK).toLocaleString('en-US') : '';
+    document.getElementById('pWholesalePriceTHB').value = p.wholesalePriceTHB ? Number(p.wholesalePriceTHB).toLocaleString('en-US') : '';
     document.getElementById('pPriceTHB').value = p.priceTHB ? Number(p.priceTHB).toLocaleString('en-US') : '';
     document.getElementById('pOldPriceTHB').value = p.oldPriceTHB ? Number(p.oldPriceTHB).toLocaleString('en-US') : '';
     document.getElementById('pRam').value = p.ram || '';
@@ -342,6 +349,7 @@ function openEditModal(id) {
     document.getElementById('pWarrantyDays').value = p.warrantyDays || '';
     document.getElementById('pStatus').value = p.status;
     document.getElementById('pImageList').value = p.images ? p.images.join(',') : '';
+    setColorStockToForm(p.colorStock);
     renderImagePreviews();
   }
 
@@ -431,8 +439,10 @@ async function handleFormSubmit(e) {
     title: document.getElementById('pTitle').value,
     category: document.getElementById('pCategory').value,
     priceLAK: priceLAK,
+    wholesalePriceLAK: parsePriceInput('pWholesalePriceLAK'),
     oldPriceLAK: parsePriceInput('pOldPriceLAK'),
     priceTHB: priceTHB,
+    wholesalePriceTHB: parsePriceInput('pWholesalePriceTHB'),
     oldPriceTHB: parsePriceInput('pOldPriceTHB'),
     ram: document.getElementById('pRam').value,
     ssd: document.getElementById('pSsd').value,
@@ -445,6 +455,7 @@ async function handleFormSubmit(e) {
     warrantyDays: Number(document.getElementById('pWarrantyDays').value) || 0,
     repairHistory: existing ? (existing.repairHistory || '') : '',
     images: document.getElementById('pImageList').value.split(',').filter(Boolean),
+    colorStock: getColorStockFromForm(),
     whatsapp: CONFIG.WHATSAPP_NUMBER,
     status: newStatus,
     soldDate: soldDate
@@ -500,114 +511,40 @@ async function persistProducts(commitMessage) {
 }
 
 /* =========================================================================
-   ຈັດການລາຄາສົ່ງ (agent_products.json) — ຂໍ້ມູນແຍກຕ່າງຫາກຈາກ products.json
+   ຈຳນວນສະຕັອກແຍກຕາມສີ (colorStock) — ບັນທຶກຢູ່ໃນ product ດຽວກັນ (products.json)
    ========================================================================= */
 
-let agentProducts = [];
-
-async function openAgentModal() {
-  document.getElementById('agentModal').classList.remove('hidden');
-  document.getElementById('agentProductList').innerHTML = '<p class="text-xs text-slate-400 text-center py-6"><i class="fas fa-spinner fa-spin"></i> ກຳລັງໂຫຼດ...</p>';
-
-  // ຕົວເລືອກສິນຄ້າ (ດຶງຈາກລາຍການປົກກະຕິທີ່ໂຫຼດໄວ້ຢູ່ແລ້ວ)
-  const select = document.getElementById('addAgentProductSelect');
-  select.innerHTML = '<option value="">-- ເລືອກສິນຄ້າຈາກລາຍການປົກກະຕິ ເພື່ອເພີ່ມເຂົ້າລາຄາສົ່ງ --</option>' +
-    allProducts.map(p => `<option value="${p.id}">${p.id} — ${p.title}</option>`).join('');
-
-  try {
-    const file = await ghGetFile(CONFIG.AGENT_PRODUCTS_PATH);
-    agentProducts = file.json || [];
-    renderAgentProductList();
-  } catch (err) {
-    console.error(err);
-    document.getElementById('agentProductList').innerHTML = '<p class="text-xs text-rose-500 text-center py-6">ໂຫຼດ agent_products.json ບໍ່ສຳເລັດ: ' + err.message + '</p>';
-  }
+function addColorStockRow(color, qty) {
+  color = color || '';
+  qty = (qty === undefined || qty === null) ? '' : qty;
+  const container = document.getElementById('colorStockRows');
+  const rowId = 'csrow_' + Math.random().toString(36).slice(2, 9);
+  const div = document.createElement('div');
+  div.className = 'flex items-center gap-2';
+  div.id = rowId;
+  div.innerHTML = `
+    <input type="text" value="${color}" placeholder="ຊື່ສີ ເຊັ່ນ Space Gray / Silver" class="cs-color flex-1 bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+    <input type="number" min="0" value="${qty}" placeholder="ຈຳນວນ" class="cs-qty w-28 bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+    <button type="button" onclick="document.getElementById('${rowId}').remove()" title="ລຶບ" class="btn-press shrink-0 w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-sm">🗑️</button>
+  `;
+  container.appendChild(div);
 }
 
-function closeAgentModal() {
-  document.getElementById('agentModal').classList.add('hidden');
-}
-
-function renderAgentProductList() {
-  const box = document.getElementById('agentProductList');
-  if (agentProducts.length === 0) {
-    box.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">ຍັງບໍ່ມີສິນຄ້າໃນລາຄາສົ່ງ, ເລືອກສິນຄ້າຈາກ dropdown ຂ້າງເທິງເພື່ອເພີ່ມ</p>';
-    return;
-  }
-
-  box.innerHTML = agentProducts.map((p, idx) => `
-    <div class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-3">
-      <div class="flex-1 min-w-0">
-        <p class="text-xs font-bold text-slate-700 truncate">${p.title}</p>
-        <p class="text-[10px] text-slate-400">ID ${p.id} · ${p.category || ''}</p>
-      </div>
-      <div class="w-40 shrink-0">
-        <label class="text-[9px] text-slate-400 block mb-0.5">ລາຄາສົ່ງ (ກີບ)</label>
-        <input type="number" min="0" value="${p.wholesalePriceLAK || 0}"
-               oninput="updateAgentPrice(${idx}, this.value)"
-               class="w-full bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs">
-      </div>
-      <button onclick="removeAgentProductRow(${idx})" title="ລຶບ" class="btn-press shrink-0 w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-sm">🗑️</button>
-    </div>
-  `).join('');
-}
-
-function updateAgentPrice(idx, value) {
-  agentProducts[idx].wholesalePriceLAK = Number(value) || 0;
-}
-
-function removeAgentProductRow(idx) {
-  agentProducts.splice(idx, 1);
-  renderAgentProductList();
-}
-
-function addAgentProductFromSelect() {
-  const select = document.getElementById('addAgentProductSelect');
-  const id = select.value;
-  if (!id) return;
-
-  if (agentProducts.find(p => p.id.toString() === id.toString())) {
-    showToast('ສິນຄ້ານີ້ຢູ່ໃນລາຄາສົ່ງແລ້ວ', 'info');
-    return;
-  }
-
-  const source = allProducts.find(p => p.id.toString() === id.toString());
-  if (!source) return;
-
-  agentProducts.push({
-    id: source.id,
-    title: source.title,
-    category: source.category,
-    wholesalePriceLAK: 0,
-    wholesalePriceTHB: 0,
-    ram: source.ram || '',
-    ssd: source.ssd || '',
-    cpu: source.cpu || '',
-    color: source.color || '',
-    moq: 1
+// ອ່ານຄ່າ colorStock ທັງໝົດຈາກຟອມ → { "ColorName": qty, ... }
+function getColorStockFromForm() {
+  const rows = document.querySelectorAll('#colorStockRows > div');
+  const result = {};
+  rows.forEach(row => {
+    const color = row.querySelector('.cs-color').value.trim();
+    const qty = Number(row.querySelector('.cs-qty').value) || 0;
+    if (color) result[color] = qty;
   });
-  select.value = '';
-  renderAgentProductList();
+  return result;
 }
 
-async function saveAgentProducts() {
-  const btn = document.getElementById('agentSaveBtn');
-  const originalText = btn.innerText;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="loader-ring-sm"></span> ກຳລັງບັນທຶກ...';
-
-  showLoadingOverlay('ກຳລັງບັນທຶກລາຄາສົ່ງລົງ GitHub...');
-  try {
-    const current = await ghGetFile(CONFIG.AGENT_PRODUCTS_PATH);
-    await ghPutJson(CONFIG.AGENT_PRODUCTS_PATH, agentProducts, current.sha, 'chore: update agent wholesale prices');
-    hideLoadingOverlay();
-    showToast('ບັນທຶກລາຄາສົ່ງສຳເລັດແລ້ວ!', 'success');
-  } catch (err) {
-    console.error(err);
-    hideLoadingOverlay();
-    showToast('ບັນທຶກບໍ່ສຳເລັດ: ' + err.message, 'error', 6000);
-  } finally {
-    btn.disabled = false;
-    btn.innerText = originalText;
-  }
+// ຕັ້ງຄ່າ colorStock ລົງຟອມ (ຕອນເປີດແກ້ໄຂສິນຄ້າ)
+function setColorStockToForm(colorStock) {
+  document.getElementById('colorStockRows').innerHTML = '';
+  if (!colorStock || typeof colorStock !== 'object') return;
+  Object.entries(colorStock).forEach(([color, qty]) => addColorStockRow(color, qty));
 }

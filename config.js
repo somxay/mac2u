@@ -26,13 +26,18 @@ IMAGES_DIR: 'images/',
   // ຈະໃຊ້ URL scheme ຂອງ Messenger ໂດຍກົງແທນ (ໃຊ້ໄດ້ດີເທິງມືຖືທີ່ລົງແອັບ Messenger ໄວ້).
   FACEBOOK_APP_ID: '',
 
-  // ---- ໜ້າລາຄາສົ່ງ (agent.html) — ຂໍ້ມູນແຍກຕ່າງຫາກຈາກ products.json ----
-  AGENT_PRODUCTS_PATH: 'agent_products.json',
+  // ---- ໜ້າລາຄາສົ່ງ (agent.html) ----
+  // ດຶງຂໍ້ມູນຈາກ products.json ຊຸດດຽວກັບໜ້າຮ້ານ (ລາຄາສົ່ງເປັນ field ໜຶ່ງໃນສິນຄ້ານັ້ນເລີຍ:
+  // wholesalePriceLAK / wholesalePriceTHB) ດັ່ງນັ້ນບໍ່ຕ້ອງມີໄຟລ໌ແຍກຕ່າງຫາກອີກຕໍ່ໄປ
+  //
+  // ໝາຍເຫດ: ເນື່ອງຈາກໃຊ້ products.json ຮ່ວມກັນ, ຄ່າ wholesalePriceLAK/THB ຈະຢູ່ໃນໄຟລ໌ດຽວກັນກັບ
+  // ຂໍ້ມູນທີ່ໜ້າຮ້ານ (index.html) ດຶງໄປໃຊ້ — ຖ້າລູກຄ້າທົ່ວໄປເປີດ DevTools → Network ເບິ່ງ request
+  // ຂອງ products.json ຈະສາມາດເຫັນຕົວເລກລາຄາສົ່ງໄດ້ (ເຖິງແມ່ນໜ້າຮ້ານຈະບໍ່ສະແດງມັນອອກມາກໍ່ຕາມ)
+  // ອ່ານລາຍລະອຽດຂໍ້ຈຳກັດນີ້ໃນ DEPLOY.md ຂໍ້ 6
 
   // ລະຫັດຕົວແທນ (Agent Code) ບໍ່ໄດ້ເກັບເປັນຕົວໜັງສືທຳມະດາ (plain text) ໄວ້ໃນນີ້
   // ແຕ່ເກັບເປັນ SHA-256 hash ແທນ — ເພື່ອບໍ່ໃຫ້ຄົນເປີດເບິ່ງ source code (view-source) ແລ້ວເຫັນລະຫັດຕົງໆ
-  // ຄ່າຂ້າງລຸ່ມນີ້ແມ່ນ hash ຂອງລະຫັດຕົວຢ່າງ "1234" — ຕ້ອງປ່ຽນເປັນລະຫັດຈິງຂອງທ່ານ (ເບິ່ງວິທີສ້າງ hash
-  // ໄດ້ໃນ DEPLOY.md ຂໍ້ 6, ຫຼືເປີດ agent.html → Console (F12) → ໃຊ້ຟັງຊັນ hashAgentCode('ລະຫັດຂອງທ່ານ')
+  // ວິທີສ້າງ hash ໃໝ່: ເປີດ agent.html → Console (F12) → hashAgentCode('ລະຫັດຂອງທ່ານ').then(h=>console.log(h))
   // ໝາຍເຫດ: ອັນນີ້ເປັນພຽງອຸປະສັກເບື້ອງຕົ້ນ (obscurity) ບໍ່ແມ່ນຄວາມປອດໄພແທ້ (ອ່ານລາຍລະອຽດຂໍ້ຈຳກັດໃນ DEPLOY.md)
   AGENT_CODE_HASH: '1b3e54e14c235b0c063a4e34ea671367a3b07965b5aeb8d01e59f16533e13b68',
 };

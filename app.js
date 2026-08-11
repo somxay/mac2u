@@ -201,6 +201,16 @@ function colorLabelLao(color) {
   return map[color] || color || '';
 }
 
+// ---------- ສະຕັອກແຍກຕາມສີ (colorStock) ----------
+// ຄືນຄ່າ true ຖ້າສິນຄ້ານີ້ໃຊ້ລະບົບສະຕັອກແຍກຕາມສີ (ບໍ່ແມ່ນເຄື່ອງມືສອງ 1 ID = 1 ເຄື່ອງ)
+function hasColorStock(p) {
+  return p.colorStock && typeof p.colorStock === 'object' && Object.keys(p.colorStock).length > 0;
+}
+function totalColorStock(p) {
+  if (!hasColorStock(p)) return null;
+  return Object.values(p.colorStock).reduce((sum, qty) => sum + (Number(qty) || 0), 0);
+}
+
 function priceInCurrentCurrency(lakVal, thbVal) {
   if (currentCurrency === 'THB') {
     if (thbVal && thbVal > 0) return thbVal;
@@ -218,14 +228,21 @@ function renderProducts(products) {
   }
 
   grid.innerHTML = products.map((p, idx) => {
-    let isSold = p.status === 'Sold';
+    const stockTotal = totalColorStock(p);
+    let isSold = stockTotal !== null ? stockTotal <= 0 : p.status === 'Sold';
     let priceVal = priceInCurrentCurrency(p.priceLAK, p.priceTHB);
     let priceFormatted = Number(priceVal).toLocaleString();
     let oldPriceVal = priceInCurrentCurrency(p.oldPriceLAK, p.oldPriceTHB);
     let currencySymbol = currentCurrency === 'THB' ? '฿' : '₭';
 
-    const statusText = p.status === 'Ready' ? (currentLang === 'EN' ? 'Ready' : 'ພ້ອມຂາຍ') : (p.status === 'Reserved' ? (currentLang === 'EN' ? 'Reserved' : 'ຈອງແລ້ວ') : (currentLang === 'EN' ? 'Sold' : 'ຂາຍແລ້ວ'));
-    const statusColor = p.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : (p.status === 'Reserved' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600');
+    let statusText, statusColor;
+    if (stockTotal !== null) {
+      statusText = stockTotal > 0 ? (currentLang === 'EN' ? `${stockTotal} in stock` : `ຍັງເຫຼືອ ${stockTotal} ເຄື່ອງ`) : (currentLang === 'EN' ? 'Sold Out' : 'ໝົດສະຕັອກ');
+      statusColor = stockTotal > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600';
+    } else {
+      statusText = p.status === 'Ready' ? (currentLang === 'EN' ? 'Ready' : 'ພ້ອມຂາຍ') : (p.status === 'Reserved' ? (currentLang === 'EN' ? 'Reserved' : 'ຈອງແລ້ວ') : (currentLang === 'EN' ? 'Sold' : 'ຂາຍແລ້ວ'));
+      statusColor = p.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : (p.status === 'Reserved' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600');
+    }
     let mainImg = (p.images && p.images.length > 0 && p.images[0]) ? p.images[0] : 'https://placehold.co/400x300?text=No+Image';
     const delay = Math.min(idx, 11) * 45;
 
@@ -241,7 +258,9 @@ function renderProducts(products) {
             <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ${keyboardFlag(p.keyboard || 'TH')}</span>
             <div class="flex items-center gap-1.5 mt-1">
               <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${p.title}</h3>
-              ${p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${colorLabelLao(p.color)}</span>` : ''}
+              ${hasColorStock(p)
+                ? `<span class="shrink-0 text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full whitespace-nowrap"><i class="fas fa-palette"></i> ${Object.keys(p.colorStock).length} ສີ</span>`
+                : (p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${colorLabelLao(p.color)}</span>` : '')}
             </div>
             ${p.category === 'Macbook' ? `
               <p class="text-[11px] text-slate-400 font-medium mt-1.5">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB · ${p.screenSize || '-'}</p>
@@ -251,7 +270,7 @@ function renderProducts(products) {
         <div class="p-4 pt-3 border-t border-slate-50 flex items-center justify-between">
           <div>
             <span class="text-[10px] text-slate-400 block">${currentCurrency === 'THB' ? 'ລາຄາ (บาท)' : 'ລາຄາ (ກີບ)'}</span>
-            ${isSold ? `<span class="text-slate-400 font-bold text-sm italic">ສິນຄ້ານີ້ຂາຍແລ້ວ</span>` : `
+            ${isSold ? `<span class="text-slate-400 font-bold text-sm italic">${stockTotal !== null ? 'ໝົດສະຕັອກ' : 'ສິນຄ້ານີ້ຂາຍແລ້ວ'}</span>` : `
               <div class="flex items-baseline gap-2">
                 <span class="text-rose-600 font-bold text-lg">${priceFormatted} ${currencySymbol}</span>
                 ${oldPriceVal > 0 ? `<span class="text-slate-300 line-through text-xs">${Number(oldPriceVal).toLocaleString()}</span>` : ''}
@@ -282,8 +301,13 @@ function openProductModal(id) {
   let oldPriceVal = priceInCurrentCurrency(p.oldPriceLAK, p.oldPriceTHB);
   let currencySymbol = currentCurrency === 'THB' ? '฿' : '₭';
 
-  const statusText = p.status === 'Ready' ? (currentLang === 'EN' ? 'Ready' : 'ພ້ອມຂາຍ') : (p.status === 'Reserved' ? (currentLang === 'EN' ? 'Reserved' : 'ຈອງແລ້ວ') : (currentLang === 'EN' ? 'Sold' : 'ຂາຍແລ້ວ'));
-  const statusColor = p.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : (p.status === 'Reserved' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600');
+  const stockTotal = totalColorStock(p);
+  const statusText = stockTotal !== null
+    ? (stockTotal > 0 ? (currentLang === 'EN' ? `${stockTotal} in stock` : `ຍັງເຫຼືອ ${stockTotal} ເຄື່ອງ`) : (currentLang === 'EN' ? 'Sold Out' : 'ໝົດສະຕັອກ'))
+    : (p.status === 'Ready' ? (currentLang === 'EN' ? 'Ready' : 'ພ້ອມຂາຍ') : (p.status === 'Reserved' ? (currentLang === 'EN' ? 'Reserved' : 'ຈອງແລ້ວ') : (currentLang === 'EN' ? 'Sold' : 'ຂາຍແລ້ວ')));
+  const statusColor = stockTotal !== null
+    ? (stockTotal > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600')
+    : (p.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : (p.status === 'Reserved' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'));
 
   let modalBody = document.getElementById('modalBody');
   modalBody.innerHTML = `
@@ -336,9 +360,25 @@ function openProductModal(id) {
         </div>
       </div>
 
+      ${hasColorStock(p) ? `
+      <div class="bg-slate-50 rounded-2xl p-4">
+        <span class="text-[10px] text-slate-400 flex items-center gap-1.5 mb-2"><i class="fas fa-palette"></i> ສະຕັອກແຍກຕາມສີ</span>
+        <div class="space-y-1.5">
+          ${Object.entries(p.colorStock).map(([color, qty]) => `
+            <div class="flex items-center justify-between text-xs bg-white rounded-xl px-3 py-2">
+              <span class="font-medium text-slate-600">${colorLabelLao(color)}</span>
+              ${Number(qty) > 0
+                ? `<span class="text-emerald-600 font-semibold">ຍັງເຫຼືອ ${qty} ເຄື່ອງ</span>`
+                : `<span class="text-rose-400 font-semibold">ສິນຄ້າໝົດ</span>`}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      ` : ''}
+
       <div class="bg-gradient-to-br from-rose-50 to-white rounded-2xl p-4">
         <span class="text-[10px] text-slate-400 block">ລາຄາສິນຄ້າ</span>
-        ${p.status === 'Sold' ? `<span class="text-slate-400 font-bold text-sm italic">ສິນຄ້ານີ້ຂາຍແລ້ວ</span>` : `
+        ${(stockTotal !== null ? stockTotal <= 0 : p.status === 'Sold') ? `<span class="text-slate-400 font-bold text-sm italic">${stockTotal !== null ? 'ໝົດສະຕັອກ' : 'ສິນຄ້ານີ້ຂາຍແລ້ວ'}</span>` : `
           <div class="flex items-baseline gap-2 mt-0.5">
             <span class="text-rose-600 font-extrabold text-2xl">${priceFormatted} ${currencySymbol}</span>
             ${oldPriceVal > 0 ? `<span class="text-slate-300 line-through text-sm">${Number(oldPriceVal).toLocaleString()}</span>` : ''}
