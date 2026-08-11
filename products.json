@@ -222,5 +222,33 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
+  },
+  {
+    "id": "894352",
+    "title": "Air 2015",
+    "category": "Macbook",
+    "priceLAK": 4800000,
+    "wholesalePriceLAK": 3800000,
+    "oldPriceLAK": 0,
+    "priceTHB": 0,
+    "wholesalePriceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "4",
+    "ssd": "128",
+    "year": "2015",
+    "keyboard": "EN",
+    "color": "Silver",
+    "cpu": "Intel i5",
+    "battery": "80-90",
+    "screenSize": "13.3 ນິ້ວ",
+    "warrantyDays": 30,
+    "repairHistory": "",
+    "images": [],
+    "colorStock": {
+      "ສີເງີນ": 11
+    },
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
   }
 ]
