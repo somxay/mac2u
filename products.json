@@ -307,5 +307,33 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
+  },
+  {
+    "id": "656016",
+    "title": "Pro 2015",
+    "category": "Macbook",
+    "priceLAK": 6500000,
+    "wholesalePriceLAK": 4900000,
+    "oldPriceLAK": 6900000,
+    "priceTHB": 0,
+    "wholesalePriceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "8",
+    "ssd": "256",
+    "year": "2015",
+    "keyboard": "EN",
+    "color": "Space Gray",
+    "cpu": "Intel i5",
+    "battery": "80-90",
+    "screenSize": "13.3 ນິ້ວ",
+    "warrantyDays": 30,
+    "repairHistory": "",
+    "images": [],
+    "colorStock": {
+      "ສີເງີນ": 9
+    },
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
   }
 ]
