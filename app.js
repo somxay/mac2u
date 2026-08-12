@@ -180,7 +180,7 @@ function applyFilters() {
 }
 
 // ຂໍ້ຄວາມ "ຂອງແຖມ" ສະແດງສະເພາະສິນຄ້າໝວດ Macbook ຢູ່ໜ້າ Modal ລາຍລະອຽດສິນຄ້າ
-const MACBOOK_FREEBIE_TEXT = 'ສາຍສາກ ສະຕິກເກີ້ພາສາລາວ ລົງໂປຣແກຣມດີເຈຂອງແທ້ Rekordbox Serato Pro ໂປຣແກຣມເຮັດເພງແທ້ ແຖມເພງດີເຈເຕັມເຄື່ອງ';
+const MACBOOK_FREEBIE_TEXT = 'ສາຍສາກ ສະຕິກເກີ້ພາສາລາວ ລົງໂປຣແກຣມດີເຈຂອງແທ້ Rekordbox Serato Pro ໂປຣແກຣມເຮັດເພງFLແທ້ ແຖມເພງດີເຈເຕັມເຄື່ອງ';
 
 // ຄີບອດ → ແປງລະຫັດ (TH/EN ฯลฯ) ໃຫ້ເປັນຂໍ້ຄວາມທີ່ອ່ານເຂົ້າໃຈງ່າຍ
 // ໃຊ້ໄດ້ທັງ index.html (app.js) ແລະ agent.html (agent.js) — ຄັດລອກຟັງຊັນນີ້ໄປໃສ່ agent.js ນຳ
