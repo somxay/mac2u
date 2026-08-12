@@ -239,6 +239,7 @@ function renderAdminGrid() {
               ${p.wholesalePriceLAK > 0 ? `<p class="text-amber-600 font-semibold text-[10px] flex items-center gap-0.5"><i class="fas fa-tags"></i> ${Number(p.wholesalePriceLAK).toLocaleString()} ₭</p>` : ''}
             </div>
             ${p.colorStock && Object.keys(p.colorStock).length > 0 ? `<p class="text-[9px] text-indigo-500 font-semibold mt-0.5"><i class="fas fa-palette"></i> ${Object.keys(p.colorStock).length} ສີ · ${Object.values(p.colorStock).reduce((a,b)=>a+(Number(b)||0),0)} ເຄື່ອງ</p>` : ''}
+            ${p.yearFrom && p.yearTo ? `<p class="text-[9px] text-slate-400 mt-0.5"><i class="fas fa-calendar-days"></i> ໃຊ້ໄດ້: ${p.yearFrom} - ${p.yearTo}</p>` : ''}
           </div>
           <div class="flex gap-2 mt-2">
             <button onclick="openEditModal('${p.id}')" title="ແກ້ໄຂ" class="btn-press flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-2 rounded-xl text-sm">✏️</button>
@@ -249,6 +250,38 @@ function renderAdminGrid() {
     `;
   }).join('');
 }
+
+/* --------------------------------- ສະແດງ/ເຊື່ອງ ຊ່ອງກອກຕາມໝວດໝູ່ --------------------------------- */
+
+// ຮຽກທຸກຄັ້ງທີ່ປ່ຽນ dropdown ໝວດໝູ່ (onchange="toggleCategoryFields()") ແລະ ຕອນເປີດຟອມ
+function toggleCategoryFields() {
+  const category = document.getElementById('pCategory').value;
+  const form = document.getElementById('productForm');
+  if (category === 'Macbook') {
+    form.classList.remove('category-nonmacbook');
+    form.classList.add('category-macbook');
+  } else {
+    form.classList.remove('category-macbook');
+    form.classList.add('category-nonmacbook');
+  }
+}
+
+// ຕື່ມຕົວເລືອກປີ (2008 - ປີປັດຈຸບັນ+1) ໃສ່ dropdown "ລຸ້ນປີທີ່ໃຊ້ໄດ້" — ຮຽກຄັ້ງດຽວຕອນ admin.js ໂຫຼດ
+function populateYearRangeSelects() {
+  const startSel = document.getElementById('pYearStart');
+  const endSel = document.getElementById('pYearEnd');
+  if (!startSel || !endSel) return;
+
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let y = currentYear + 1; y >= 2008; y--) years.push(y);
+
+  const optionsHtml = '<option value="">-- ເລືອກປີ --</option>' +
+    years.map(y => `<option value="${y}">${y}</option>`).join('');
+  startSel.innerHTML = optionsHtml;
+  endSel.innerHTML = optionsHtml;
+}
+populateYearRangeSelects();
 
 /* --------------------------------- Price input helpers --------------------------------- */
 
@@ -322,6 +355,8 @@ function openEditModal(id) {
     setSelectOrOtherValue('pColorSelect', 'pColorOther', '');
     setSelectOrOtherValue('pCpuSelect', 'pCpuOther', '');
     setColorStockToForm(null);
+    document.getElementById('pYearStart').value = '';
+    document.getElementById('pYearEnd').value = '';
   } else {
     const p = allProducts.find(x => x.id.toString() === id.toString());
     if (!p) return;
@@ -341,6 +376,8 @@ function openEditModal(id) {
     document.getElementById('pRam').value = p.ram || '';
     document.getElementById('pSsd').value = p.ssd || '';
     document.getElementById('pYear').value = p.year || '';
+    document.getElementById('pYearStart').value = p.yearFrom || '';
+    document.getElementById('pYearEnd').value = p.yearTo || '';
     document.getElementById('pKeyboard').value = p.keyboard || 'TH';
     setSelectOrOtherValue('pColorSelect', 'pColorOther', p.color || '');
     setSelectOrOtherValue('pCpuSelect', 'pCpuOther', p.cpu || '');
@@ -353,6 +390,7 @@ function openEditModal(id) {
     renderImagePreviews();
   }
 
+  toggleCategoryFields();
   document.getElementById('editModal').classList.remove('hidden');
 }
 
@@ -447,6 +485,8 @@ async function handleFormSubmit(e) {
     ram: document.getElementById('pRam').value,
     ssd: document.getElementById('pSsd').value,
     year: document.getElementById('pYear').value,
+    yearFrom: document.getElementById('pYearStart').value,
+    yearTo: document.getElementById('pYearEnd').value,
     keyboard: document.getElementById('pKeyboard').value,
     color: getSelectOrOtherValue('pColorSelect', 'pColorOther'),
     cpu: getSelectOrOtherValue('pCpuSelect', 'pCpuOther'),

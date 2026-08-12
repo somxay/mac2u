@@ -68,6 +68,10 @@
 
     .loader-ring { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #e2e8f0; border-top-color: var(--brand-ink); animation: spin .7s linear infinite; }
     .loader-ring-sm { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: spin .6s linear infinite; display: inline-block; }
+
+    /* ---- ສະແດງ/ເຊື່ອງ ຊ່ອງກອກຕາມໝວດໝູ່ສິນຄ້າ (ຄວບຄຸມໂດຍ toggleCategoryFields() ໃນ admin.js) ---- */
+    #productForm.category-nonmacbook .field-macbook-only { display: none !important; }
+    #productForm.category-macbook .field-nonmacbook-only { display: none !important; }
   </style>
 </head>
 <body class="text-slate-800 antialiased">
@@ -167,14 +171,14 @@
       <button onclick="closeEditModal()" class="btn-press absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 z-10"><i class="fas fa-times"></i></button>
       <h3 id="editModalTitle" class="font-bold text-base mb-4">ເພີ່ມສິນຄ້າໃໝ່</h3>
 
-      <form onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <form id="productForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລະຫັດສິນຄ້າ (ID)</label>
           <input id="pId" type="text" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs" required>
         </div>
         <div>
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ໝວດໝູ່</label>
-          <select id="pCategory" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+          <select id="pCategory" onchange="toggleCategoryFields()" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
             <option value="Macbook">MacBook</option>
             <option value="Accessories">ສາຍສາກ/ອຸປະກອນ</option>
             <option value="DJ">ເຄື່ອງ DJ</option>
@@ -196,25 +200,25 @@
           <input id="pWholesalePriceLAK" type="text" inputmode="numeric" placeholder="xxx,xxx,xxx (ສະເພາະຕົວແທນເບິ່ງ)" oninput="formatPriceInput(this)" class="w-full bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-xs">
         </div>
 
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລາຄາເກົ່າ (ຂີດຄ່ອມ, ຖ້າມີ)</label>
           <input id="pOldPriceLAK" type="text" inputmode="numeric" placeholder="xxx,xxx,xxx" oninput="formatPriceInput(this)" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
         </div>
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-amber-600 block mb-1 ml-1"><i class="fas fa-tags"></i> ລາຄາສົ່ງ (ບາດ)</label>
           <input id="pWholesalePriceTHB" type="text" inputmode="numeric" placeholder="xxx,xxx (ຖ້າມີ)" oninput="formatPriceInput(this)" class="w-full bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-xs">
         </div>
 
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລາຄາ (ບາດ) — ໃສ່ສະເພາະສິນຄ້າທີ່ຕັ້ງລາຄາເປັນບາດ</label>
           <input id="pPriceTHB" type="text" inputmode="numeric" placeholder="xxx,xxx (ປ່ອຍວ່າງຖ້າໃຊ້ອັດຕາແປງອັດຕະໂນມັດ)" oninput="formatPriceInput(this)" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
         </div>
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລາຄາເກົ່າ (ບາດ, ຂີດຄ່ອມ)</label>
           <input id="pOldPriceTHB" type="text" inputmode="numeric" placeholder="xxx,xxx" oninput="formatPriceInput(this)" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
         </div>
 
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">RAM (GB)</label>
           <select id="pRam" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
             <option value="">-- ເລືອກ RAM --</option>
@@ -224,7 +228,7 @@
             <option value="32">32 GB</option>
           </select>
         </div>
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">SSD (GB)</label>
           <select id="pSsd" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
             <option value="">-- ເລືອກ SSD --</option>
@@ -234,7 +238,7 @@
             <option value="1000">1 TB (1000 GB)</option>
           </select>
         </div>
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ປີຜະລິດ</label>
           <select id="pYear" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
             <option value="">-- ເລືອກປີ --</option>
@@ -250,14 +254,27 @@
             <option value="2023">2023</option>
           </select>
         </div>
-        <div>
+
+        <div class="field-nonmacbook-only md:col-span-2 grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-indigo-600 block mb-1 ml-1"><i class="fas fa-calendar-days"></i> ລຸ້ນປີທີ່ໃຊ້ໄດ້ — ຕັ້ງແຕ່ປີ</label>
+            <select id="pYearStart" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs"></select>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-indigo-600 block mb-1 ml-1"><i class="fas fa-calendar-days"></i> ຮອດປີ</label>
+            <select id="pYearEnd" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs"></select>
+          </div>
+          <p class="text-[10px] text-slate-400 ml-1 col-span-2">ຕົວຢ່າງ: ສາຍສາກນີ້ໃຊ້ໄດ້ກັບ MacBook ປີ 2012 ຮອດ 2015 → ເລືອກ "ຕັ້ງແຕ່ປີ" = 2012, "ຮອດປີ" = 2015</p>
+        </div>
+
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຄີບອດ</label>
           <select id="pKeyboard" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
             <option value="TH">ຄີບອດໄທ (TH)</option>
             <option value="EN">ຄີບອດອັງກິດ (EN)</option>
           </select>
         </div>
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ສີ (Color)</label>
           <select id="pColorSelect" onchange="toggleOtherInput('pColorSelect','pColorOther')" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
             <option value="">-- ເລືອກສີ --</option>
@@ -270,7 +287,7 @@
           </select>
           <input id="pColorOther" type="text" placeholder="ພິມສີເອງ" class="hidden w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs mt-2">
         </div>
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">CPU / Specs</label>
           <select id="pCpuSelect" onchange="toggleOtherInput('pCpuSelect','pCpuOther')" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
             <option value="">-- ເລືອກ CPU --</option>
@@ -283,11 +300,11 @@
           </select>
           <input id="pCpuOther" type="text" placeholder="ພິມ CPU ເອງ" class="hidden w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs mt-2">
         </div>
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ແບັດ / ຮອບສາກ</label>
           <input id="pBattery" type="text" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
         </div>
-        <div>
+        <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຂະໜາດໜ້າຈໍ</label>
           <select id="pScreenSize" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
             <option value="">-- ເລືອກຂະໜາດ --</option>
@@ -313,7 +330,7 @@
           </select>
         </div>
 
-        <div class="md:col-span-2">
+        <div class="field-macbook-only md:col-span-2">
           <label class="text-[10px] font-bold text-indigo-600 block mb-1 ml-1"><i class="fas fa-palette"></i> ຈຳນວນສະຕັອກແຍກຕາມສີ (ບໍ່ບັງຄັບ)</label>
           <p class="text-[10px] text-slate-400 mb-2 ml-1">ຖ້າສິນຄ້ານີ້ມີຫຼາຍສີ/ຫຼາຍສະຕັອກ (ເຊັ່ນ ອຸປະກອນເສີມ, ສິນຄ້າໃໝ່ຫຼາຍເຄື່ອງ) ໃຫ້ໃສ່ຈຳນວນແຍກຕາມສີບ່ອນນີ້ — ຖ້າໃສ່ໄວ້, ໜ້າຮ້ານຈະສະແດງຈຳນວນຄົງເຫຼືອຕາມສີແທນສະຖານະ "ພ້ອມຂາຍ/ຂາຍແລ້ວ" ທຳມະດາ. ຖ້າເປັນເຄື່ອງມືສອງ 1 ID = 1 ເຄື່ອງ, ບໍ່ຈຳເປັນຕ້ອງໃສ່ (ໃຊ້ຊ່ອງ "ສີ" ດ້ານເທິງພໍ)</p>
           <div id="colorStockRows" class="space-y-2 mb-2"></div>
