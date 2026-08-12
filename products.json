@@ -361,5 +361,31 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
+  },
+  {
+    "id": "222735",
+    "title": "Air 2020 M1",
+    "category": "Macbook",
+    "priceLAK": 11500000,
+    "wholesalePriceLAK": 10500000,
+    "oldPriceLAK": 0,
+    "priceTHB": 0,
+    "wholesalePriceTHB": 0,
+    "oldPriceTHB": 0,
+    "ram": "8",
+    "ssd": "500",
+    "year": "2020",
+    "keyboard": "TH",
+    "color": "Silver",
+    "cpu": "Apple M1",
+    "battery": "",
+    "screenSize": "13.3 ນິ້ວ",
+    "warrantyDays": 30,
+    "repairHistory": "",
+    "images": [],
+    "colorStock": {},
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
   }
 ]
