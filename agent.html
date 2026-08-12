@@ -37,6 +37,20 @@
     .btn-press:active { transform: scale(.94); }
     .skeleton { background: linear-gradient(90deg, #eef1f5 25%, #e2e7ef 37%, #eef1f5 63%); background-size: 400px 100%; animation: shimmer 1.3s ease infinite; }
     #gateScreen { animation: fadeIn .25s ease both; }
+
+    .ripple-relative { position: relative; overflow: hidden; }
+    .ripple-effect {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.55);
+      transform: scale(0);
+      animation: rippleAnim .65s cubic-bezier(.16,.84,.44,1);
+      pointer-events: none;
+    }
+    @keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }
+
+    .toast-item { opacity: 0; transform: translateY(-16px) scale(.94); transition: opacity .3s cubic-bezier(.16,.84,.44,1), transform .3s cubic-bezier(.16,.84,.44,1); }
+    .toast-item.toast-show { opacity: 1; transform: translateY(0) scale(1); }
+    .toast-item.toast-hide { opacity: 0; transform: translateY(-10px) scale(.96); }
   </style>
 </head>
 <body class="text-slate-800 antialiased">
@@ -68,7 +82,7 @@
             <i class="fas fa-tags"></i>
           </div>
           <div>
-            <h1 class="font-bold text-sm leading-tight">ລາຄາສົ່ງ - ຕົວແທນ ລາຄານີ້ບໍ່ມີຮັບປະກັນ</h1>
+            <h1 class="font-bold text-sm leading-tight">ລາຄາສົ່ງ - ຕົວແທນ</h1>
             <p class="text-[11px] text-slate-400">Mac & DJ Store — Agent Only</p>
           </div>
         </div>

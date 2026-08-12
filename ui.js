@@ -1,6 +1,6 @@
 /* =========================================================================
-   ui.js — ລະບົບ UI ຮ່ວມກັນລະຫວ່າງ index.html ແລະ admin.html
-   ປະກອບດ້ວຍ: Toast Notification + Ripple micro-interaction ເທິງປຸ່ມ
+   ui.js — ລະບົບ UI ຮ່ວມກັນລະຫວ່າງ index.html, admin.html, agent.html
+   ປະກອບດ້ວຍ: Toast Notification + Ripple micro-interaction + Loading Overlay (GIF)
    ========================================================================= */
 
 function ensureToastContainer() {
@@ -64,17 +64,19 @@ document.addEventListener('click', function (e) {
   setTimeout(() => circle.remove(), 650);
 }, true);
 
-/* ---------- Full-screen glass loading overlay (ໃຊ້ຢູ່ admin.js ຕອນ commit ຂຶ້ນ GitHub) ---------- */
+/* ---------- Full-screen loading overlay (GIF ຂອງຮ້ານ + ພື້ນຫຼັງໂປ່ງແສງ) ----------
+   ໃຊ້ໄດ້ຢູ່ທຸກໜ້າ (index.html, agent.html, admin.html) ຕອນ fetch ຂໍ້ມູນ ຫຼື ບັນທຶກ/commit
+   ຮຽກໃຊ້: showLoadingOverlay('ຂໍ້ຄວາມ...')  →  hideLoadingOverlay() ເມື່ອສຳເລັດ/error */
 function showLoadingOverlay(message) {
   let el = document.getElementById('globalLoadingOverlay');
   if (!el) {
     el = document.createElement('div');
     el.id = 'globalLoadingOverlay';
-    el.className = 'fixed inset-0 z-[90] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center';
+    el.className = 'fixed inset-0 z-[95] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center';
     el.innerHTML = `
-      <div class="bg-white/95 backdrop-blur-xl rounded-3xl-custom px-8 py-7 shadow-2xl flex flex-col items-center gap-3 ring-1 ring-white/40">
-        <div class="loader-ring"></div>
-        <p id="globalLoadingText" class="text-xs font-semibold text-slate-600"></p>
+      <div class="flex flex-col items-center gap-3">
+        <img src="loading.gif" alt="ກຳລັງໂຫຼດ..." class="w-28 h-28 object-contain drop-shadow-xl select-none pointer-events-none">
+        <p id="globalLoadingText" class="text-xs font-semibold text-white bg-slate-900/70 px-4 py-1.5 rounded-full backdrop-blur-md"></p>
       </div>`;
     document.body.appendChild(el);
   }

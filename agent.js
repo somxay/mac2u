@@ -62,16 +62,19 @@ function unlockAgentPage() {
 
 // ---------- ດຶງຂໍ້ມູນສິນຄ້າ (ຊຸດດຽວກັບໜ້າຮ້ານ products.json — ລາຄາສົ່ງເປັນ field ໃນສິນຄ້ານັ້ນເລີຍ) ----------
 async function loadAgentProducts() {
+  showLoadingOverlay('ກຳລັງໂຫຼດລາຄາສົ່ງ...');
   try {
     const res = await fetch(ghRawUrl(CONFIG.PRODUCTS_PATH));
     if (!res.ok) throw new Error('ไม่พบ ' + CONFIG.PRODUCTS_PATH);
     agentProducts = await res.json();
     document.getElementById('agentLoading').style.display = 'none';
     renderAgentList();
+    hideLoadingOverlay();
   } catch (err) {
     console.error(err);
     document.getElementById('agentLoading').innerHTML =
       '<p class="text-center text-xs text-rose-500 py-10">ໂຫຼດຂໍ້ມູນສິນຄ້າບໍ່ສຳເລັດ, ລອງໃໝ່ພາຍຫຼັງ</p>';
+    hideLoadingOverlay();
   }
 }
 

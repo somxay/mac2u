@@ -13,6 +13,7 @@ let currentCategory = 'all';
 window.onload = function () { loadData(); };
 
 async function loadData() {
+  showLoadingOverlay('ກຳລັງໂຫຼດສິນຄ້າ...');
   try {
     const [productsRes, settingsRes] = await Promise.all([
       fetch(ghRawUrl(CONFIG.PRODUCTS_PATH)),
@@ -33,10 +34,12 @@ async function loadData() {
 
     applyFilters();
     openDeepLinkedProductIfAny();
+    hideLoadingOverlay();
   } catch (err) {
     console.error('Error loading data:', err);
     const loadingEl = document.getElementById('loading');
     if (loadingEl) loadingEl.innerText = 'ເກີດຂໍ້ຜິດພາດໃນການໂຫຼດຂໍ້ມູນ (ກວດ config.js ວ່າຕັ້ງ GITHUB_OWNER/REPO ຖືກຕ້ອງບໍ່)';
+    hideLoadingOverlay();
     showToast('ໂຫຼດຂໍ້ມູນສິນຄ້າບໍ່ສຳເລັດ, ກະລຸນາລອງໃໝ່', 'error');
   }
 }
@@ -180,7 +183,7 @@ function applyFilters() {
 }
 
 // ຂໍ້ຄວາມ "ຂອງແຖມ" ສະແດງສະເພາະສິນຄ້າໝວດ Macbook ຢູ່ໜ້າ Modal ລາຍລະອຽດສິນຄ້າ
-const MACBOOK_FREEBIE_TEXT = 'ສາຍສາກ ສະຕິກເກີ້ພາສາລາວ ລົງໂປຣແກຣມດີເຈຂອງແທ້ Rekordbox Serato Pro ໂປຣແກຣມເຮັດເພງFLແທ້ ແຖມເພງດີເຈເຕັມເຄື່ອງ';
+const MACBOOK_FREEBIE_TEXT = 'ສາຍສາກ ສະຕິກເກີ້ພາສາລາວ ລົງໂປຣແກຣມດີເຈຂອງແທ້ Rekordbox Serato Pro ໂປຣແກຣມເຮັດເພງແທ້ ແຖມເພງດີເຈເຕັມເຄື່ອງ';
 
 // ຄີບອດ → ແປງລະຫັດ (TH/EN ฯลฯ) ໃຫ້ເປັນຂໍ້ຄວາມທີ່ອ່ານເຂົ້າໃຈງ່າຍ
 // ໃຊ້ໄດ້ທັງ index.html (app.js) ແລະ agent.html (agent.js) — ຄັດລອກຟັງຊັນນີ້ໄປໃສ່ agent.js ນຳ
