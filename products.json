@@ -267,11 +267,13 @@
     "keyboard": "TH",
     "color": "Space Gray",
     "cpu": "Apple M1 Pro",
-    "battery": "80-90",
+    "battery": "64",
     "screenSize": "14 ນິ້ວ",
     "warrantyDays": 30,
     "repairHistory": "",
-    "images": [],
+    "images": [
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/undefined/1786533928517_83.jpg"
+    ],
     "colorStock": {
       "Space Gray": 1,
       "Silver": 1
