@@ -326,7 +326,8 @@ function openProductModal(id) {
   modalBody.innerHTML = `
     <div class="space-y-4">
       <div class="relative h-64 bg-slate-100 rounded-2xl overflow-hidden">
-        <img id="sliderImg" src="${activeImages[0]}" class="w-full h-full object-cover">
+        <img id="sliderImg" src="${activeImages[0]}" class="w-full h-full object-cover cursor-zoom-in" onclick="openImageZoom(activeImages[currentSlideIdx])">
+        <span class="absolute bottom-3 left-3 w-8 h-8 rounded-full bg-slate-900/60 text-white flex items-center justify-center text-xs pointer-events-none"><i class="fas fa-magnifying-glass-plus"></i></span>
         <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 backdrop-blur-md">${statusText}</span>
         <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
         ${activeImages.length > 1 ? `
@@ -554,3 +555,225 @@ function openDeepLinkedProductIfAny() {
     openProductModal(id);
   }
 }
+
+/* =========================================================================
+   Full-screen Image Zoom Viewer — ຄລິກຮູບຫຼັກ (sliderImg) ຢູ່ modal ລາຍລະອຽດສິນຄ້າ
+   ຮອງຮັບ: Pinch-to-zoom (2 ນິ້ວ), Mouse wheel zoom, Drag/Pan, Double-click/tap zoom
+   ========================================================================= */
+
+const ZOOM_MIN = 1;
+const ZOOM_MAX = 4;
+const ZOOM_STEP = 0.6;
+
+let zoomScale = 1;
+let zoomPanX = 0;
+let zoomPanY = 0;
+
+let zoomActivePointers = new Map(); // pointerId -> {x, y}
+let zoomPinchStartDist = 0;
+let zoomPinchStartScale = 1;
+let zoomPinchStartMidpoint = { x: 0, y: 0 };
+let zoomPanStart = null;   // {x, y, panX, panY} — ຈຸດເລີ່ມຕົ້ນຕອນລາກ (1 ນິ້ວ/mouse)
+let zoomIsDragging = false;
+let zoomLastTapTime = 0;
+
+function openImageZoom(src) {
+  if (!src) return;
+  const viewer = document.getElementById('imageZoomViewer');
+  const img = document.getElementById('zoomImg');
+  img.src = src;
+  resetZoomState();
+  viewer.classList.remove('hidden');
+  viewer.classList.add('show');
+  document.body.style.overflow = 'hidden'; // ບໍ່ໃຫ້ scroll ພື້ນຫຼັງໄປພ້ອມກັນ
+}
+
+function closeImageZoom() {
+  const viewer = document.getElementById('imageZoomViewer');
+  viewer.classList.add('hidden');
+  viewer.classList.remove('show');
+  document.body.style.overflow = '';
+  resetZoomState();
+}
+
+function resetZoomState() {
+  zoomScale = 1;
+  zoomPanX = 0;
+  zoomPanY = 0;
+  zoomActivePointers.clear();
+  zoomPanStart = null;
+  zoomIsDragging = false;
+  applyZoomTransform();
+  document.getElementById('zoomViewerStage').classList.remove('zoomed', 'dragging');
+}
+
+function zoomReset() {
+  const img = document.getElementById('zoomImg');
+  img.classList.remove('no-transition');
+  resetZoomState();
+}
+
+function zoomStep(direction) {
+  const img = document.getElementById('zoomImg');
+  img.classList.remove('no-transition');
+  setZoomScale(zoomScale + direction * ZOOM_STEP, null);
+}
+
+// ຕັ້ງຄ່າ scale ໃໝ່, ຄົງຈຸດ focal (focalPoint) ໃຫ້ຢູ່ບ່ອນເດີມໃນຈໍ (ຊູມເຂົ້າຫາຈຸດທີ່ scroll/pinch)
+function setZoomScale(newScale, focalPoint) {
+  newScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, newScale));
+  const stage = document.getElementById('zoomViewerStage');
+  const rect = stage.getBoundingClientRect();
+  const fx = focalPoint ? focalPoint.x - rect.left : rect.width / 2;
+  const fy = focalPoint ? focalPoint.y - rect.top : rect.height / 2;
+
+  // ຄິດໄລ່ຈຸດເທິງຮູບ (ກ່ອນ scale ປ່ຽນ) ທີ່ຢູ່ໃຕ້ focal point
+  const imgX = (fx - zoomPanX) / zoomScale;
+  const imgY = (fy - zoomPanY) / zoomScale;
+
+  zoomScale = newScale;
+  zoomPanX = fx - imgX * zoomScale;
+  zoomPanY = fy - imgY * zoomScale;
+
+  if (zoomScale <= 1.001) { zoomScale = 1; zoomPanX = 0; zoomPanY = 0; }
+  clampZoomPan();
+  applyZoomTransform();
+
+  stage.classList.toggle('zoomed', zoomScale > 1);
+}
+
+function clampZoomPan() {
+  const stage = document.getElementById('zoomViewerStage');
+  const img = document.getElementById('zoomImg');
+  if (!img.naturalWidth) return;
+  const rect = stage.getBoundingClientRect();
+
+  // ຂະໜາດຮູບຕອນສະແດງຜົນຢູ່ scale=1 (object-fit: contain style manual calc)
+  const baseW = img.clientWidth || rect.width;
+  const baseH = img.clientHeight || rect.height;
+  const scaledW = baseW * zoomScale;
+  const scaledH = baseH * zoomScale;
+
+  const minX = Math.min(0, rect.width - scaledW);
+  const minY = Math.min(0, rect.height - scaledH);
+  zoomPanX = Math.max(minX, Math.min(0, zoomPanX));
+  zoomPanY = Math.max(minY, Math.min(0, zoomPanY));
+}
+
+function applyZoomTransform() {
+  const img = document.getElementById('zoomImg');
+  img.style.transform = `translate(${zoomPanX}px, ${zoomPanY}px) scale(${zoomScale})`;
+}
+
+function zoomPointerDistance(p1, p2) {
+  return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+}
+function zoomPointerMidpoint(p1, p2) {
+  return { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+}
+
+(function initImageZoomHandlers() {
+  document.addEventListener('DOMContentLoaded', bindZoomEvents);
+  if (document.readyState !== 'loading') bindZoomEvents();
+
+  function bindZoomEvents() {
+    const stage = document.getElementById('zoomViewerStage');
+    const img = document.getElementById('zoomImg');
+    if (!stage || stage.dataset.zoomBound) return;
+    stage.dataset.zoomBound = '1';
+
+    // ---- Pointer events: ຮອງຮັບທັງ mouse ແລະ touch ໃນ handler ດຽວ ----
+    stage.addEventListener('pointerdown', e => {
+      stage.setPointerCapture(e.pointerId);
+      zoomActivePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (zoomActivePointers.size === 2) {
+        const pts = Array.from(zoomActivePointers.values());
+        zoomPinchStartDist = zoomPointerDistance(pts[0], pts[1]);
+        zoomPinchStartScale = zoomScale;
+        zoomPinchStartMidpoint = zoomPointerMidpoint(pts[0], pts[1]);
+        zoomPanStart = null;
+      } else if (zoomActivePointers.size === 1) {
+        // double-click / double-tap → toggle zoom
+        const now = Date.now();
+        if (now - zoomLastTapTime < 300) {
+          img.classList.remove('no-transition');
+          if (zoomScale > 1) {
+            zoomReset();
+          } else {
+            setZoomScale(2.4, { x: e.clientX, y: e.clientY });
+          }
+          zoomLastTapTime = 0;
+          return;
+        }
+        zoomLastTapTime = now;
+
+        zoomPanStart = { x: e.clientX, y: e.clientY, panX: zoomPanX, panY: zoomPanY };
+      }
+    });
+
+    stage.addEventListener('pointermove', e => {
+      if (!zoomActivePointers.has(e.pointerId)) return;
+      zoomActivePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (zoomActivePointers.size === 2) {
+        // ---- Pinch to zoom ----
+        img.classList.add('no-transition');
+        const pts = Array.from(zoomActivePointers.values());
+        const dist = zoomPointerDistance(pts[0], pts[1]);
+        if (zoomPinchStartDist > 0) {
+          const scale = zoomPinchStartScale * (dist / zoomPinchStartDist);
+          setZoomScale(scale, zoomPinchStartMidpoint);
+        }
+      } else if (zoomActivePointers.size === 1 && zoomPanStart && zoomScale > 1) {
+        // ---- Pan (ລາກ) ---- ໃຊ້ໄດ້ສະເພາະຕອນຊູມຢູ່ ----
+        img.classList.add('no-transition');
+        zoomIsDragging = true;
+        stage.classList.add('dragging');
+        zoomPanX = zoomPanStart.panX + (e.clientX - zoomPanStart.x);
+        zoomPanY = zoomPanStart.panY + (e.clientY - zoomPanStart.y);
+        clampZoomPan();
+        applyZoomTransform();
+      }
+    });
+
+    function endPointer(e) {
+      zoomActivePointers.delete(e.pointerId);
+      if (zoomActivePointers.size < 2) zoomPinchStartDist = 0;
+      if (zoomActivePointers.size === 0) {
+        zoomPanStart = null;
+        zoomIsDragging = false;
+        stage.classList.remove('dragging');
+        img.classList.remove('no-transition');
+      }
+    }
+    stage.addEventListener('pointerup', endPointer);
+    stage.addEventListener('pointercancel', endPointer);
+    stage.addEventListener('pointerleave', e => {
+      if (e.pointerType === 'mouse' && zoomActivePointers.size <= 1) endPointer(e);
+    });
+
+    // ---- Mouse wheel zoom (desktop) ----
+    stage.addEventListener('wheel', e => {
+      e.preventDefault();
+      img.classList.remove('no-transition');
+      const delta = e.deltaY < 0 ? ZOOM_STEP * 0.5 : -ZOOM_STEP * 0.5;
+      setZoomScale(zoomScale + delta, { x: e.clientX, y: e.clientY });
+    }, { passive: false });
+
+    // ---- ກົດພື້ນຫຼັງດຳ (ນອກຮູບ) ເພື່ອປິດ, ແຕ່ບໍ່ປິດຖ້າ user ຫາກໍ່ລາກ/ຊູມ ----
+    stage.addEventListener('click', e => {
+      if (e.target === stage && !zoomIsDragging && zoomScale <= 1) {
+        closeImageZoom();
+      }
+    });
+  }
+})();
+
+// ---- Esc key ປິດ viewer ----
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const viewer = document.getElementById('imageZoomViewer');
+    if (viewer && viewer.classList.contains('show')) closeImageZoom();
+  }
+});

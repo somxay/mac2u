@@ -84,6 +84,15 @@
     .fade-swap.fading { opacity: 0; }
 
     .price-pulse { animation: pulseSoft .5s ease; }
+
+    /* ---- Full-screen Image Zoom Viewer ---- */
+    @keyframes zoomViewerIn { from { opacity: 0; } to { opacity: 1; } }
+    #imageZoomViewer.show { display: block; animation: zoomViewerIn .2s ease both; }
+    #zoomViewerStage { cursor: zoom-in; }
+    #zoomViewerStage.zoomed { cursor: grab; }
+    #zoomViewerStage.zoomed.dragging { cursor: grabbing; }
+    #zoomImg { transform-origin: 0 0; transition: transform .06s linear; }
+    #zoomImg.no-transition { transition: none; }
   </style>
 </head>
 
@@ -276,6 +285,22 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- Modal: Full-screen Image Zoom Viewer (ຄລິກຮູບຫຼັກໃນ product modal ເພື່ອເປີດ) -->
+  <div id="imageZoomViewer" class="fixed inset-0 z-[200] bg-black/95 hidden select-none">
+    <button onclick="closeImageZoom()" class="btn-press absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="absolute top-4 left-4 z-10 flex gap-2">
+      <button onclick="zoomStep(-1)" class="btn-press w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><i class="fas fa-minus"></i></button>
+      <button onclick="zoomStep(1)" class="btn-press w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><i class="fas fa-plus"></i></button>
+      <button onclick="zoomReset()" class="btn-press w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs"><i class="fas fa-expand"></i></button>
+    </div>
+    <div id="zoomViewerStage" class="relative w-full h-full overflow-hidden touch-none">
+      <img id="zoomImg" src="" draggable="false" class="absolute inset-0 w-full h-full object-contain will-change-transform" style="touch-action: none;">
+    </div>
+    <p class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-white/50 pointer-events-none">ຖ່າງ/ຫຍໍ້ນິ້ວ ຫຼື scroll ເພື່ອຊູມ · ລາກເພື່ອເລື່ອນ</p>
   </div>
 
   <script src="config.js"></script>
