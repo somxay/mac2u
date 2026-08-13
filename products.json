@@ -264,6 +264,8 @@
     "ram": "16",
     "ssd": "500",
     "year": "2021",
+    "yearFrom": "",
+    "yearTo": "",
     "keyboard": "TH",
     "color": "Space Gray",
     "cpu": "Apple M1 Pro",
