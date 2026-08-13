@@ -380,6 +380,8 @@
     "ram": "8",
     "ssd": "500",
     "year": "2020",
+    "yearFrom": "",
+    "yearTo": "",
     "keyboard": "TH",
     "color": "Silver",
     "cpu": "Apple M1",
