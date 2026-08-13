@@ -187,15 +187,11 @@ async function saveExchangeRate() {
 // ຊື່ສີ (ພາສາອັງກິດ) → ແປເປັນພາສາລາວ ສຳລັບສີທີ່ຮູ້ຈັກ, ຖ້າບໍ່ຮູ້ຈັກໃຫ້ສະແດງຄືເດີມ
 function colorLabelLao(color) {
   const map = {
-    'Space Gray': 'ສີເທົາອາວະກາດ',
+    'Space Gray': 'ສີເທົາ',
     'Silver': 'ສີເງິນ',
-    'Gold': 'ສີຄຳ',
-    'Rose Gold': 'ສີຄຳກຸຫຼາບ',
-    'Midnight': 'ສີດຳຄ່ຳຄືນ',
-    'Starlight': 'ສີແສງດາວ',
-    'Sky Blue': 'ສີຟ້າ',
-    'Black': 'ສີດຳ',
-    'White': 'ສີຂາວ'
+    'Rose Gold': 'ສີຄຳກຸຫຼາບທອງ',
+    'Midnight': 'ສີດຳກາງຄືນ',
+    'Starlight': 'ສີແສງດາວ'
   };
   return map[color] || color || '';
 }

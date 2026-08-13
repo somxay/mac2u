@@ -97,8 +97,8 @@ function formatKeyboard(kb) {
 
 function agentColorLabel(color) {
   const map = {
-    'Space Gray': 'ສີເທົາອາວະກາດ', 'Silver': 'ສີເງິນ', 'Gold': 'ສີຄຳ', 'Rose Gold': 'ສີຄຳກຸຫຼາບ',
-    'Midnight': 'ສີດຳຄ່ຳຄືນ', 'Starlight': 'ສີແສງດາວ', 'Sky Blue': 'ສີຟ້າ', 'Black': 'ສີດຳ', 'White': 'ສີຂາວ'
+    'Space Gray': 'ສີເທົາ', 'Silver': 'ສີເງິນ', 'Rose Gold': 'ສີຄຳກຸຫຼາບທອງ',
+    'Midnight': 'ສີດຳກາງຄືນ', 'Starlight': 'ສີແສງດາວ'
   };
   return map[color] || color || '';
 }
@@ -131,7 +131,6 @@ function renderAgentList() {
           <div class="text-right shrink-0">
             <span class="text-[9px] text-slate-400 block">ລາຄາສົ່ງ</span>
             <span class="text-rose-600 font-extrabold text-base">${formatLak(p.wholesalePriceLAK)}</span>
-            ${p.priceLAK ? `<p class="text-[9px] text-slate-300">ຂາຍ ${formatLak(p.priceLAK)}</p>` : ''}
           </div>
         </div>
 
