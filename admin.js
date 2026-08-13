@@ -417,21 +417,41 @@ function removeImageAt(idx) {
 
 /* --------------------------------- Image upload --------------------------------- */
 
-function uploadImage(input) {
-  if (!(input.files && input.files[0])) return;
-  const file = input.files[0];
+// ອ່ານໄຟລ໌ດຽວເປັນ base64 (ໃຊ້ Promise ເພື່ອໃຫ້ອັບໂຫຼດຫຼາຍຮູບແບບລຽງກັນໄດ້ງ່າຍ)
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('ອ່ານໄຟລ໌ບໍ່ສຳເລັດ'));
+    reader.readAsDataURL(file);
+  });
+}
 
-  if (file.size > 2 * 1024 * 1024) {
-    showToast('ຮູບພາບໃຫຍ່ເກີນ 2MB — ຄວນຫຍໍ້ຂະໜາດຮູບກ່ອນອັບໂຫຼດ ເພື່ອຄວາມໄວຂອງເວັບໄຊ', 'info', 5000);
+async function uploadImage(input) {
+  const files = Array.from(input.files || []);
+  if (files.length === 0) return;
+
+  const oversized = files.filter(f => f.size > 2 * 1024 * 1024);
+  if (oversized.length > 0) {
+    showToast(`ມີ ${oversized.length} ຮູບໃຫຍ່ເກີນ 2MB — ຄວນຫຍໍ້ຂະໜາດຮູບກ່ອນອັບໂຫຼດ ເພື່ອຄວາມໄວຂອງເວັບໄຊ`, 'info', 5000);
   }
-  showLoadingOverlay('ກຳລັງອັບໂຫຼດຮູບພາບຂຶ້ນ GitHub...');
 
-  const reader = new FileReader();
-  reader.onload = async function (e) {
+  // ${CONFIG.IMAGES_DIR} ມາຈາກ config.js ເຊັ່ນ 'images/' — ຕັດ '/' ທ້າຍອອກກ່ອນເພື່ອກັນ path ຊ້ຳ '//'
+  const imagesDir = (CONFIG.IMAGES_DIR || CONFIG.IMAGES_PATH || 'images').replace(/\/+$/, '');
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    showLoadingOverlay(files.length > 1
+      ? `ກຳລັງອັບໂຫຼດຮູບ ${i + 1}/${files.length}...`
+      : 'ກຳລັງອັບໂຫຼດຮູບພາບຂຶ້ນ GitHub...');
+
     try {
-      const base64Data = e.target.result.split(',')[1];
+      const base64Data = await readFileAsBase64(file);
       const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      const fileName = `${CONFIG.IMAGES_PATH}/${Date.now()}_${Math.floor(Math.random() * 1000)}.${ext}`;
+      const fileName = `${imagesDir}/${Date.now()}_${i}_${Math.floor(Math.random() * 1000)}.${ext}`;
 
       await ghPutImage(fileName, base64Data, `feat: upload product image ${fileName}`);
 
@@ -439,17 +459,23 @@ function uploadImage(input) {
       let current = document.getElementById('pImageList').value;
       document.getElementById('pImageList').value = current ? current + ',' + url : url;
       renderImagePreviews();
-      hideLoadingOverlay();
-      showToast('ອັບໂຫຼດຮູບພາບສຳເລັດແລ້ວ!', 'success');
+      successCount++;
     } catch (err) {
       console.error(err);
-      hideLoadingOverlay();
-      showToast('ອັບໂຫຼດຮູບບໍ່ສຳເລັດ: ' + err.message, 'error', 6000);
-    } finally {
-      input.value = '';
+      failCount++;
     }
-  };
-  reader.readAsDataURL(file);
+  }
+
+  hideLoadingOverlay();
+  input.value = '';
+
+  if (failCount === 0) {
+    showToast(successCount > 1 ? `ອັບໂຫຼດຮູບພາບສຳເລັດ ${successCount} ຮູບ!` : 'ອັບໂຫຼດຮູບພາບສຳເລັດແລ້ວ!', 'success');
+  } else if (successCount > 0) {
+    showToast(`ອັບໂຫຼດສຳເລັດ ${successCount} ຮູບ, ລົ້ມເຫຼວ ${failCount} ຮູບ — ລອງໃໝ່ຮູບທີ່ເຫຼືອ`, 'info', 6000);
+  } else {
+    showToast('ອັບໂຫຼດຮູບບໍ່ສຳເລັດເລີຍ, ລອງໃໝ່ພາຍຫຼັງ', 'error', 6000);
+  }
 }
 
 /* --------------------------------- Save / Delete product --------------------------------- */

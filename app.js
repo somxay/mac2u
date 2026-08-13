@@ -262,7 +262,7 @@ function renderProducts(products) {
     return `
       <div class="product-card group glass-card rounded-3xl-custom overflow-hidden flex flex-col justify-between cursor-pointer" style="animation-delay:${delay}ms" onclick="openProductModal('${p.id}')">
         <div>
-          <div class="relative h-44 bg-slate-100 overflow-hidden">
+          <div class="relative aspect-square bg-slate-100 overflow-hidden">
             <img src="${mainImg}" alt="${p.title}" class="card-img w-full h-full object-cover">
             <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 backdrop-blur-md">${statusText}</span>
             <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
@@ -326,7 +326,7 @@ function openProductModal(id) {
   modalBody.innerHTML = `
     <div class="space-y-4">
       <div class="relative h-64 bg-slate-100 rounded-2xl overflow-hidden">
-        <img id="sliderImg" src="${activeImages[0]}" class="w-full h-full object-cover cursor-zoom-in" onclick="openImageZoom(activeImages[currentSlideIdx])">
+        <img id="sliderImg" src="${activeImages[0]}" class="w-full h-full object-cover cursor-zoom-in" onclick="openImageZoom(currentSlideIdx)">
         <span class="absolute bottom-3 left-3 w-8 h-8 rounded-full bg-slate-900/60 text-white flex items-center justify-center text-xs pointer-events-none"><i class="fas fa-magnifying-glass-plus"></i></span>
         <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 backdrop-blur-md">${statusText}</span>
         <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
@@ -576,12 +576,18 @@ let zoomPinchStartMidpoint = { x: 0, y: 0 };
 let zoomPanStart = null;   // {x, y, panX, panY} — ຈຸດເລີ່ມຕົ້ນຕອນລາກ (1 ນິ້ວ/mouse)
 let zoomIsDragging = false;
 let zoomLastTapTime = 0;
+let zoomJustSwiped = false;
 
-function openImageZoom(src) {
-  if (!src) return;
+let zoomImages = [];   // ລາຍການຮູບທັງໝົດຂອງສິນຄ້າທີ່ກຳລັງເບິ່ງຢູ່ (ຄັດລອກມາຈາກ activeImages ຕອນເປີດ)
+let zoomIndex = 0;
+
+function openImageZoom(index) {
+  zoomImages = activeImages.slice();
+  if (zoomImages.length === 0) return;
+  zoomIndex = Math.max(0, Math.min(index || 0, zoomImages.length - 1));
+
   const viewer = document.getElementById('imageZoomViewer');
-  const img = document.getElementById('zoomImg');
-  img.src = src;
+  renderZoomImage();
   resetZoomState();
   viewer.classList.remove('hidden');
   viewer.classList.add('show');
@@ -594,6 +600,37 @@ function closeImageZoom() {
   viewer.classList.remove('show');
   document.body.style.overflow = '';
   resetZoomState();
+}
+
+// ສະແດງຮູບໃນ index ປັດຈຸບັນ + ອັບເດດ counter ແລະ ເຊື່ອງ/ໂຊປຸ່ມ prev/next ຖ້າມີຮູບດຽວ
+function renderZoomImage() {
+  const img = document.getElementById('zoomImg');
+  img.src = zoomImages[zoomIndex];
+
+  const counter = document.getElementById('zoomCounter');
+  const prevBtn = document.getElementById('zoomPrevBtn');
+  const nextBtn = document.getElementById('zoomNextBtn');
+  const multi = zoomImages.length > 1;
+
+  counter.classList.toggle('hidden', !multi);
+  if (multi) counter.innerText = `${zoomIndex + 1} / ${zoomImages.length}`;
+  prevBtn.style.display = multi ? 'flex' : 'none';
+  nextBtn.style.display = multi ? 'flex' : 'none';
+}
+
+// ປ່ຽນຮູບ (ຈາກປຸ່ມ prev/next, ລູກສອນຄີບອດ, ຫຼື swipe) — direction: -1 = ຮູບກ່ອນ, 1 = ຮູບຕໍ່ໄປ
+function zoomShowStep(direction) {
+  if (zoomImages.length <= 1) return;
+  zoomIndex = (zoomIndex + direction + zoomImages.length) % zoomImages.length;
+  document.getElementById('zoomImg').classList.remove('no-transition');
+  renderZoomImage();
+  resetZoomState();
+
+  // sync ກັບ slider ຂອງ modal ຫຼັກ (ຖ້າຮູບຊຸດດຽວກັນ)
+  if (zoomImages.length === activeImages.length) {
+    currentSlideIdx = zoomIndex;
+    if (typeof setSlide === 'function') setSlide(currentSlideIdx);
+  }
 }
 
 function resetZoomState() {
@@ -738,8 +775,22 @@ function zoomPointerMidpoint(p1, p2) {
     });
 
     function endPointer(e) {
+      const wasSinglePointer = zoomActivePointers.size === 1;
+      const startInfo = zoomPanStart;
+
       zoomActivePointers.delete(e.pointerId);
       if (zoomActivePointers.size < 2) zoomPinchStartDist = 0;
+
+      // ---- Swipe ປ່ຽນຮູບ: ໃຊ້ໄດ້ສະເພາະຕອນບໍ່ໄດ້ຊູມ (scale=1) ແລະ ເປັນການລາກນິ້ວດຽວ ----
+      if (wasSinglePointer && zoomScale <= 1 && startInfo) {
+        const dx = e.clientX - startInfo.x;
+        const dy = e.clientY - startInfo.y;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+          zoomJustSwiped = true;
+          zoomShowStep(dx < 0 ? 1 : -1);
+        }
+      }
+
       if (zoomActivePointers.size === 0) {
         zoomPanStart = null;
         zoomIsDragging = false;
@@ -761,8 +812,9 @@ function zoomPointerMidpoint(p1, p2) {
       setZoomScale(zoomScale + delta, { x: e.clientX, y: e.clientY });
     }, { passive: false });
 
-    // ---- ກົດພື້ນຫຼັງດຳ (ນອກຮູບ) ເພື່ອປິດ, ແຕ່ບໍ່ປິດຖ້າ user ຫາກໍ່ລາກ/ຊູມ ----
+    // ---- ກົດພື້ນຫຼັງດຳ (ນອກຮູບ) ເພື່ອປິດ, ແຕ່ບໍ່ປິດຖ້າ user ຫາກໍ່ລາກ/ຊູມ/swipe ----
     stage.addEventListener('click', e => {
+      if (zoomJustSwiped) { zoomJustSwiped = false; return; }
       if (e.target === stage && !zoomIsDragging && zoomScale <= 1) {
         closeImageZoom();
       }
@@ -770,10 +822,16 @@ function zoomPointerMidpoint(p1, p2) {
   }
 })();
 
-// ---- Esc key ປິດ viewer ----
+// ---- ຄີບອດ: Esc ປິດ, ← → ປ່ຽນຮູບ ----
 document.addEventListener('keydown', e => {
+  const viewer = document.getElementById('imageZoomViewer');
+  if (!viewer || !viewer.classList.contains('show')) return;
+
   if (e.key === 'Escape') {
-    const viewer = document.getElementById('imageZoomViewer');
-    if (viewer && viewer.classList.contains('show')) closeImageZoom();
+    closeImageZoom();
+  } else if (e.key === 'ArrowLeft') {
+    zoomShowStep(-1);
+  } else if (e.key === 'ArrowRight') {
+    zoomShowStep(1);
   }
 });

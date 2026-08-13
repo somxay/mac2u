@@ -341,9 +341,9 @@
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຮູບພາບສິນຄ້າ</label>
           <div class="flex items-center gap-2 mb-2">
             <label for="pImageFile" class="cursor-pointer bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 text-slate-500 rounded-xl px-4 py-2.5 text-xs font-semibold flex items-center gap-2 transition">
-              <i class="fas fa-cloud-arrow-up text-indigo-500"></i> ເລືອກຮູບພາບ (Commit ເຂົ້າ GitHub)
+              <i class="fas fa-cloud-arrow-up text-indigo-500"></i> ເລືອກຮູບພາບ (ເລືອກໄດ້ຫຼາຍຮູບ, Commit ເຂົ້າ GitHub)
             </label>
-            <input id="pImageFile" type="file" accept="image/*" onchange="uploadImage(this)" class="hidden">
+            <input id="pImageFile" type="file" accept="image/*" multiple onchange="uploadImage(this)" class="hidden">
           </div>
           <div id="imagePreviewList" class="flex gap-2 flex-wrap"></div>
           <input type="hidden" id="pImageList" value="">

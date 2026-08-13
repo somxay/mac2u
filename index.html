@@ -297,10 +297,19 @@
       <button onclick="zoomStep(1)" class="btn-press w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><i class="fas fa-plus"></i></button>
       <button onclick="zoomReset()" class="btn-press w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs"><i class="fas fa-expand"></i></button>
     </div>
+
+    <button id="zoomPrevBtn" onclick="zoomShowStep(-1)" class="btn-press absolute left-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <button id="zoomNextBtn" onclick="zoomShowStep(1)" class="btn-press absolute right-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+
     <div id="zoomViewerStage" class="relative w-full h-full overflow-hidden touch-none">
       <img id="zoomImg" src="" draggable="false" class="absolute inset-0 w-full h-full object-contain will-change-transform" style="touch-action: none;">
     </div>
-    <p class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-white/50 pointer-events-none">ຖ່າງ/ຫຍໍ້ນິ້ວ ຫຼື scroll ເພື່ອຊູມ · ລາກເພື່ອເລື່ອນ</p>
+    <div id="zoomCounter" class="absolute top-4 left-1/2 -translate-x-1/2 z-10 text-[11px] text-white bg-white/10 px-3 py-1 rounded-full hidden"></div>
+    <p class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-white/50 pointer-events-none">ຖ່າງ/ຫຍໍ້ນິ້ວ ຫຼື scroll ເພື່ອຊູມ · ລາກ/ປັດເພື່ອເລື່ອນຮູບ</p>
   </div>
 
   <script src="config.js"></script>
