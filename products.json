@@ -136,12 +136,13 @@
       {
         "sn": "C02FH1TXML85",
         "color": "Space Gray",
-        "status": "Ready",
-        "saleType": "",
+        "status": "Sold",
+        "saleType": "agent",
         "hasWarranty": false,
-        "soldDate": "",
+        "soldDate": "2026-08-14",
         "warrantyEndDate": "",
-        "consignment": null
+        "consignment": null,
+        "cycleCount": ""
       }
     ],
     "whatsapp": "22258416",
