@@ -331,17 +331,26 @@
     "ram": "8",
     "ssd": "256",
     "year": "2015",
+    "yearFrom": "",
+    "yearTo": "",
     "keyboard": "EN",
     "color": "Silver",
     "cpu": "Intel i5",
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
-    "warrantyDays": 30,
-    "repairHistory": "",
     "images": [],
-    "colorStock": {
-      "Silver": 10
-    },
+    "units": [
+      {
+        "sn": "C02FH1TXML85",
+        "color": "Silver",
+        "status": "Sold",
+        "saleType": "agent",
+        "hasWarranty": false,
+        "soldDate": "2026-08-14",
+        "warrantyEndDate": "",
+        "consignment": null
+      }
+    ],
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
