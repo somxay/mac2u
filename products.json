@@ -339,18 +339,7 @@
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
     "images": [],
-    "units": [
-      {
-        "sn": "C02FH1TXML85",
-        "color": "Silver",
-        "status": "Sold",
-        "saleType": "agent",
-        "hasWarranty": false,
-        "soldDate": "2026-08-14",
-        "warrantyEndDate": "",
-        "consignment": null
-      }
-    ],
+    "units": [],
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
