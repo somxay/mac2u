@@ -280,7 +280,6 @@ function renderProducts(products) {
           <div class="relative aspect-square bg-slate-100 overflow-hidden">
             <img src="${mainImg}" alt="${p.title}" class="card-img w-full h-full object-cover">
             <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 backdrop-blur-md">${statusText}</span>
-            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
           </div>
           <div class="p-4">
             <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ${formatKeyboard(p.keyboard || 'TH')}</span>
@@ -344,7 +343,6 @@ function openProductModal(id) {
         <img id="sliderImg" src="${activeImages[0]}" class="w-full h-full object-cover cursor-zoom-in" onclick="openImageZoom(currentSlideIdx)">
         <span class="absolute bottom-3 left-3 w-8 h-8 rounded-full bg-slate-900/60 text-white flex items-center justify-center text-xs pointer-events-none"><i class="fas fa-magnifying-glass-plus"></i></span>
         <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 backdrop-blur-md">${statusText}</span>
-        <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/60 text-white backdrop-blur-md">ID ${p.id}</span>
         ${activeImages.length > 1 ? `
           <button onclick="prevSlide()" class="btn-press absolute left-2 top-1/2 -translate-y-1/2 bg-slate-900/60 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-900"><i class="fas fa-chevron-left text-xs"></i></button>
           <button onclick="nextSlide()" class="btn-press absolute right-2 top-1/2 -translate-y-1/2 bg-slate-900/60 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-900"><i class="fas fa-chevron-right text-xs"></i></button>
@@ -459,6 +457,57 @@ function nextSlide() {
 function prevSlide() {
   currentSlideIdx = (currentSlideIdx - 1 + activeImages.length) % activeImages.length;
   setSlide(currentSlideIdx);
+}
+
+// ---------- Warranty Check (ຄົ້ນຫາດ້ວຍ Serial Number ຂອງ unit ໂດຍກົງ) ----------
+function openWarrantyModal() { document.getElementById('warrantyModal').classList.remove('hidden'); }
+function closeWarrantyModal() { document.getElementById('warrantyModal').classList.add('hidden'); }
+
+// ຄິດໄລ່ຂໍ້ຄວາມສະຖານະປະກັນ ຈາກ unit ດຽວ (ໃຊ້ unit.warrantyEndDate ທີ່ຄິດໄລ່ໄວ້ຢູ່ແລ້ວຕອນຂາຍ)
+function unitWarrantyText(unit) {
+  if (unit.status !== 'Sold') return 'ຍັງບໍ່ໄດ້ຂາຍ (ຍັງບໍ່ເລີ່ມນັບປະກັນ)';
+  if (!unit.hasWarranty || !unit.warrantyEndDate) return 'ບໍ່ມີປະກັນ';
+
+  const expiryDate = new Date(unit.warrantyEndDate);
+  const expiryText = expiryDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
+  const isActive = expiryDate.getTime() >= new Date().getTime();
+  return expiryText + (isActive ? ' (ຍັງຢູ່ໃນໄລຍະປະກັນ)' : ' (ໝົດອາຍຸປະກັນແລ້ວ)');
+}
+
+function checkWarranty() {
+  const sn = document.getElementById('warrantyInputSn').value.trim();
+  const box = document.getElementById('warrantyResultBox');
+  if (!sn) { showToast('ກະລຸນາໃສ່ Serial Number', 'info'); return; }
+
+  // ຄົ້ນຫາ unit ທີ່ SN ກົງກັນ ຈາກທຸກສິນຄ້າ
+  let foundUnit = null, foundProduct = null;
+  for (const p of allProducts) {
+    if (!Array.isArray(p.units)) continue;
+    const u = p.units.find(x => (x.sn || '').trim().toLowerCase() === sn.toLowerCase());
+    if (u) { foundUnit = u; foundProduct = p; break; }
+  }
+
+  if (!foundUnit) {
+    box.innerHTML = `<p class="text-xs text-rose-500 mt-2">ບໍ່ພົບ Serial Number ນີ້ໃນລະບົບ</p>`;
+    return;
+  }
+
+  const warrantyText = unitWarrantyText(foundUnit);
+  const saleTypeText = foundUnit.status !== 'Sold' ? '-' : (foundUnit.saleType === 'retail' ? 'ຂາຍແບບມີປະກັນ (ລູກຄ້າທົ່ວໄປ)' : 'ຂາຍໃຫ້ຕົວແທນ (ບໍ່ມີປະກັນ)');
+
+  box.innerHTML = `
+    <div class="bg-indigo-50/60 p-3 rounded-2xl border border-indigo-100 text-xs space-y-1.5 mt-2">
+      <p><b>ລຸ້ນ:</b> ${foundProduct.title}</p>
+      <p><b>ສີ:</b> ${foundUnit.color ? colorLabelLao(foundUnit.color) : '-'}</p>
+      <p><b>RAM / SSD:</b> ${foundProduct.ram || '-'} GB / ${foundProduct.ssd || '-'} GB</p>
+      <p><b>ຂະໜາດໜ້າຈໍ:</b> ${foundProduct.screenSize || '-'}</p>
+      <p><b>ປີຜະລິດ:</b> ${foundProduct.year || '-'}</p>
+      <p><b>ຮອບຊາດ (Cycle Count):</b> ${foundUnit.cycleCount || 'ບໍ່ມີຂໍ້ມູນ'}</p>
+      <p><b>ວັນທີ່ຂາຍ:</b> ${foundUnit.soldDate || 'ຍັງບໍ່ໄດ້ຂາຍ'}</p>
+      <p><b>ປະເພດການຂາຍ:</b> ${saleTypeText}</p>
+      <p><b>ສະຖານະປະກັນ:</b> <span class="text-indigo-600 font-semibold">${warrantyText}</span></p>
+    </div>
+  `;
 }
 
 // ---------- Share Modal ----------

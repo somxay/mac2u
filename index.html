@@ -110,6 +110,7 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
+        <button onclick="openWarrantyModal()" class="btn-press bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1"><i class="fas fa-shield-alt"></i> ກວດປະກັນ</button>
         <button onclick="toggleCurrency()" id="currencyBtn" class="btn-press bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm">₭ LAK</button>
         <button onclick="toggleLang()" id="langBtn" class="btn-press bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm">EN</button>
         <!-- ໜ້າຫຼັງບ້ານເປັນໄຟລ໌ static ແຍກຕ່າງຫາກ (admin.html) — ໃຊ້ relative path ຈຶ່ງໃຊ້ໄດ້ທຸກໂດເມນ -->
@@ -272,7 +273,20 @@
     </div>
   </div>
 
-  <!-- Modal: Full-screen Image Zoom Viewer (ຄລິກຮູບຫຼັກໃນ product modal ເພື່ອເປີດ) -->
+  <!-- Modal: Warranty Check (ຄົ້ນຫາດ້ວຍ Serial Number) -->
+  <div id="warrantyModal" class="modal-backdrop-fade fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="modal-pop bg-white rounded-3xl-custom shadow-2xl ring-1 ring-slate-900/5 w-full max-w-md p-6 relative">
+      <button onclick="closeWarrantyModal()" class="btn-press absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200"><i class="fas fa-times"></i></button>
+      <h3 class="font-bold text-sm mb-2"><i class="fas fa-shield-alt text-indigo-600 mr-1"></i> ກວດສອບການຮັບປະກັນ</h3>
+      <p class="text-[11px] text-slate-400 mb-3">ໃສ່ Serial Number (SN) ຂອງເຄື່ອງ ເພື່ອກວດສອບລາຍລະອຽດ ແລະ ໄລຍະປະກັນ</p>
+      <div class="flex gap-2 mb-3">
+        <input type="text" id="warrantyInputSn" placeholder="ໃສ່ Serial Number" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs focus:outline-none font-mono">
+        <button onclick="checkWarranty()" class="btn-press bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap">ກວດສອບ</button>
+      </div>
+      <div id="warrantyResultBox" class="space-y-2"></div>
+    </div>
+  </div>
+
   <div id="imageZoomViewer" class="fixed inset-0 z-[200] bg-black/95 hidden select-none">
     <button onclick="closeImageZoom()" class="btn-press absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg">
       <i class="fas fa-times"></i>

@@ -596,7 +596,7 @@ let activeUnitIndex = null; // index ຂອງ unit ທີ່ກຳລັງກ�
 function blankUnit() {
   return {
     sn: '', color: '', status: 'Ready',       // Ready | Sold | Consignment
-    saleType: '', hasWarranty: false, soldDate: '', warrantyEndDate: '',
+    saleType: '', hasWarranty: false, soldDate: '', warrantyEndDate: '', cycleCount: '',
     consignment: null   // { partnerName, priceLAK, dateOut, dateSold }
   };
 }
@@ -604,6 +604,17 @@ function blankUnit() {
 function addUnitRow() {
   currentUnits.push(blankUnit());
   renderUnitRows();
+}
+
+// ເພີ່ມຫຼາຍເຄື່ອງພ້ອມກັນ ໂດຍບໍ່ຕ້ອງໃສ່ SN ຕັ້ງແຕ່ທຳອິດ (ໃສ່ SN ພາຍຫຼັງເທື່ອລະເຄື່ອງຕອນຂາຍ/ກະກຽມເຄື່ອງ)
+function bulkAddUnits() {
+  const qty = Number(document.getElementById('bulkAddQty').value) || 0;
+  if (qty <= 0) { showToast('ກະລຸນາໃສ່ຈຳນວນທີ່ຢາກເພີ່ມ', 'info'); return; }
+  if (qty > 500) { showToast('ເພີ່ມເທື່ອລະບໍ່ເກີນ 500 ເຄື່ອງ', 'info'); return; }
+
+  for (let i = 0; i < qty; i++) currentUnits.push(blankUnit());
+  renderUnitRows();
+  showToast(`ເພີ່ມ ${qty} ເຄື່ອງແລ້ວ (SN ຍັງວ່າງ, ໃສ່ພາຍຫຼັງໄດ້)`, 'success');
 }
 
 function removeUnitRow(index) {
@@ -647,9 +658,11 @@ function returnConsignmentUnit(index) {
 function openSellUnitModal(index) {
   activeUnitIndex = index;
   const unit = currentUnits[index];
-  document.getElementById('sellUnitSnLabel').innerText = unit.sn || '(ບໍ່ມີ SN)';
+  document.getElementById('sellUnitSnInput').value = unit.sn || '';
+  document.getElementById('sellUnitCycleCount').value = unit.cycleCount || '';
   document.querySelector('input[name="sellType"][value="retail"]').checked = true;
   document.getElementById('sellUnitModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('sellUnitSnInput').focus(), 100);
 }
 function closeSellUnitModal() {
   document.getElementById('sellUnitModal').classList.add('hidden');
@@ -657,10 +670,17 @@ function closeSellUnitModal() {
 }
 function confirmSellUnit() {
   if (activeUnitIndex === null) return;
+
+  const sn = document.getElementById('sellUnitSnInput').value.trim();
+  if (!sn) { showToast('ກະລຸນາໃສ່ Serial Number ຂອງເຄື່ອງທີ່ຂາຍອອກໄປ', 'info'); return; }
+
+  const cycleCount = document.getElementById('sellUnitCycleCount').value.trim();
   const sellType = document.querySelector('input[name="sellType"]:checked').value;
   const today = new Date().toISOString().slice(0, 10);
   const unit = currentUnits[activeUnitIndex];
 
+  unit.sn = sn;
+  unit.cycleCount = cycleCount ? Number(cycleCount) : '';
   unit.status = 'Sold';
   unit.saleType = sellType;
   unit.soldDate = today;
@@ -683,11 +703,12 @@ function confirmSellUnit() {
 function openConsignUnitModal(index) {
   activeUnitIndex = index;
   const unit = currentUnits[index];
-  document.getElementById('consignUnitSnLabel').innerText = unit.sn || '(ບໍ່ມີ SN)';
+  document.getElementById('consignUnitSnInput').value = unit.sn || '';
   document.getElementById('consignPartnerName').value = '';
   document.getElementById('consignPriceLAK').value = '';
   document.getElementById('consignDateOut').value = new Date().toISOString().slice(0, 10);
   document.getElementById('consignUnitModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('consignUnitSnInput').focus(), 100);
 }
 function closeConsignUnitModal() {
   document.getElementById('consignUnitModal').classList.add('hidden');
@@ -695,6 +716,10 @@ function closeConsignUnitModal() {
 }
 function confirmConsignUnit() {
   if (activeUnitIndex === null) return;
+
+  const sn = document.getElementById('consignUnitSnInput').value.trim();
+  if (!sn) { showToast('ກະລຸນາໃສ່ Serial Number ຂອງເຄື່ອງ', 'info'); return; }
+
   const partnerName = document.getElementById('consignPartnerName').value.trim();
   if (!partnerName) { showToast('ກະລຸນາໃສ່ຊື່ຮ້ານ/ໝູ່ທີ່ຝາກຂາຍ', 'info'); return; }
 
@@ -702,6 +727,7 @@ function confirmConsignUnit() {
   const dateOut = document.getElementById('consignDateOut').value || new Date().toISOString().slice(0, 10);
 
   const unit = currentUnits[activeUnitIndex];
+  unit.sn = sn;
   unit.status = 'Consignment';
   unit.consignment = { partnerName, priceLAK, dateOut, dateSold: '' };
 
@@ -734,6 +760,7 @@ function renderUnitRows() {
       detailLine = `<p class="text-[10px] text-slate-400 mt-1">
         ${unit.saleType === 'retail' ? 'ຂາຍລູກຄ້າທົ່ວໄປ' : 'ຂາຍໃຫ້ຕົວແທນ'} · ວັນຂາຍ ${unit.soldDate || '-'}
         ${unit.hasWarranty ? ` · ປະກັນຮອດ ${unit.warrantyEndDate}` : ' · ບໍ່ມີປະກັນ'}
+        ${unit.cycleCount ? ` · ຮອບຊາດ ${unit.cycleCount}` : ''}
       </p>`;
     } else if (unit.status === 'Consignment' && unit.consignment) {
       const c = unit.consignment;
@@ -782,7 +809,8 @@ function setUnitsToForm(units) {
   renderUnitRows();
 }
 
-// ອ່ານ units ອອກຈາກຟອມ (ຕອນບັນທຶກ) — ຂ້າມແຖວທີ່ບໍ່ໄດ້ໃສ່ SN
+// ອ່ານ units ອອກຈາກຟອມ (ຕອນບັນທຶກ) — ເກັບໄວ້ທຸກແຖວ ເຖິງແມ່ນວ່າຍັງບໍ່ໄດ້ໃສ່ SN
+// (ຮອງຮັບ Bulk Add: ເພີ່ມຫຼາຍເຄື່ອງກ່ອນ, ໃສ່ SN ພາຍຫຼັງເທື່ອລະເຄື່ອງໄດ້)
 function getUnitsFromForm() {
-  return currentUnits.filter(u => u.sn && u.sn.trim());
+  return currentUnits.map(u => ({ ...u, sn: (u.sn || '').trim() }));
 }

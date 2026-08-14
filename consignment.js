@@ -51,7 +51,7 @@ async function doLogin() {
 
   try {
     await ghGetFile(CONFIG.PRODUCTS_PATH);
-    sessionStorage.setItem('consignment_token', githubToken);
+    sessionStorage.setItem('macdj_admin_token', githubToken);
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('dashboard').classList.remove('hidden');
     document.getElementById('loginError').classList.add('hidden');
@@ -68,13 +68,13 @@ document.getElementById('loginToken').addEventListener('keydown', e => { if (e.k
 
 function doLogout() {
   githubToken = '';
-  sessionStorage.removeItem('consignment_token');
+  sessionStorage.removeItem('macdj_admin_token');
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
 }
 
 (function autoLogin() {
-  const saved = sessionStorage.getItem('consignment_token');
+  const saved = localStorage.getItem('macdj_admin_token') || sessionStorage.getItem('macdj_admin_token');
   if (saved) {
     githubToken = saved;
     ghGetFile(CONFIG.PRODUCTS_PATH).then(() => {
@@ -141,7 +141,12 @@ function renderConsignList() {
             <span class="text-amber-600 font-extrabold text-sm">${Number(c.priceLAK || 0).toLocaleString()} ₭</span>
           </div>
         </div>
-        <p class="text-[10px] text-slate-400 mt-1">ຝາກຮ້ານ "<b class="text-slate-600">${c.partnerName || '-'}</b>" · ອອກວັນທີ ${c.dateOut || '-'}</p>
+        <p class="text-[10px] text-slate-400 mt-1">ຝາກຮ້ານ "<b class="text-slate-600">${c.partnerName || '-'}</b>"</p>
+        <div class="flex items-center gap-1.5 mt-1.5">
+          <label class="text-[10px] text-slate-400">ວັນ/ເດືອນ/ປີ ທີ່ນຳເຄື່ອງອອກໄປຝາກ:</label>
+          <input type="date" value="${c.dateOut || ''}" onchange="updateConsignDateOut('${p.id}', ${unitIndex}, this.value)"
+                 class="bg-slate-50 border border-slate-200 rounded-lg text-[10px] px-2 py-1">
+        </div>
         <div class="flex gap-2 mt-3">
           <button onclick="markUnitSold('${p.id}', ${unitIndex})" class="btn-press flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-2 rounded-xl text-xs font-semibold">ຂາຍໄດ້ແລ້ວ</button>
           <button onclick="returnUnit('${p.id}', ${unitIndex})" class="btn-press flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2 rounded-xl text-xs font-semibold">ສົ່ງຄືນຮ້ານ</button>
@@ -202,6 +207,17 @@ async function returnUnit(productId, unitIndex) {
 
   const ok = await persistProducts(`chore: consignment unit returned — ${product.id} / ${product.units[unitIndex].sn}`);
   if (ok) { showToast('ບັນທຶກການສົ່ງຄືນແລ້ວ!', 'success'); renderConsignList(); }
+}
+
+// ແກ້ໄຂວັນທີ່ນຳເຄື່ອງອອກໄປຝາກ ໂດຍກົງຈາກໜ້ານີ້ (ບໍ່ຕ້ອງກັບໄປແກ້ຢູ່ Admin)
+async function updateConsignDateOut(productId, unitIndex, newDate) {
+  const product = allProducts.find(p => p.id.toString() === productId.toString());
+  if (!product || !product.units[unitIndex] || !product.units[unitIndex].consignment) return;
+
+  product.units[unitIndex].consignment.dateOut = newDate;
+  const ok = await persistProducts(`chore: update consignment date out — ${product.id} / ${product.units[unitIndex].sn}`);
+  if (ok) showToast('ບັນທຶກວັນທີ່ແລ້ວ!', 'success');
+  renderConsignList();
 }
 
 /* --------------------------------- ລາຍງານປະຈຳເດືອນ --------------------------------- */
