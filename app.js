@@ -210,14 +210,33 @@ function colorLabelLao(color) {
   return map[color] || color || '';
 }
 
-// ---------- ສະຕັອກແຍກຕາມສີ (colorStock) ----------
+// ---------- ສະຕັອກແຍກຕາມສີ (ຄິດໄລ່ຈາກ Serial Number units, ຫຼື colorStock ເກົ່າຖ້າຍັງບໍ່ໄດ້ migrate) ----------
+
+// ຄິດໄລ່ຈຳນວນຄົງເຫຼືອຕາມສີ ຈາກ product.units (ນັບສະເພາະເຄື່ອງທີ່ status === 'Ready', ບໍ່ນັບ Sold/Consignment)
+// ຄືນຄ່າ object { colorName: qty } — ບໍ່ເຄີຍລວມ Serial Number ເຂົ້າໃນຄ່ານີ້ (ລູກຄ້າຫ້າມເຫັນ SN ເດັດຂາດ)
+function stockByColorFromUnits(p) {
+  if (!Array.isArray(p.units) || p.units.length === 0) return null;
+  const result = {};
+  p.units.forEach(u => {
+    const color = u.color || 'ບໍ່ລະບຸສີ';
+    if (!(color in result)) result[color] = 0;
+    if (u.status === 'Ready') result[color]++;
+  });
+  return result;
+}
+
+function getEffectiveColorStock(p) {
+  return stockByColorFromUnits(p) || p.colorStock || null;
+}
+
 // ຄືນຄ່າ true ຖ້າສິນຄ້ານີ້ໃຊ້ລະບົບສະຕັອກແຍກຕາມສີ (ບໍ່ແມ່ນເຄື່ອງມືສອງ 1 ID = 1 ເຄື່ອງ)
 function hasColorStock(p) {
-  return p.colorStock && typeof p.colorStock === 'object' && Object.keys(p.colorStock).length > 0;
+  const stock = getEffectiveColorStock(p);
+  return !!stock && Object.keys(stock).length > 0;
 }
 function totalColorStock(p) {
   if (!hasColorStock(p)) return null;
-  return Object.values(p.colorStock).reduce((sum, qty) => sum + (Number(qty) || 0), 0);
+  return Object.values(getEffectiveColorStock(p)).reduce((sum, qty) => sum + (Number(qty) || 0), 0);
 }
 
 function priceInCurrentCurrency(lakVal, thbVal) {
@@ -268,7 +287,7 @@ function renderProducts(products) {
             <div class="flex items-center gap-1.5 mt-1">
               <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${p.title}</h3>
               ${hasColorStock(p)
-                ? `<span class="shrink-0 text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full whitespace-nowrap"><i class="fas fa-palette"></i> ${Object.keys(p.colorStock).length} ສີ</span>`
+                ? `<span class="shrink-0 text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full whitespace-nowrap"><i class="fas fa-palette"></i> ${Object.keys(getEffectiveColorStock(p)).length} ສີ</span>`
                 : (p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${colorLabelLao(p.color)}</span>` : '')}
             </div>
             ${p.category === 'Macbook' ? `
@@ -381,7 +400,7 @@ function openProductModal(id) {
       <div class="bg-slate-50 rounded-2xl p-4">
         <span class="text-[10px] text-slate-400 flex items-center gap-1.5 mb-2"><i class="fas fa-palette"></i> ສະຕັອກແຍກຕາມສີ</span>
         <div class="space-y-1.5">
-          ${Object.entries(p.colorStock).map(([color, qty]) => `
+          ${Object.entries(getEffectiveColorStock(p)).map(([color, qty]) => `
             <div class="flex items-center justify-between text-xs bg-white rounded-xl px-3 py-2">
               <span class="font-medium text-slate-600">${colorLabelLao(color)}</span>
               ${Number(qty) > 0
@@ -440,47 +459,6 @@ function nextSlide() {
 function prevSlide() {
   currentSlideIdx = (currentSlideIdx - 1 + activeImages.length) % activeImages.length;
   setSlide(currentSlideIdx);
-}
-
-// ---------- Warranty Modal (ຄິດໄລ່ຝັ່ງ Client ຈາກຂໍ້ມູນສິນຄ້າໂດຍກົງ) ----------
-function openWarrantyModal() { document.getElementById('warrantyModal').classList.remove('hidden'); }
-function closeWarrantyModal() { document.getElementById('warrantyModal').classList.add('hidden'); }
-
-function computeWarrantyText(status, soldDateVal, warrantyDays) {
-  if (status !== 'Sold') return 'ຍັງບໍ່ໄດ້ຂາຍ (ຍັງບໍ່ເລີ່ມນັບປະກັນ)';
-  if (!warrantyDays || warrantyDays <= 0) return 'ບໍ່ມີປະກັນ';
-  if (!soldDateVal) return 'ບໍ່ມີຂໍ້ມູນວັນທີ່ຂາຍ';
-
-  const soldDate = new Date(soldDateVal);
-  const expiryDate = new Date(soldDate.getTime());
-  expiryDate.setDate(expiryDate.getDate() + Number(warrantyDays));
-
-  const expiryText = expiryDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
-  const isActive = expiryDate.getTime() >= new Date().getTime();
-
-  return expiryText + (isActive ? ' (ຍັງຢູ່ໃນໄລຍະປະກັນ)' : ' (ໝົດອາຍຸປະກັນແລ້ວ)');
-}
-
-function checkWarranty() {
-  const code = document.getElementById('warrantyInputCode').value.trim();
-  const box = document.getElementById('warrantyResultBox');
-  if (!code) { showToast('ກະລຸນາໃສ່ລະຫັດສິນຄ້າ', 'info'); return; }
-
-  const p = allProducts.find(x => x.id.toString().trim() === code);
-  if (!p) {
-    box.innerHTML = `<p class="text-xs text-rose-500 mt-2">ບໍ່ພົບເລກລະຫັດສິນຄ້ານີ້ໃນລະບົບ</p>`;
-    return;
-  }
-
-  const warrantyText = computeWarrantyText(p.status, p.soldDate, p.warrantyDays);
-  box.innerHTML = `
-    <div class="bg-indigo-50/60 p-3 rounded-2xl border border-indigo-100 text-xs space-y-1.5 mt-2">
-      <p><b>ລະຫັດ:</b> ${p.id} (${p.title})</p>
-      <p><b>ສະຖານະ:</b> <span class="text-emerald-600 font-semibold">${p.status}</span></p>
-      <p><b>ວັນໝົດປະກັນ:</b> <span class="text-indigo-600 font-semibold">${warrantyText}</span></p>
-      <p><b>ປະຫວັດການສ້ອມແຊມ:</b> ${p.repairHistory || 'ບໍ່ມີປະຫວັດການສ້ອມແຊມ'}</p>
-    </div>
-  `;
 }
 
 // ---------- Share Modal ----------

@@ -234,7 +234,12 @@ function renderAdminGrid() {
               <p class="text-rose-600 font-bold text-xs">${p.priceLAK > 0 ? Number(p.priceLAK).toLocaleString() + ' ₭' : (p.priceTHB > 0 ? Number(p.priceTHB).toLocaleString() + ' ฿' : '-')}</p>
               ${p.wholesalePriceLAK > 0 ? `<p class="text-amber-600 font-semibold text-[10px] flex items-center gap-0.5"><i class="fas fa-tags"></i> ${Number(p.wholesalePriceLAK).toLocaleString()} ₭</p>` : ''}
             </div>
-            ${p.colorStock && Object.keys(p.colorStock).length > 0 ? `<p class="text-[9px] text-indigo-500 font-semibold mt-0.5"><i class="fas fa-palette"></i> ${Object.keys(p.colorStock).length} ສີ · ${Object.values(p.colorStock).reduce((a,b)=>a+(Number(b)||0),0)} ເຄື່ອງ</p>` : ''}
+            ${p.units && p.units.length > 0 ? (() => {
+              const ready = p.units.filter(u => u.status === 'Ready').length;
+              const sold = p.units.filter(u => u.status === 'Sold').length;
+              const consign = p.units.filter(u => u.status === 'Consignment').length;
+              return `<p class="text-[9px] text-indigo-500 font-semibold mt-0.5"><i class="fas fa-barcode"></i> ${p.units.length} SN · ພ້ອມຂາຍ ${ready} · ຂາຍແລ້ວ ${sold}${consign > 0 ? ' · ຝາກຂາຍ ' + consign : ''}</p>`;
+            })() : ''}
             ${p.yearFrom && p.yearTo ? `<p class="text-[9px] text-slate-400 mt-0.5"><i class="fas fa-calendar-days"></i> ໃຊ້ໄດ້: ${p.yearFrom} - ${p.yearTo}</p>` : ''}
           </div>
           <div class="flex gap-2 mt-2">
@@ -350,7 +355,7 @@ function openEditModal(id) {
     document.getElementById('pId').readOnly = false;
     setSelectOrOtherValue('pColorSelect', 'pColorOther', '');
     setSelectOrOtherValue('pCpuSelect', 'pCpuOther', '');
-    setColorStockToForm(null);
+    setUnitsToForm(null);
     document.getElementById('pYearStart').value = '';
     document.getElementById('pYearEnd').value = '';
   } else {
@@ -379,10 +384,9 @@ function openEditModal(id) {
     setSelectOrOtherValue('pCpuSelect', 'pCpuOther', p.cpu || '');
     document.getElementById('pBattery').value = p.battery || '';
     document.getElementById('pScreenSize').value = p.screenSize || '';
-    document.getElementById('pWarrantyDays').value = p.warrantyDays || '';
     document.getElementById('pStatus').value = p.status;
     document.getElementById('pImageList').value = p.images ? p.images.join(',') : '';
-    setColorStockToForm(p.colorStock);
+    setUnitsToForm(p.units);
     renderImagePreviews();
   }
 
@@ -514,10 +518,8 @@ async function handleFormSubmit(e) {
     cpu: getSelectOrOtherValue('pCpuSelect', 'pCpuOther'),
     battery: document.getElementById('pBattery').value,
     screenSize: document.getElementById('pScreenSize').value,
-    warrantyDays: Number(document.getElementById('pWarrantyDays').value) || 0,
-    repairHistory: existing ? (existing.repairHistory || '') : '',
     images: document.getElementById('pImageList').value.split(',').filter(Boolean),
-    colorStock: getColorStockFromForm(),
+    units: getUnitsFromForm(),
     whatsapp: CONFIG.WHATSAPP_NUMBER,
     status: newStatus,
     soldDate: soldDate
@@ -573,10 +575,11 @@ async function persistProducts(commitMessage) {
 }
 
 /* =========================================================================
-   ຈຳນວນສະຕັອກແຍກຕາມສີ (colorStock) — ບັນທຶກຢູ່ໃນ product ດຽວກັນ (products.json)
+   ຈັດການ Serial Number (SN) ແຕ່ລະເຄື່ອງ — ບັນທຶກຢູ່ໃນ product.units (products.json)
+   ແທນທີ່ລະບົບ colorStock ເກົ່າ (qty ຢ່າງດຽວ) ດ້ວຍ SN ຕົວຈິງຕໍ່ເຄື່ອງ + ສະຖານະ + ປະກັນ + ຝາກຂາຍ
    ========================================================================= */
 
-// ລາຍການສີທີ່ອະນຸຍາດໃນ "ຈຳນວນສະຕັອກແຍກຕາມສີ" (ຄົງທີ່ 5 ສີ ຕາມທີ່ຮ້ານກຳນົດ)
+// ລາຍການສີທີ່ອະນຸຍາດ (ຄົງທີ່ 5 ສີ ຕາມທີ່ຮ້ານກຳນົດ) — ໃຊ້ຮ່ວມກັບ pColorSelect
 const COLOR_STOCK_OPTIONS = [
   { value: 'Space Gray', label: 'Space Gray (ສີເທົາ)' },
   { value: 'Silver', label: 'Silver (ສີເງິນ)' },
@@ -585,43 +588,201 @@ const COLOR_STOCK_OPTIONS = [
   { value: 'Starlight', label: 'Starlight (ສີແສງດາວ)' }
 ];
 
-function addColorStockRow(color, qty) {
-  color = color || '';
-  qty = (qty === undefined || qty === null) ? '' : qty;
-  const container = document.getElementById('colorStockRows');
-  const rowId = 'csrow_' + Math.random().toString(36).slice(2, 9);
-  const div = document.createElement('div');
-  div.className = 'flex items-center gap-2';
-  div.id = rowId;
-  const optionsHtml = COLOR_STOCK_OPTIONS.map(o =>
-    `<option value="${o.value}" ${o.value === color ? 'selected' : ''}>${o.label}</option>`
-  ).join('');
-  div.innerHTML = `
-    <select class="cs-color flex-1 bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
-      <option value="">-- ເລືອກສີ --</option>
-      ${optionsHtml}
-    </select>
-    <input type="number" min="0" value="${qty}" placeholder="ຈຳນວນ" class="cs-qty w-28 bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
-    <button type="button" onclick="document.getElementById('${rowId}').remove()" title="ລຶບ" class="btn-press shrink-0 w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-sm">🗑️</button>
-  `;
-  container.appendChild(div);
+const WARRANTY_DAYS_DEFAULT = 30; // ຈຳນວນວັນຮັບປະກັນມາດຕະຖານ ເມື່ອຂາຍລູກຄ້າທົ່ວໄປ
+
+let currentUnits = [];      // unit ຂອງສິນຄ້າທີ່ກຳລັງແກ້ໄຂຢູ່ໃນຟອມ
+let activeUnitIndex = null; // index ຂອງ unit ທີ່ກຳລັງກົດ "ຂາຍ" ຫຼື "ຝາກຂາຍ" ຢູ່
+
+function blankUnit() {
+  return {
+    sn: '', color: '', status: 'Ready',       // Ready | Sold | Consignment
+    saleType: '', hasWarranty: false, soldDate: '', warrantyEndDate: '',
+    consignment: null   // { partnerName, priceLAK, dateOut, dateSold }
+  };
 }
 
-// ອ່ານຄ່າ colorStock ທັງໝົດຈາກຟອມ → { "ColorName": qty, ... }
-function getColorStockFromForm() {
-  const rows = document.querySelectorAll('#colorStockRows > div');
-  const result = {};
-  rows.forEach(row => {
-    const color = row.querySelector('.cs-color').value.trim();
-    const qty = Number(row.querySelector('.cs-qty').value) || 0;
-    if (color) result[color] = qty;
-  });
-  return result;
+function addUnitRow() {
+  currentUnits.push(blankUnit());
+  renderUnitRows();
 }
 
-// ຕັ້ງຄ່າ colorStock ລົງຟອມ (ຕອນເປີດແກ້ໄຂສິນຄ້າ)
-function setColorStockToForm(colorStock) {
-  document.getElementById('colorStockRows').innerHTML = '';
-  if (!colorStock || typeof colorStock !== 'object') return;
-  Object.entries(colorStock).forEach(([color, qty]) => addColorStockRow(color, qty));
+function removeUnitRow(index) {
+  if (!confirm('ລຶບ SN ນີ້ອອກແທ້ບໍ?')) return;
+  currentUnits.splice(index, 1);
+  renderUnitRows();
+}
+
+function updateUnitField(index, field, value) {
+  if (!currentUnits[index]) return;
+  currentUnits[index][field] = value;
+}
+
+// ຍົກເລີກການຂາຍ → ກັບເປັນ "ພ້ອມຂາຍ" (ໃຊ້ກໍລະນີພິມຜິດ/ຍົກເລີກອໍເດີ)
+function cancelUnitSale(index) {
+  if (!confirm('ຍົກເລີກການຂາຍ SN ນີ້ ແລະ ເອົາກັບເປັນ "ພ້ອມຂາຍ" ແທ້ບໍ?')) return;
+  currentUnits[index] = { ...currentUnits[index], status: 'Ready', saleType: '', hasWarranty: false, soldDate: '', warrantyEndDate: '' };
+  renderUnitRows();
+}
+
+// ໝາຍວ່າຂາຍໄດ້ແລ້ວ (ຈາກສະຖານະຝາກຂາຍ) → ບັນທຶກ dateSold, ປ່ຽນເປັນ Sold
+function markConsignmentSold(index) {
+  const unit = currentUnits[index];
+  if (!unit || !unit.consignment) return;
+  unit.consignment.dateSold = new Date().toISOString().slice(0, 10);
+  unit.status = 'Sold';
+  unit.saleType = 'agent';
+  unit.hasWarranty = false;
+  unit.soldDate = unit.consignment.dateSold;
+  renderUnitRows();
+}
+
+// ສົ່ງຄືນຮ້ານ (ຝາກຂາຍບໍ່ອອກ) → ກັບເປັນ "ພ້ອມຂາຍ"
+function returnConsignmentUnit(index) {
+  if (!confirm('ໝາຍວ່າສົ່ງເຄື່ອງນີ້ຄືນຮ້ານ (ຝາກຂາຍບໍ່ອອກ) ແທ້ບໍ?')) return;
+  currentUnits[index] = { ...currentUnits[index], status: 'Ready', consignment: null };
+  renderUnitRows();
+}
+
+/* ---------- Sell modal ---------- */
+function openSellUnitModal(index) {
+  activeUnitIndex = index;
+  const unit = currentUnits[index];
+  document.getElementById('sellUnitSnLabel').innerText = unit.sn || '(ບໍ່ມີ SN)';
+  document.querySelector('input[name="sellType"][value="retail"]').checked = true;
+  document.getElementById('sellUnitModal').classList.remove('hidden');
+}
+function closeSellUnitModal() {
+  document.getElementById('sellUnitModal').classList.add('hidden');
+  activeUnitIndex = null;
+}
+function confirmSellUnit() {
+  if (activeUnitIndex === null) return;
+  const sellType = document.querySelector('input[name="sellType"]:checked').value;
+  const today = new Date().toISOString().slice(0, 10);
+  const unit = currentUnits[activeUnitIndex];
+
+  unit.status = 'Sold';
+  unit.saleType = sellType;
+  unit.soldDate = today;
+  if (sellType === 'retail') {
+    unit.hasWarranty = true;
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + WARRANTY_DAYS_DEFAULT);
+    unit.warrantyEndDate = expiry.toISOString().slice(0, 10);
+  } else {
+    unit.hasWarranty = false;
+    unit.warrantyEndDate = '';
+  }
+
+  closeSellUnitModal();
+  renderUnitRows();
+  showToast('ບັນທຶກການຂາຍແລ້ວ — ຢ່າລືມກົດ "ບັນທຶກສິນຄ້າ" ເພື່ອ commit ຂຶ້ນ GitHub', 'success');
+}
+
+/* ---------- Consignment modal ---------- */
+function openConsignUnitModal(index) {
+  activeUnitIndex = index;
+  const unit = currentUnits[index];
+  document.getElementById('consignUnitSnLabel').innerText = unit.sn || '(ບໍ່ມີ SN)';
+  document.getElementById('consignPartnerName').value = '';
+  document.getElementById('consignPriceLAK').value = '';
+  document.getElementById('consignDateOut').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('consignUnitModal').classList.remove('hidden');
+}
+function closeConsignUnitModal() {
+  document.getElementById('consignUnitModal').classList.add('hidden');
+  activeUnitIndex = null;
+}
+function confirmConsignUnit() {
+  if (activeUnitIndex === null) return;
+  const partnerName = document.getElementById('consignPartnerName').value.trim();
+  if (!partnerName) { showToast('ກະລຸນາໃສ່ຊື່ຮ້ານ/ໝູ່ທີ່ຝາກຂາຍ', 'info'); return; }
+
+  const priceLAK = Number(document.getElementById('consignPriceLAK').value.replace(/[^\d]/g, '')) || 0;
+  const dateOut = document.getElementById('consignDateOut').value || new Date().toISOString().slice(0, 10);
+
+  const unit = currentUnits[activeUnitIndex];
+  unit.status = 'Consignment';
+  unit.consignment = { partnerName, priceLAK, dateOut, dateSold: '' };
+
+  closeConsignUnitModal();
+  renderUnitRows();
+  showToast('ບັນທຶກການຝາກຂາຍແລ້ວ — ຢ່າລືມກົດ "ບັນທຶກສິນຄ້າ" ເພື່ອ commit ຂຶ້ນ GitHub', 'success');
+}
+
+/* ---------- Render ---------- */
+function renderUnitRows() {
+  const container = document.getElementById('unitRows');
+  if (currentUnits.length === 0) {
+    container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">ຍັງບໍ່ມີ SN, ກົດ "+ ເພີ່ມ SN" ຂ້າງລຸ່ມ</p>';
+    return;
+  }
+
+  container.innerHTML = currentUnits.map((unit, index) => {
+    const colorOptionsHtml = COLOR_STOCK_OPTIONS.map(o =>
+      `<option value="${o.value}" ${o.value === unit.color ? 'selected' : ''}>${o.label}</option>`
+    ).join('');
+
+    const statusBadge = unit.status === 'Ready'
+      ? '<span class="text-[9px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-600 whitespace-nowrap">ພ້ອມຂາຍ</span>'
+      : unit.status === 'Sold'
+        ? '<span class="text-[9px] font-bold px-2 py-1 rounded-full bg-slate-200 text-slate-500 whitespace-nowrap">ຂາຍແລ້ວ</span>'
+        : '<span class="text-[9px] font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-600 whitespace-nowrap">ຝາກຂາຍ</span>';
+
+    let detailLine = '';
+    if (unit.status === 'Sold') {
+      detailLine = `<p class="text-[10px] text-slate-400 mt-1">
+        ${unit.saleType === 'retail' ? 'ຂາຍລູກຄ້າທົ່ວໄປ' : 'ຂາຍໃຫ້ຕົວແທນ'} · ວັນຂາຍ ${unit.soldDate || '-'}
+        ${unit.hasWarranty ? ` · ປະກັນຮອດ ${unit.warrantyEndDate}` : ' · ບໍ່ມີປະກັນ'}
+      </p>`;
+    } else if (unit.status === 'Consignment' && unit.consignment) {
+      const c = unit.consignment;
+      detailLine = `<p class="text-[10px] text-slate-400 mt-1">
+        ຝາກຮ້ານ "${c.partnerName}" · ລາຄາ ${Number(c.priceLAK).toLocaleString()} ₭ · ອອກວັນທີ ${c.dateOut}
+        ${c.dateSold ? ` · ຂາຍໄດ້ ${c.dateSold}` : ''}
+      </p>`;
+    }
+
+    let actionsHtml = '';
+    if (unit.status === 'Ready') {
+      actionsHtml = `
+        <button type="button" onclick="openSellUnitModal(${index})" class="btn-press bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold">ຂາຍ</button>
+        <button type="button" onclick="openConsignUnitModal(${index})" class="btn-press bg-amber-50 hover:bg-amber-100 text-amber-700 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold">ຝາກຂາຍ</button>`;
+    } else if (unit.status === 'Sold') {
+      actionsHtml = `<button type="button" onclick="cancelUnitSale(${index})" class="btn-press bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold">ຍົກເລີກຂາຍ</button>`;
+    } else if (unit.status === 'Consignment') {
+      actionsHtml = `
+        <button type="button" onclick="markConsignmentSold(${index})" class="btn-press bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold">ຂາຍໄດ້ແລ້ວ</button>
+        <button type="button" onclick="returnConsignmentUnit(${index})" class="btn-press bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold">ສົ່ງຄືນຮ້ານ</button>`;
+    }
+
+    return `
+      <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3">
+        <div class="flex items-center gap-2">
+          <input type="text" value="${unit.sn}" placeholder="ໃສ່ Serial Number"
+                 oninput="updateUnitField(${index}, 'sn', this.value)"
+                 class="flex-1 bg-white border border-slate-200 p-2 rounded-lg text-xs font-mono">
+          <select onchange="updateUnitField(${index}, 'color', this.value)" class="w-40 bg-white border border-slate-200 p-2 rounded-lg text-xs">
+            <option value="">-- ສີ --</option>
+            ${colorOptionsHtml}
+          </select>
+          ${statusBadge}
+          <button type="button" onclick="removeUnitRow(${index})" title="ລຶບ" class="btn-press shrink-0 w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs">🗑️</button>
+        </div>
+        ${detailLine}
+        ${actionsHtml ? `<div class="flex gap-1.5 mt-2">${actionsHtml}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+// ໂຫຼດ units ຂອງສິນຄ້າເຂົ້າຟອມ (ຕອນເປີດແກ້ໄຂ)
+function setUnitsToForm(units) {
+  currentUnits = Array.isArray(units) ? JSON.parse(JSON.stringify(units)) : [];
+  renderUnitRows();
+}
+
+// ອ່ານ units ອອກຈາກຟອມ (ຕອນບັນທຶກ) — ຂ້າມແຖວທີ່ບໍ່ໄດ້ໃສ່ SN
+function getUnitsFromForm() {
+  return currentUnits.filter(u => u.sn && u.sn.trim());
 }

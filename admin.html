@@ -124,6 +124,9 @@
           <button onclick="openEditModal(null)" class="btn-press bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">
             <i class="fas fa-plus"></i> ເພີ່ມສິນຄ້າ
           </button>
+          <a href="consignment.html" class="btn-press bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+            <i class="fas fa-store"></i> ຝາກຂາຍ
+          </a>
           <button onclick="doLogout()" class="btn-press bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">ອອກຈາກລະບົບ</button>
           <a href="index.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">← ໜ້າຮ້ານ</a>
         </div>
@@ -317,24 +320,20 @@
           </select>
         </div>
         <div>
-          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຈຳນວນວັນຮັບປະກັນ</label>
-          <input id="pWarrantyDays" type="number" min="0" step="1" placeholder="ຕົວຢ່າງ: 180" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
-          <p class="text-[10px] text-slate-400 mt-1 ml-1">ນັບຈາກມື້ທີ່ປ່ຽນສະຖານະເປັນ "ຂາຍແລ້ວ" · ໃສ່ 0 = ບໍ່ມີປະກັນ</p>
-        </div>
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ສະຖານະ</label>
+          <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ສະຖານະ (ສຳລັບສິນຄ້າທີ່ບໍ່ໄດ້ໃຊ້ລະບົບ SN)</label>
           <select id="pStatus" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
             <option value="Ready">ພ້ອມຂາຍ</option>
             <option value="Reserved">ຈອງແລ້ວ</option>
             <option value="Sold">ຂາຍແລ້ວ</option>
           </select>
+          <p class="text-[10px] text-slate-400 mt-1 ml-1">ຖ້າສິນຄ້ານີ້ມີການໃສ່ Serial Number ຢູ່ລຸ່ມ, ສະຖານະຈະຄິດໄລ່ຈາກ SN ແທນ ບໍ່ຕ້ອງແກ້ບ່ອນນີ້</p>
         </div>
 
-        <div class="field-macbook-only md:col-span-2">
-          <label class="text-[10px] font-bold text-indigo-600 block mb-1 ml-1"><i class="fas fa-palette"></i> ຈຳນວນສະຕັອກແຍກຕາມສີ (ບໍ່ບັງຄັບ)</label>
-          <p class="text-[10px] text-slate-400 mb-2 ml-1">ຖ້າສິນຄ້ານີ້ມີຫຼາຍສີ/ຫຼາຍສະຕັອກ (ເຊັ່ນ ອຸປະກອນເສີມ, ສິນຄ້າໃໝ່ຫຼາຍເຄື່ອງ) ໃຫ້ໃສ່ຈຳນວນແຍກຕາມສີບ່ອນນີ້ — ຖ້າໃສ່ໄວ້, ໜ້າຮ້ານຈະສະແດງຈຳນວນຄົງເຫຼືອຕາມສີແທນສະຖານະ "ພ້ອມຂາຍ/ຂາຍແລ້ວ" ທຳມະດາ. ຖ້າເປັນເຄື່ອງມືສອງ 1 ID = 1 ເຄື່ອງ, ບໍ່ຈຳເປັນຕ້ອງໃສ່ (ໃຊ້ຊ່ອງ "ສີ" ດ້ານເທິງພໍ)</p>
-          <div id="colorStockRows" class="space-y-2 mb-2"></div>
-          <button type="button" onclick="addColorStockRow()" class="btn-press bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 text-slate-500 rounded-xl px-4 py-2 text-xs font-semibold">+ ເພີ່ມສີ</button>
+        <div class="md:col-span-2">
+          <label class="text-[10px] font-bold text-indigo-600 block mb-1 ml-1"><i class="fas fa-barcode"></i> ຈັດການ Serial Number (SN) ແຕ່ລະເຄື່ອງ</label>
+          <p class="text-[10px] text-slate-400 mb-2 ml-1">ໃສ່ SN ແຍກຕາມເຄື່ອງ ພ້ອມສີ — ຖ້າໃສ່ໄວ້, ໜ້າຮ້ານຈະສະແດງຈຳນວນຄົງເຫຼືອຕາມສີ (ນັບສະເພາະ SN ທີ່ຍັງ "ພ້ອມຂາຍ") <b>SN ຈະບໍ່ຖືກສະແດງໃຫ້ລູກຄ້າເຫັນເດັດຂາດ</b>, ເຫັນສະເພາະ Admin. ກົດ "ຂາຍ" ຫຼື "ຝາກຂາຍ" ຢູ່ແຕ່ລະແຖວເພື່ອຕັດສະຕັອກ.</p>
+          <div id="unitRows" class="space-y-2 mb-2"></div>
+          <button type="button" onclick="addUnitRow()" class="btn-press bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 text-slate-500 rounded-xl px-4 py-2 text-xs font-semibold">+ ເພີ່ມ SN</button>
         </div>
 
         <div class="md:col-span-2">
@@ -354,6 +353,54 @@
           <button type="button" onclick="closeEditModal()" class="btn-press px-5 bg-slate-100 text-slate-600 rounded-2xl text-xs font-semibold">ຍົກເລີກ</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Popup: ຢືນຢັນການຂາຍ SN -->
+  <div id="sellUnitModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl-custom shadow-2xl w-full max-w-sm p-6 relative">
+      <button onclick="closeSellUnitModal()" class="btn-press absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200"><i class="fas fa-times"></i></button>
+      <h3 class="font-bold text-sm mb-1"><i class="fas fa-cash-register text-emerald-600 mr-1"></i> ຢືນຢັນການຂາຍ</h3>
+      <p class="text-[11px] text-slate-400 mb-4">SN: <span id="sellUnitSnLabel" class="font-mono font-semibold text-slate-600"></span></p>
+
+      <div class="space-y-2 mb-4">
+        <label class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-2xl p-3 cursor-pointer has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50">
+          <input type="radio" name="sellType" value="retail" checked class="accent-emerald-600">
+          <span class="text-xs">
+            <b class="block text-slate-700">ຂາຍລູກຄ້າທົ່ວໄປ</b>
+            <span class="text-slate-400">ມີປະກັນ 30 ວັນ ອັດຕະໂນມັດ</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-2xl p-3 cursor-pointer has-[:checked]:border-amber-400 has-[:checked]:bg-amber-50">
+          <input type="radio" name="sellType" value="agent" class="accent-amber-600">
+          <span class="text-xs">
+            <b class="block text-slate-700">ຂາຍໃຫ້ຕົວແທນ / ບໍ່ມີປະກັນ</b>
+            <span class="text-slate-400">ລາຄາຖືກ, ບໍ່ແຖມປະກັນ</span>
+          </span>
+        </label>
+      </div>
+
+      <button onclick="confirmSellUnit()" class="btn-press w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">ຢືນຢັນການຂາຍ</button>
+    </div>
+  </div>
+
+  <!-- Popup: ຝາກຂາຍ SN ໃຫ້ຮ້ານໝູ່ -->
+  <div id="consignUnitModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl-custom shadow-2xl w-full max-w-sm p-6 relative">
+      <button onclick="closeConsignUnitModal()" class="btn-press absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200"><i class="fas fa-times"></i></button>
+      <h3 class="font-bold text-sm mb-1"><i class="fas fa-store text-amber-600 mr-1"></i> ຝາກຂາຍໃຫ້ຮ້ານໝູ່</h3>
+      <p class="text-[11px] text-slate-400 mb-4">SN: <span id="consignUnitSnLabel" class="font-mono font-semibold text-slate-600"></span></p>
+
+      <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຊື່ຮ້ານ/ໝູ່ທີ່ຝາກຂາຍ</label>
+      <input id="consignPartnerName" type="text" placeholder="ຕົວຢ່າງ: ຮ້ານ ນ້ອງແອັມ" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs mb-3">
+
+      <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ລາຄາທີ່ຂາຍໃຫ້ໝູ່ (ກີບ)</label>
+      <input id="consignPriceLAK" type="text" inputmode="numeric" placeholder="xxx,xxx,xxx" oninput="formatPriceInput(this)" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs mb-3">
+
+      <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ວັນທີ່ເອົາອອກໄປຝາກ</label>
+      <input id="consignDateOut" type="date" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs mb-4">
+
+      <button onclick="confirmConsignUnit()" class="btn-press w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">ຢືນຢັນຝາກຂາຍ</button>
     </div>
   </div>
 

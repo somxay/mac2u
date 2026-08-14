@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>ຝາກຂາຍ - Mac & DJ Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao+Looped:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 12% 0%, #f1f5fb 0%, #f8fafc 42%, #f8fafc 100%); }
+    .rounded-2xl-custom { border-radius: 1.75rem; }
+    .rounded-3xl-custom { border-radius: 2.25rem; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .glass-header { background: rgba(255,255,255,.72); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); border-bottom: 1px solid rgba(15,23,42,.06); }
+    .glass-card { background: rgba(255,255,255,.86); backdrop-filter: blur(10px); box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 20px 40px -28px rgba(15,23,42,.18); border: 1px solid rgba(15,23,42,.04); }
+    .btn-press { transition: transform .16s cubic-bezier(.34,1.56,.64,1); position: relative; overflow: hidden; }
+    .btn-press:active { transform: scale(.94); }
+    .ripple-relative { position: relative; overflow: hidden; }
+    .ripple-effect { position: absolute; border-radius: 50%; background: rgba(255,255,255,.55); transform: scale(0); animation: rippleAnim .65s cubic-bezier(.16,.84,.44,1); pointer-events: none; }
+    @keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }
+    .toast-item { opacity: 0; transform: translateY(-16px) scale(.94); transition: opacity .3s cubic-bezier(.16,.84,.44,1), transform .3s cubic-bezier(.16,.84,.44,1); }
+    .toast-item.toast-show { opacity: 1; transform: translateY(0) scale(1); }
+    .toast-item.toast-hide { opacity: 0; transform: translateY(-10px) scale(.96); }
+    .loader-ring { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #e2e8f0; border-top-color: #0f172a; animation: spin .7s linear infinite; }
+    .loader-ring-sm { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: spin .6s linear infinite; display: inline-block; }
+    #loginScreen { animation: fadeIn .25s ease both; }
+  </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+  <!-- ໜ້າ Login (ໃຊ້ GitHub Token ຄືກັນກັບ admin.html ເພາະໜ້ານີ້ຕ້ອງຂຽນ/commit ຂໍ້ມູນ) -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-5">
+    <div class="glass-card w-full max-w-sm p-7 rounded-3xl-custom shadow-xl">
+      <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md mb-4"><i class="fas fa-store"></i></div>
+      <h2 class="font-bold text-lg mb-1">ລະບົບຝາກຂາຍ</h2>
+      <p class="text-xs text-slate-400 mb-4">ໃສ່ GitHub Token ດຽວກັນກັບໜ້າ Admin ເພື່ອຈັດການເຄື່ອງຝາກຂາຍ</p>
+      <input id="loginToken" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm mb-3">
+      <p id="loginError" class="text-xs text-rose-500 mb-2 hidden">Token ບໍ່ຖືກຕ້ອງ ຫຼື ບໍ່ມີສິດຂຽນເຂົ້າ Repository!</p>
+      <button id="loginBtn" onclick="doLogin()" class="btn-press w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-70">ເຂົ້າສູ່ລະບົບ</button>
+      <a href="admin.html" class="block text-center text-xs text-slate-400 mt-4 hover:underline">← ໜ້າ Admin</a>
+    </div>
+  </div>
+
+  <!-- ໜ້າຫຼັກ -->
+  <div id="dashboard" class="hidden min-h-screen pb-20">
+    <header class="sticky top-0 z-30 glass-header px-4 py-3">
+      <div class="max-w-5xl mx-auto flex justify-between items-center gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md"><i class="fas fa-store"></i></div>
+          <div>
+            <h1 class="font-bold text-sm leading-tight">ລະບົບຝາກຂາຍ</h1>
+            <p class="text-[11px] text-slate-400">Mac & DJ Store — Consignment</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="admin.html" class="btn-press bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold shadow-sm">Admin</a>
+          <button onclick="doLogout()" class="btn-press bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold shadow-sm">ອອກຈາກລະບົບ</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-4 space-y-4">
+
+      <!-- ລາຍງານສະຫຼຸບປະຈຳເດືອນ -->
+      <div class="glass-card p-4 rounded-3xl-custom">
+        <p class="text-xs font-bold text-slate-600 mb-2"><i class="fas fa-chart-column text-indigo-500 mr-1"></i> ລາຍງານສະຫຼຸບປະຈຳເດືອນ</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <input id="reportMonth" type="month" class="bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
+          <button onclick="generateMonthlyReport()" class="btn-press bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold">ສ້າງລາຍງານ</button>
+        </div>
+        <div id="reportResult" class="mt-3 hidden"></div>
+      </div>
+
+      <!-- ລາຍການເຄື່ອງທີ່ກຳລັງຝາກຂາຍ -->
+      <div>
+        <p class="text-xs font-bold text-slate-600 mb-2"><i class="fas fa-truck-fast text-amber-500 mr-1"></i> ເຄື່ອງທີ່ກຳລັງຝາກຂາຍຢູ່ຮ້ານໝູ່</p>
+        <div id="consignLoading" class="text-center py-10 text-xs text-slate-400"><i class="fas fa-spinner fa-spin mr-1"></i> ກຳລັງໂຫຼດ...</div>
+        <div id="consignList" class="space-y-2"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="ui.js"></script>
+  <script src="consignment.js"></script>
+</body>
+</html>
