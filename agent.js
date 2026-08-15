@@ -112,9 +112,36 @@ function renderAgentList() {
   }
 
   box.innerHTML = agentProducts.map(p => {
-    const hasColorStock = p.colorStock && typeof p.colorStock === 'object' && Object.keys(p.colorStock).length > 0;
-    const specs = [p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.year, p.screenSize, p.battery, p.keyboard ? formatKeyboard(p.keyboard) : '']
+    // ຄິດໄລ່ stock ຈາກ units ດ້ວຍ (ຮອງຮັບທັງ units ໃໝ່ ແລະ colorStock ເກົ່າ)
+    let stockBadges = '';
+    if (Array.isArray(p.units) && p.units.length > 0) {
+      // units-based: ນັບ Ready ແຍກຕາມສີ
+      const byColor = {};
+      p.units.forEach(u => {
+        const c = u.color || 'ບໍ່ລະບຸສີ';
+        byColor[c] = (byColor[c] || 0) + (u.status === 'Ready' ? 1 : 0);
+      });
+      stockBadges = Object.entries(byColor).map(([color, qty]) =>
+        `<span class="text-[10px] font-semibold px-2.5 py-1 rounded-full ${qty > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-400 line-through'}">
+           ${agentColorLabel(color)}: ${qty > 0 ? qty + ' ເຄື່ອງ' : 'ໝົດ'}
+         </span>`
+      ).join('');
+    } else if (p.colorStock && typeof p.colorStock === 'object' && Object.keys(p.colorStock).length > 0) {
+      // colorStock legacy
+      stockBadges = Object.entries(p.colorStock).map(([color, qty]) =>
+        `<span class="text-[10px] font-semibold px-2.5 py-1 rounded-full ${Number(qty) > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-400 line-through'}">
+           ${agentColorLabel(color)}: ${Number(qty) > 0 ? qty + ' ເຄື່ອງ' : 'ໝົດ'}
+         </span>`
+      ).join('');
+    }
+
+    const specs = [p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.year, p.screenSize, p.battery]
       .filter(Boolean).join(' · ');
+
+    // ປ້າຍຄີບອດ — ສີໃຫ້ຕ່າງຈາກ stock badge (indigo) ຈັດໄວ້ຂ້າງ stock badges
+    const kbBadge = p.keyboard
+      ? `<span class="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700">${formatKeyboard(p.keyboard)}</span>`
+      : '';
 
     return `
       <div class="p-4 hover:bg-slate-50/60 transition">
@@ -122,9 +149,8 @@ function renderAgentList() {
           <div class="min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
               <h3 class="font-bold text-slate-800 text-sm">${p.title}</h3>
-              <span class="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">ID ${p.id}</span>
               <span class="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase">${p.category || ''}</span>
-              ${!hasColorStock && p.color ? `<span class="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">${agentColorLabel(p.color)}</span>` : ''}
+              ${!stockBadges && p.color ? `<span class="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">${agentColorLabel(p.color)}</span>` : ''}
             </div>
             ${specs ? `<p class="text-[11px] text-slate-400 mt-1">${specs}</p>` : ''}
           </div>
@@ -134,13 +160,10 @@ function renderAgentList() {
           </div>
         </div>
 
-        ${hasColorStock ? `
+        ${stockBadges || kbBadge ? `
           <div class="flex flex-wrap gap-1.5 mt-2">
-            ${Object.entries(p.colorStock).map(([color, qty]) => `
-              <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full ${Number(qty) > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-400 line-through'}">
-                ${agentColorLabel(color)}: ${Number(qty) > 0 ? qty + ' ເຄື່ອງ' : 'ໝົດ'}
-              </span>
-            `).join('')}
+            ${stockBadges}
+            ${kbBadge}
           </div>
         ` : ''}
       </div>
