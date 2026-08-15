@@ -135,7 +135,7 @@ function renderAgentList() {
       ).join('');
     }
 
-    const specs = [p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.year, p.screenSize, p.battery]
+    const specs = [p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.year, p.screenSize]
       .filter(Boolean).join(' · ');
 
     // ປ້າຍຄີບອດ — ສີໃຫ້ຕ່າງຈາກ stock badge (indigo) ຈັດໄວ້ຂ້າງ stock badges

@@ -226,7 +226,6 @@ function renderAdminGrid() {
         <div class="relative h-36 bg-slate-100">
           <img src="${mainImg}" class="w-full h-full object-cover">
           <span class="absolute top-2 left-2 px-2.5 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 shadow-sm">${statusText}</span>
-          <span class="absolute top-2 right-2 px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-900/70 text-white">ID: ${p.id}</span>
         </div>
         <div class="p-3 flex-1 flex flex-col justify-between">
           <div>
