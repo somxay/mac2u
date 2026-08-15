@@ -597,7 +597,8 @@ function blankUnit() {
   return {
     sn: '', color: '', status: 'Ready',       // Ready | Sold | Consignment
     saleType: '', hasWarranty: false, soldDate: '', warrantyEndDate: '', cycleCount: '',
-    consignment: null   // { partnerName, priceLAK, dateOut, dateSold }
+    salePrice: '',                             // ລາຄາຂາຍຈິງ (ໃສ່ຕອນຂາຍ ຫຼື ຕອນເພີ່ມ SN ກ່ອນຂາຍ)
+    consignment: null                          // { partnerName, priceLAK, dateOut, dateSold }
   };
 }
 
@@ -626,6 +627,12 @@ function removeUnitRow(index) {
 function updateUnitField(index, field, value) {
   if (!currentUnits[index]) return;
   currentUnits[index][field] = value;
+}
+
+function updateUnitPriceField(index, displayValue) {
+  if (!currentUnits[index]) return;
+  const raw = Number(displayValue.replace(/[^\d]/g, '')) || '';
+  currentUnits[index].salePrice = raw;
 }
 
 // ຍົກເລີກການຂາຍ → ກັບເປັນ "ພ້ອມຂາຍ" (ໃຊ້ກໍລະນີພິມຜິດ/ຍົກເລີກອໍເດີ)
@@ -681,6 +688,8 @@ function confirmSellUnit() {
 
   unit.sn = sn;
   unit.cycleCount = cycleCount ? Number(cycleCount) : '';
+  // ເກັບລາຄາໄວ້ (ຖ້າໃສ່ໄວ້ໃນ row ກ່ອນຂາຍ; ບໍ່ overwrite ຖ້າໃສ່ໄວ້ຢູ່ແລ້ວ)
+  if (!unit.salePrice) unit.salePrice = '';
   unit.status = 'Sold';
   unit.saleType = sellType;
   unit.soldDate = today;
@@ -761,6 +770,7 @@ function renderUnitRows() {
         ${unit.saleType === 'retail' ? 'ຂາຍລູກຄ້າທົ່ວໄປ' : 'ຂາຍໃຫ້ຕົວແທນ'} · ວັນຂາຍ ${unit.soldDate || '-'}
         ${unit.hasWarranty ? ` · ປະກັນຮອດ ${unit.warrantyEndDate}` : ' · ບໍ່ມີປະກັນ'}
         ${unit.cycleCount ? ` · ຮອບຊາດ ${unit.cycleCount}` : ''}
+        ${unit.salePrice ? ` · ລາຄາ <b class="text-rose-600">${Number(unit.salePrice).toLocaleString()} ₭</b>` : ''}
       </p>`;
     } else if (unit.status === 'Consignment' && unit.consignment) {
       const c = unit.consignment;
@@ -785,11 +795,14 @@ function renderUnitRows() {
 
     return `
       <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3">
-        <div class="flex items-center gap-2">
-          <input type="text" value="${unit.sn}" placeholder="ໃສ່ Serial Number"
+        <div class="flex items-center gap-2 flex-wrap">
+          <input type="text" value="${unit.sn}" placeholder="Serial Number"
                  oninput="updateUnitField(${index}, 'sn', this.value)"
-                 class="flex-1 bg-white border border-slate-200 p-2 rounded-lg text-xs font-mono">
-          <select onchange="updateUnitField(${index}, 'color', this.value)" class="w-40 bg-white border border-slate-200 p-2 rounded-lg text-xs">
+                 class="flex-1 min-w-[120px] bg-white border border-slate-200 p-2 rounded-lg text-xs font-mono">
+          <input type="text" inputmode="numeric" value="${unit.salePrice ? Number(unit.salePrice).toLocaleString('en-US') : ''}" placeholder="ລາຄາຂາຍ ₭"
+                 oninput="updateUnitPriceField(${index}, this.value)"
+                 class="w-36 bg-white border border-rose-200 p-2 rounded-lg text-xs text-rose-700 font-semibold">
+          <select onchange="updateUnitField(${index}, 'color', this.value)" class="w-32 bg-white border border-slate-200 p-2 rounded-lg text-xs">
             <option value="">-- ສີ --</option>
             ${colorOptionsHtml}
           </select>

@@ -210,10 +210,21 @@ function colorLabelLao(color) {
   return map[color] || color || '';
 }
 
-// ---------- ສະຕັອກແຍກຕາມສີ (ຄິດໄລ່ຈາກ Serial Number units, ຫຼື colorStock ເກົ່າຖ້າຍັງບໍ່ໄດ້ migrate) ----------
+// ---------- ສະຕັອກ (ຄິດໄລ່ຈາກ units, ຫຼື colorStock/status ເກົ່າຖ້າຍັງບໍ່ໄດ້ migrate) ----------
 
-// ຄິດໄລ່ຈຳນວນຄົງເຫຼືອຕາມສີ ຈາກ product.units (ນັບສະເພາະເຄື່ອງທີ່ status === 'Ready', ບໍ່ນັບ Sold/Consignment)
-// ຄືນຄ່າ object { colorName: qty } — ບໍ່ເຄີຍລວມ Serial Number ເຂົ້າໃນຄ່ານີ້ (ລູກຄ້າຫ້າມເຫັນ SN ເດັດຂາດ)
+// ຈຳນວນຄົງເຫຼືອທັງໝົດ = Ready units (ໃຊ້ເປັນຕົວຕັດສິນໃຈໃນໜ້າຮ້ານ)
+// ຖ້າໃຊ້ units → ນັບ Ready; ຖ້າໃຊ້ colorStock ເກົ່າ → sum qty; ຖ້າ 1 ID = 1 ເຄື່ອງ → null (ໃຊ້ p.status)
+function totalColorStock(p) {
+  if (Array.isArray(p.units) && p.units.length > 0) {
+    return p.units.filter(u => u.status === 'Ready').length;
+  }
+  if (p.colorStock && typeof p.colorStock === 'object' && Object.keys(p.colorStock).length > 0) {
+    return Object.values(p.colorStock).reduce((sum, qty) => sum + (Number(qty) || 0), 0);
+  }
+  return null; // single-item product → ໃຊ້ p.status ແທນ
+}
+
+// ຄ່ານີ້ໃຊ້ສະເພາະສຳລັບ badge ແລະ modal per-color breakdown (ບໍ່ໃຊ້ຕັດສິນໃຈ in-stock/out-of-stock)
 function stockByColorFromUnits(p) {
   if (!Array.isArray(p.units) || p.units.length === 0) return null;
   const result = {};
@@ -229,14 +240,9 @@ function getEffectiveColorStock(p) {
   return stockByColorFromUnits(p) || p.colorStock || null;
 }
 
-// ຄືນຄ່າ true ຖ້າສິນຄ້ານີ້ໃຊ້ລະບົບສະຕັອກແຍກຕາມສີ (ບໍ່ແມ່ນເຄື່ອງມືສອງ 1 ID = 1 ເຄື່ອງ)
 function hasColorStock(p) {
   const stock = getEffectiveColorStock(p);
   return !!stock && Object.keys(stock).length > 0;
-}
-function totalColorStock(p) {
-  if (!hasColorStock(p)) return null;
-  return Object.values(getEffectiveColorStock(p)).reduce((sum, qty) => sum + (Number(qty) || 0), 0);
 }
 
 function priceInCurrentCurrency(lakVal, thbVal) {
@@ -504,6 +510,7 @@ function checkWarranty() {
       <p><b>ປີຜະລິດ:</b> ${foundProduct.year || '-'}</p>
       <p><b>ຮອບຊາດ (Cycle Count):</b> ${foundUnit.cycleCount || 'ບໍ່ມີຂໍ້ມູນ'}</p>
       <p><b>ວັນທີ່ຂາຍ:</b> ${foundUnit.soldDate || 'ຍັງບໍ່ໄດ້ຂາຍ'}</p>
+      ${foundUnit.salePrice ? `<p><b>ລາຄາທີ່ຂາຍຈິງ:</b> <span class="text-rose-600 font-bold">${Number(foundUnit.salePrice).toLocaleString()} ₭</span></p>` : ''}
       <p><b>ປະເພດການຂາຍ:</b> ${saleTypeText}</p>
       <p><b>ສະຖານະປະກັນ:</b> <span class="text-indigo-600 font-semibold">${warrantyText}</span></p>
     </div>

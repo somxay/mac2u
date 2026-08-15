@@ -328,20 +328,22 @@
             <option value="Reserved">ຈອງແລ້ວ</option>
             <option value="Sold">ຂາຍແລ້ວ</option>
           </select>
-          <p class="text-[10px] text-slate-400 mt-1 ml-1">ຖ້າສິນຄ້ານີ້ມີການໃສ່ Serial Number ຢູ່ລຸ່ມ, ສະຖານະຈະຄິດໄລ່ຈາກ SN ແທນ ບໍ່ຕ້ອງແກ້ບ່ອນນີ້</p>
+          <p class="text-[10px] text-slate-400 mt-1 ml-1">ຖ້າສິນຄ້ານີ້ໃສ່ SN ຢູ່ລຸ່ມ, ສະຖານະຈະຄິດໄລ່ຈາກ SN ແທນ</p>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold text-indigo-600 block mb-1 ml-1"><i class="fas fa-layer-group"></i> ເພີ່ມສະຕັອກແບບກຸ່ມ</label>
+          <div class="flex items-center gap-2">
+            <input id="bulkAddQty" type="number" min="1" step="1" value="10" placeholder="ຈຳນວນ" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5">
+            <button type="button" onclick="bulkAddUnits()" class="btn-press bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-2.5 text-xs font-semibold whitespace-nowrap shadow-sm">+ ເພີ່ມ N ເຄື່ອງ</button>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1 ml-1">ເພີ່ມໄດ້ຫຼາຍເຄື່ອງໂດຍຍັງບໍ່ຕ້ອງໃສ່ SN (ໃສ່ SN ຕອນຂາຍ)</p>
         </div>
 
         <div class="md:col-span-2">
           <label class="text-[10px] font-bold text-indigo-600 block mb-1 ml-1"><i class="fas fa-barcode"></i> ຈັດການ Serial Number (SN) ແຕ່ລະເຄື່ອງ</label>
-          <p class="text-[10px] text-slate-400 mb-2 ml-1">ໃສ່ SN ແຍກຕາມເຄື່ອງ ພ້ອມສີ — ຖ້າໃສ່ໄວ້, ໜ້າຮ້ານຈະສະແດງຈຳນວນຄົງເຫຼືອຕາມສີ (ນັບສະເພາະ SN ທີ່ຍັງ "ພ້ອມຂາຍ") <b>SN ຈະບໍ່ຖືກສະແດງໃຫ້ລູກຄ້າເຫັນເດັດຂາດ</b>, ເຫັນສະເພາະ Admin. ກົດ "ຂາຍ" ຫຼື "ຝາກຂາຍ" ຢູ່ແຕ່ລະແຖວເພື່ອຕັດສະຕັອກ.</p>
+          <p class="text-[10px] text-slate-400 mb-2 ml-1">SN ໃຊ້ສຳລັບ<b>ກວດສອບການຮັບປະກັນ</b>ເທົ່ານັ້ນ — ຈຳນວນທີ່ໂຊໃນໜ້າຮ້ານຄຳນວນຈາກ <b>ຈຳນວນ unit ທັງໝົດ ລົບ ທີ່ຂາຍ/ຝາກ</b>. ກົດ "ຂາຍ" ຫຼື "ຝາກຂາຍ" ເພື່ອຕັດສະຕັອກ, SN ຈະບໍ່ໂຊໃຫ້ລູກຄ້າ.</p>
           <div id="unitRows" class="space-y-2 mb-2"></div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button type="button" onclick="addUnitRow()" class="btn-press bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 text-slate-500 rounded-xl px-4 py-2 text-xs font-semibold">+ ເພີ່ມ SN (ເທື່ອລະເຄື່ອງ)</button>
-            <div class="flex items-center gap-1.5 bg-slate-50 border border-dashed border-slate-300 rounded-xl px-3 py-1.5">
-              <input id="bulkAddQty" type="number" min="1" step="1" value="10" class="w-16 bg-white border border-slate-200 rounded-lg text-xs px-2 py-1">
-              <button type="button" onclick="bulkAddUnits()" class="btn-press bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap">+ ເພີ່ມແບບກຸ່ມ (ບໍ່ຕ້ອງໃສ່ SN ດຽວນີ້)</button>
-            </div>
-          </div>
+          <button type="button" onclick="addUnitRow()" class="btn-press bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 text-slate-500 rounded-xl px-4 py-2 text-xs font-semibold">+ ເພີ່ມ SN ເທື່ອລະເຄື່ອງ</button>
         </div>
 
         <div class="md:col-span-2">
