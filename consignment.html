@@ -8,25 +8,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao+Looped:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/liquid-glass.css">
   <style>
-    body { font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 12% 0%, #f1f5fb 0%, #f8fafc 42%, #f8fafc 100%); }
-    .rounded-2xl-custom { border-radius: 1.75rem; }
-    .rounded-3xl-custom { border-radius: 2.25rem; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .glass-header { background: rgba(255,255,255,.72); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); border-bottom: 1px solid rgba(15,23,42,.06); }
-    .glass-card { background: rgba(255,255,255,.86); backdrop-filter: blur(10px); box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 20px 40px -28px rgba(15,23,42,.18); border: 1px solid rgba(15,23,42,.04); }
-    .btn-press { transition: transform .16s cubic-bezier(.34,1.56,.64,1); position: relative; overflow: hidden; }
-    .btn-press:active { transform: scale(.94); }
-    .ripple-relative { position: relative; overflow: hidden; }
-    .ripple-effect { position: absolute; border-radius: 50%; background: rgba(255,255,255,.55); transform: scale(0); animation: rippleAnim .65s cubic-bezier(.16,.84,.44,1); pointer-events: none; }
-    @keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }
-    .toast-item { opacity: 0; transform: translateY(-16px) scale(.94); transition: opacity .3s cubic-bezier(.16,.84,.44,1), transform .3s cubic-bezier(.16,.84,.44,1); }
-    .toast-item.toast-show { opacity: 1; transform: translateY(0) scale(1); }
-    .toast-item.toast-hide { opacity: 0; transform: translateY(-10px) scale(.96); }
-    .loader-ring { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #e2e8f0; border-top-color: #0f172a; animation: spin .7s linear infinite; }
-    .loader-ring-sm { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: spin .6s linear infinite; display: inline-block; }
-    #loginScreen { animation: fadeIn .25s ease both; }
+    #loginScreen, #gateScreen { animation: fadeIn .25s ease both; }
   </style>
 </head>
 <body class="text-slate-800 antialiased">

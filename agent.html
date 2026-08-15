@@ -9,48 +9,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao+Looped:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/liquid-glass.css">
   <style>
-    body { font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 12% 0%, #f1f5fb 0%, #f8fafc 42%, #f8fafc 100%); }
-    .rounded-2xl-custom { border-radius: 1.75rem; }
-    .rounded-3xl-custom { border-radius: 2.25rem; }
-
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
-
-    .glass-header {
-      background: rgba(255,255,255,.72);
-      backdrop-filter: blur(18px) saturate(160%);
-      -webkit-backdrop-filter: blur(18px) saturate(160%);
-      border-bottom: 1px solid rgba(15,23,42,.06);
-    }
-    .glass-card {
-      background: rgba(255,255,255,.86);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 20px 40px -28px rgba(15,23,42,.18);
-      border: 1px solid rgba(15,23,42,.04);
-    }
-    .product-card { animation: fadeInUp .5s cubic-bezier(.16,.84,.44,1) both; transition: transform .3s ease, box-shadow .3s ease; }
-    .product-card:hover { transform: translateY(-5px); box-shadow: 0 20px 36px -20px rgba(15,23,42,.25); }
-    .btn-press { transition: transform .16s cubic-bezier(.34,1.56,.64,1); position: relative; overflow: hidden; }
-    .btn-press:active { transform: scale(.94); }
-    .skeleton { background: linear-gradient(90deg, #eef1f5 25%, #e2e7ef 37%, #eef1f5 63%); background-size: 400px 100%; animation: shimmer 1.3s ease infinite; }
-    #gateScreen { animation: fadeIn .25s ease both; }
-
-    .ripple-relative { position: relative; overflow: hidden; }
-    .ripple-effect {
-      position: absolute; border-radius: 50%;
-      background: rgba(255,255,255,.55);
-      transform: scale(0);
-      animation: rippleAnim .65s cubic-bezier(.16,.84,.44,1);
-      pointer-events: none;
-    }
-    @keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }
-
-    .toast-item { opacity: 0; transform: translateY(-16px) scale(.94); transition: opacity .3s cubic-bezier(.16,.84,.44,1), transform .3s cubic-bezier(.16,.84,.44,1); }
-    .toast-item.toast-show { opacity: 1; transform: translateY(0) scale(1); }
-    .toast-item.toast-hide { opacity: 0; transform: translateY(-10px) scale(.96); }
+    #loginScreen, #gateScreen { animation: fadeIn .25s ease both; }
   </style>
 </head>
 <body class="text-slate-800 antialiased">
@@ -82,7 +43,7 @@
             <i class="fas fa-tags"></i>
           </div>
           <div>
-            <h1 class="font-bold text-sm leading-tight">ລາຄາສົ່ງ - ຕົວແທນ ບໍ່ມີປະກັນ</h1>
+            <h1 class="font-bold text-sm leading-tight">ລາຄາສົ່ງ - ຕົວແທນ</h1>
             <p class="text-[11px] text-slate-400">Mac & DJ Store — Agent Only</p>
           </div>
         </div>

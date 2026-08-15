@@ -7,92 +7,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao+Looped:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/liquid-glass.css">
   <style>
-    :root {
-      --brand-ink: #0f172a;
-      --brand-gold: #b8925a;
-      --brand-glass: rgba(255,255,255,.72);
-    }
-    body { font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 12% 0%, #f1f5fb 0%, #f8fafc 42%, #f8fafc 100%); }
-    .rounded-2xl-custom { border-radius: 1.75rem; }
-    .rounded-3xl-custom { border-radius: 2.25rem; }
-
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes modalPop { from { opacity: 0; transform: scale(.94) translateY(14px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-    @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
-    @keyframes gridFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes pulseSoft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-
-    /* ---- Glass surfaces (Apple-store style: soft blur + hairline + long soft shadow) ---- */
-    .glass-header {
-      background: var(--brand-glass);
-      backdrop-filter: blur(18px) saturate(160%);
-      -webkit-backdrop-filter: blur(18px) saturate(160%);
-      border-bottom: 1px solid rgba(15,23,42,.06);
-    }
-    .glass-card {
-      background: rgba(255,255,255,.86);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 20px 40px -28px rgba(15,23,42,.18);
-      border: 1px solid rgba(15,23,42,.04);
-    }
-
-    .product-card { animation: fadeInUp .55s cubic-bezier(.16,.84,.44,1) both; transition: transform .38s cubic-bezier(.16,.84,.44,1), box-shadow .38s ease; will-change: transform; }
-    .product-card:hover { transform: translateY(-7px); box-shadow: 0 24px 44px -20px rgba(15,23,42,.28); }
-    .card-img { transition: transform .7s cubic-bezier(.16,.84,.44,1); }
-    .product-card:hover .card-img { transform: scale(1.08); }
-    #productGrid { animation: gridFade .4s ease both; }
-
-    .modal-backdrop-fade { animation: fadeIn .22s ease both; backdrop-filter: blur(6px); }
-    .modal-pop { animation: modalPop .35s cubic-bezier(.16,.84,.44,1) both; }
-
-    .btn-press { transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, background-color .2s ease; }
-    .btn-press:active { transform: scale(.94); }
-    .cat-btn { transition: all .3s cubic-bezier(.16,.84,.44,1); }
-
-    .skeleton {
-      background: linear-gradient(90deg, #eef1f5 25%, #e2e7ef 37%, #eef1f5 63%);
-      background-size: 400px 100%;
-      animation: shimmer 1.3s ease infinite;
-    }
-
-    /* ---- Ripple micro-interaction (injected by ui.js) ---- */
-    .ripple-relative { position: relative; overflow: hidden; }
-    .btn-press, .ripple { position: relative; overflow: hidden; }
-    .ripple-effect {
-      position: absolute; border-radius: 50%;
-      background: rgba(255,255,255,.55);
-      transform: scale(0);
-      animation: rippleAnim .65s cubic-bezier(.16,.84,.44,1);
-      pointer-events: none;
-    }
-    @keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }
-
-    /* ---- Toast notifications ---- */
-    .toast-item { opacity: 0; transform: translateY(-16px) scale(.94); transition: opacity .3s cubic-bezier(.16,.84,.44,1), transform .3s cubic-bezier(.16,.84,.44,1); }
-    .toast-item.toast-show { opacity: 1; transform: translateY(0) scale(1); }
-    .toast-item.toast-hide { opacity: 0; transform: translateY(-10px) scale(.96); }
-
-    /* ---- Loading ring (spinner premium) ---- */
-    .loader-ring { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #e2e8f0; border-top-color: var(--brand-ink); animation: spin .7s linear infinite; }
-
-    /* ---- Currency / filter cross-fade ---- */
-    .fade-swap { transition: opacity .22s ease; }
-    .fade-swap.fading { opacity: 0; }
-
-    .price-pulse { animation: pulseSoft .5s ease; }
-
-    /* ---- Full-screen Image Zoom Viewer ---- */
-    @keyframes zoomViewerIn { from { opacity: 0; } to { opacity: 1; } }
-    #imageZoomViewer.show { display: block; animation: zoomViewerIn .2s ease both; }
-    #zoomViewerStage { cursor: zoom-in; }
-    #zoomViewerStage.zoomed { cursor: grab; }
-    #zoomViewerStage.zoomed.dragging { cursor: grabbing; }
-    #zoomImg { transform-origin: 0 0; transition: transform .06s linear; }
-    #zoomImg.no-transition { transition: none; }
+    /* page-specific only */
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 
