@@ -1,0 +1,299 @@
+/* =========================================================================
+   liquid-glass.css — iOS Liquid Glass Design System
+   ໃຊ້ຮ່ວມກັນໃນທຸກໜ້າ (index, admin, agent, consignment)
+   ========================================================================= */
+
+/* ---- CSS Custom Properties ---- */
+:root {
+  --lg-blur: 20px;
+  --lg-saturate: 180%;
+  --lg-bg: rgba(255,255,255,0.62);
+  --lg-bg-strong: rgba(255,255,255,0.82);
+  --lg-border: rgba(255,255,255,0.55);
+  --lg-border-subtle: rgba(255,255,255,0.30);
+  --lg-shadow: 0 8px 32px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06);
+  --lg-shadow-lifted: 0 20px 60px rgba(15,23,42,0.18), 0 4px 12px rgba(15,23,42,0.08);
+  --lg-shadow-modal: 0 32px 80px rgba(15,23,42,0.28), 0 8px 20px rgba(15,23,42,0.1);
+  --lg-radius-sm: 1rem;
+  --lg-radius: 1.5rem;
+  --lg-radius-lg: 2rem;
+  --lg-radius-xl: 2.5rem;
+  --brand-ink: #0f172a;
+  --brand-glass: rgba(255,255,255,0.72);
+  --spring: cubic-bezier(.16,.84,.44,1);
+  --spring-bounce: cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ---- Vivid gradient background ---- */
+body {
+  font-family: 'Noto Sans Lao Looped', 'Plus Jakarta Sans', sans-serif;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% -10%, rgba(139,92,246,0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 80% 110%, rgba(59,130,246,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(16,185,129,0.06) 0%, transparent 60%),
+    linear-gradient(160deg, #f0f4ff 0%, #f8fafc 45%, #f0f9ff 100%);
+  min-height: 100vh;
+}
+
+/* ---- Liquid Glass surface primitives ---- */
+.glass-header {
+  background: var(--lg-bg);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  border-bottom: 1px solid var(--lg-border-subtle);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(15,23,42,0.06);
+}
+
+.glass-card {
+  background: var(--lg-bg-strong);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--lg-border);
+  box-shadow: var(--lg-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Liquid sheen highlight — subtle top light reflection */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.45) 0%,
+    rgba(255,255,255,0.10) 40%,
+    rgba(255,255,255,0.00) 60%,
+    rgba(255,255,255,0.08) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content sits above the sheen */
+.glass-card > * { position: relative; z-index: 1; }
+
+/* ---- Frosted modal backdrop ---- */
+.glass-modal {
+  background: rgba(255,255,255,0.90);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--lg-border);
+  box-shadow: var(--lg-shadow-modal);
+}
+
+/* ---- Liquid Button system ---- */
+.btn-press {
+  transition:
+    transform .18s var(--spring-bounce),
+    box-shadow .22s ease,
+    background-color .2s ease,
+    opacity .2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.btn-press:hover { box-shadow: 0 4px 16px rgba(15,23,42,0.12); }
+.btn-press:active { transform: scale(.93); box-shadow: 0 1px 4px rgba(15,23,42,0.08); }
+
+/* Glass button variant */
+.btn-glass {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow: 0 2px 8px rgba(15,23,42,0.08), 0 1px 0 rgba(255,255,255,0.8) inset;
+}
+.btn-glass:hover {
+  background: rgba(255,255,255,0.72);
+  box-shadow: 0 4px 16px rgba(15,23,42,0.12), 0 1px 0 rgba(255,255,255,0.9) inset;
+}
+
+/* ---- Product card upgrades ---- */
+.product-card {
+  animation: fadeInUp .5s var(--spring) both;
+  transition: transform .38s var(--spring), box-shadow .38s ease;
+  will-change: transform;
+}
+.product-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: var(--lg-shadow-lifted);
+}
+.product-card:hover .card-img { transform: scale(1.09); }
+.card-img { transition: transform .7s var(--spring); }
+
+/* ---- Badge system ---- */
+/* Stock badges (emerald/rose) */
+.badge-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .625rem;
+  font-weight: 700;
+  padding: .25rem .7rem;
+  border-radius: 100px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid transparent;
+}
+.badge-stock-ready {
+  background: rgba(209,250,229,0.75);
+  color: #065f46;
+  border-color: rgba(167,243,208,0.6);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset;
+}
+.badge-stock-low {
+  background: rgba(254,243,199,0.75);
+  color: #92400e;
+  border-color: rgba(253,230,138,0.6);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset;
+}
+.badge-stock-out {
+  background: rgba(254,226,226,0.70);
+  color: #991b1b;
+  border-color: rgba(252,165,165,0.5);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset;
+}
+
+/* Keyboard badge (indigo, distinct from stock) */
+.badge-keyboard {
+  display: inline-flex;
+  align-items: center;
+  font-size: .625rem;
+  font-weight: 700;
+  padding: .25rem .7rem;
+  border-radius: 100px;
+  background: rgba(224,231,255,0.75);
+  color: #3730a3;
+  border: 1px solid rgba(199,210,254,0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset;
+}
+
+/* Category badge */
+.badge-category {
+  display: inline-flex;
+  font-size: .625rem;
+  font-weight: 700;
+  padding: .22rem .65rem;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.55);
+  color: #475569;
+  border: 1px solid rgba(203,213,225,0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* ---- Modal backdrop ---- */
+.modal-backdrop-fade {
+  animation: fadeIn .22s ease both;
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  background: rgba(15,23,42,0.45);
+}
+.modal-pop { animation: modalPop .38s var(--spring) both; }
+
+/* ---- Filter pill buttons (category) ---- */
+.cat-btn {
+  transition: all .3s var(--spring);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ---- Form input glass style ---- */
+.input-glass {
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(203,213,225,0.55);
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.input-glass:focus {
+  background: rgba(255,255,255,0.88);
+  border-color: rgba(139,92,246,0.4);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.12);
+  outline: none;
+}
+
+/* ---- Ripple micro-interaction ---- */
+.ripple-relative { position: relative; overflow: hidden; }
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  transform: scale(0);
+  animation: rippleAnim .6s var(--spring);
+  pointer-events: none;
+}
+
+/* ---- Toast notifications ---- */
+.toast-item {
+  opacity: 0;
+  transform: translateY(-16px) scale(.94);
+  transition: opacity .3s var(--spring), transform .3s var(--spring);
+  background: rgba(15,23,42,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 24px rgba(15,23,42,0.25);
+}
+.toast-item.toast-show { opacity: 1; transform: translateY(0) scale(1); }
+.toast-item.toast-hide { opacity: 0; transform: translateY(-10px) scale(.96); }
+
+/* ---- Skeleton shimmer ---- */
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(226,232,240,0.8) 25%,
+    rgba(203,213,225,0.9) 37%,
+    rgba(226,232,240,0.8) 63%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+/* ---- Border radius helpers ---- */
+.rounded-2xl-custom { border-radius: var(--lg-radius); }
+.rounded-3xl-custom { border-radius: var(--lg-radius-lg); }
+
+/* ---- Loader rings ---- */
+.loader-ring {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(203,213,225,0.5);
+  border-top-color: var(--brand-ink);
+  animation: spin .7s linear infinite;
+}
+.loader-ring-sm {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  animation: spin .6s linear infinite;
+  display: inline-block;
+}
+
+/* ---- Utility animations ---- */
+@keyframes fadeInUp   { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn     { from { opacity:0; } to { opacity:1; } }
+@keyframes modalPop   { from { opacity:0; transform:scale(.92) translateY(16px); } to { opacity:1; transform:scale(1) translateY(0); } }
+@keyframes shimmer    { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+@keyframes gridFade   { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin       { to { transform: rotate(360deg); } }
+@keyframes pulseSoft  { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+@keyframes rippleAnim { to { transform:scale(1); opacity:0; } }
+@keyframes bubbleIn   { from{transform:scale(0) rotate(-20deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+
+/* ---- Zoom viewer ---- */
+@keyframes zoomViewerIn { from{opacity:0} to{opacity:1} }
+#imageZoomViewer.show  { display:block; animation:zoomViewerIn .2s ease both; }
+#zoomViewerStage       { cursor:zoom-in; }
+#zoomViewerStage.zoomed { cursor:grab; }
+#zoomViewerStage.zoomed.dragging { cursor:grabbing; }
+#zoomImg               { transform-origin:0 0; transition:transform .06s linear; }
+#zoomImg.no-transition { transition:none; }
+
+/* ---- Misc ---- */
+.fade-swap { transition: opacity .22s ease; }
+.fade-swap.fading { opacity: 0; }
+.price-pulse { animation: pulseSoft .5s ease; }
+#productGrid { animation: gridFade .4s ease both; }
