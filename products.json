@@ -139,10 +139,10 @@
         "status": "Sold",
         "saleType": "agent",
         "hasWarranty": false,
-        "soldDate": "2026-08-14",
+        "soldDate": "2026-08-15",
         "warrantyEndDate": "",
         "consignment": null,
-        "cycleCount": "",
+        "cycleCount": 60,
         "salePrice": 11500000
       },
       {
