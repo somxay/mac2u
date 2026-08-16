@@ -287,31 +287,28 @@ function renderProducts(products) {
             <img src="${mainImg}" alt="${p.title}" class="card-img w-full h-full object-cover">
             <span class="absolute top-3 left-3 liquid-pill ${statusColor}">${statusText}</span>
           </div>
-          <div class="p-4">
-            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ${formatKeyboard(p.keyboard || 'TH')}</span>
-            <div class="flex items-center gap-1.5 mt-1">
+          <div class="p-3 pb-1">
+            <div class="flex items-center gap-1.5">
               <h3 class="font-bold text-slate-800 text-sm line-clamp-2">${p.title}</h3>
               ${hasColorStock(p)
                 ? `<span class="shrink-0 text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full whitespace-nowrap"><i class="fas fa-palette"></i> ${Object.keys(getEffectiveColorStock(p)).length} ສີ</span>`
                 : (p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${colorLabelLao(p.color)}</span>` : '')}
             </div>
             ${p.category === 'Macbook' ? `
-              <p class="text-[11px] text-slate-400 font-medium mt-1.5">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB</p>
-            ` : ''}
+              <p class="text-[10px] text-slate-400 font-medium mt-1 leading-snug">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB${p.screenSize ? ' · ' + p.screenSize : ''} · ${formatKeyboard(p.keyboard || 'TH')}</p>
+            ` : (p.keyboard ? `<p class="text-[10px] text-slate-400 mt-1">${formatKeyboard(p.keyboard)}</p>` : '')}
           </div>
         </div>
-        <div class="p-4 pt-3 border-t border-white/30 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] text-slate-400 block">${currentCurrency === 'THB' ? 'ລາຄາ (บาท)' : 'ລາຄາ (ກີບ)'}</span>
-            ${isSold ? `<span class="text-slate-400 font-bold text-sm italic">${stockTotal !== null ? 'ໝົດສະຕັອກ' : 'ສິນຄ້ານີ້ຂາຍແລ້ວ'}</span>` : `
-              <div class="flex items-baseline gap-2">
-                <span class="text-rose-600 font-bold text-lg">${priceFormatted} ${currencySymbol}</span>
-                ${oldPriceVal > 0 ? `<span class="text-slate-300 line-through text-xs">${Number(oldPriceVal).toLocaleString()}</span>` : ''}
-              </div>
+        <div class="px-3 py-2.5 border-t border-white/30 flex items-center justify-between">
+          <div class="min-w-0">
+            <span class="text-[9px] text-slate-400 block">${currentCurrency === 'THB' ? 'ລາຄາ (บาท)' : 'ລາຄາ (ກີບ)'}</span>
+            ${isSold ? `<span class="text-slate-400 font-bold text-xs italic">${stockTotal !== null ? 'ໝົດສະຕັອກ' : 'ຂາຍແລ້ວ'}</span>` : `
+              <p class="text-rose-600 font-bold text-sm leading-tight whitespace-nowrap">${priceFormatted} ${currencySymbol}</p>
+              ${oldPriceVal > 0 ? `<span class="text-slate-300 line-through text-[9px]">${Number(oldPriceVal).toLocaleString()}</span>` : ''}
             `}
           </div>
-          <div class="w-9 h-9 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center transition-all duration-300 group-hover:bg-slate-900 group-hover:text-white group-hover:translate-x-0.5">
-            <i class="fas fa-arrow-right text-xs"></i>
+          <div class="shrink-0 w-7 h-7 rounded-full bg-slate-50/80 text-slate-400 flex items-center justify-center transition-all duration-300 group-hover:bg-slate-900 group-hover:text-white">
+            <i class="fas fa-arrow-right text-[10px]"></i>
           </div>
         </div>
       </div>
