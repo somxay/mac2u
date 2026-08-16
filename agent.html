@@ -28,6 +28,11 @@
       <input id="agentCodeInput" type="password" placeholder="ລະຫັດຕົວແທນ"
              class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl text-sm mb-3 focus:outline-none focus:border-slate-400">
 
+      <label class="flex items-center gap-2 mb-3 cursor-pointer select-none">
+        <input id="agentRemember" type="checkbox" class="w-4 h-4 rounded accent-slate-800">
+        <span class="text-xs text-slate-500">ຈື່ລະຫັດ (ໃຊ້ localStorage — ໃຊ້ສະເພາະອຸປະກອນຂອງທ່ານເອງ)</span>
+      </label>
+
       <p id="gateError" class="text-xs text-rose-500 mb-2 hidden">ລະຫັດບໍ່ຖືກຕ້ອງ, ລອງໃໝ່ອີກຄັ້ງ</p>
       <button id="gateSubmitBtn" onclick="checkAgentCode()" class="btn-press w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-semibold">ເຂົ້າສູ່ລະບົບ</button>
       <a href="index.html" class="block text-center text-xs text-slate-400 mt-4 hover:underline">← ກັບຄືນໜ້າຮ້ານ</a>

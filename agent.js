@@ -20,6 +20,7 @@ async function checkAgentCode() {
   const input = document.getElementById('agentCodeInput');
   const code = input.value.trim();
   const btn = document.getElementById('gateSubmitBtn');
+  const remember = document.getElementById('agentRemember')?.checked || false;
   if (!code) return;
 
   btn.disabled = true;
@@ -27,6 +28,7 @@ async function checkAgentCode() {
 
   if (hash === CONFIG.AGENT_CODE_HASH) {
     sessionStorage.setItem(AGENT_SESSION_KEY, '1');
+    if (remember) localStorage.setItem(AGENT_SESSION_KEY, '1');
     unlockAgentPage();
   } else {
     document.getElementById('gateError').classList.remove('hidden');
@@ -42,6 +44,7 @@ document.getElementById('agentCodeInput').addEventListener('keydown', e => {
 
 function agentLogout() {
   sessionStorage.removeItem(AGENT_SESSION_KEY);
+  localStorage.removeItem(AGENT_SESSION_KEY);
   document.getElementById('agentContent').classList.add('hidden');
   document.getElementById('gateScreen').classList.remove('hidden');
   document.getElementById('agentCodeInput').value = '';
@@ -53,9 +56,10 @@ function unlockAgentPage() {
   loadAgentProducts();
 }
 
-// ຖ້າ session ຍັງມີຢູ່ (ຍັງບໍ່ໄດ້ປິດແທັບ/ browser) ໃຫ້ຂ້າມໜ້າຖາມລະຫັດ
+// ຖ້າ session ຫຼື localStorage ຍັງມີຢູ່ ໃຫ້ຂ້າມໜ້າຖາມລະຫັດ
 (function autoUnlock() {
-  if (sessionStorage.getItem(AGENT_SESSION_KEY) === '1') {
+  if (sessionStorage.getItem(AGENT_SESSION_KEY) === '1' ||
+      localStorage.getItem(AGENT_SESSION_KEY) === '1') {
     unlockAgentPage();
   }
 })();

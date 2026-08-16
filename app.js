@@ -295,16 +295,16 @@ function renderProducts(products) {
                 : (p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${colorLabelLao(p.color)}</span>` : '')}
             </div>
             ${p.category === 'Macbook' ? `
-              <p class="text-[10px] text-slate-400 font-medium mt-1 leading-snug">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB${p.screenSize ? ' · ' + p.screenSize : ''} · ${formatKeyboard(p.keyboard || 'TH')}</p>
-            ` : (p.keyboard ? `<p class="text-[10px] text-slate-400 mt-1">${formatKeyboard(p.keyboard)}</p>` : '')}
+              <p class="text-[10px] text-slate-400 font-medium mt-1 leading-snug">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB${p.screenSize ? ' · ' + p.screenSize : ''}</p>
+              <span class="inline-block mt-1 liquid-pill pill-indigo">${formatKeyboard(p.keyboard || 'TH')}</span>
+            ` : (p.keyboard ? `<span class="inline-block mt-1 liquid-pill pill-indigo">${formatKeyboard(p.keyboard)}</span>` : '')}
           </div>
         </div>
         <div class="px-3 py-2.5 border-t border-white/30 flex items-center justify-between">
-          <div class="min-w-0">
+          <div class="min-w-0 overflow-hidden">
             <span class="text-[9px] text-slate-400 block">${currentCurrency === 'THB' ? 'ລາຄາ (บาท)' : 'ລາຄາ (ກີບ)'}</span>
             ${isSold ? `<span class="text-slate-400 font-bold text-xs italic">${stockTotal !== null ? 'ໝົດສະຕັອກ' : 'ຂາຍແລ້ວ'}</span>` : `
-              <p class="text-rose-600 font-bold text-sm leading-tight whitespace-nowrap">${priceFormatted} ${currencySymbol}</p>
-              ${oldPriceVal > 0 ? `<span class="text-slate-300 line-through text-[9px]">${Number(oldPriceVal).toLocaleString()}</span>` : ''}
+              <p class="text-rose-600 font-bold text-[0.82rem] leading-tight whitespace-nowrap">${priceFormatted} ${currencySymbol}</p>
             `}
           </div>
           <div class="shrink-0 w-7 h-7 rounded-full bg-slate-50/80 text-slate-400 flex items-center justify-center transition-all duration-300 group-hover:bg-slate-900 group-hover:text-white">
@@ -418,7 +418,6 @@ function openProductModal(id) {
         ${(stockTotal !== null ? stockTotal <= 0 : p.status === 'Sold') ? `<span class="text-slate-400 font-bold text-sm italic">${stockTotal !== null ? 'ໝົດສະຕັອກ' : 'ສິນຄ້ານີ້ຂາຍແລ້ວ'}</span>` : `
           <div class="flex items-baseline gap-2 mt-0.5">
             <span class="text-rose-600 font-extrabold text-2xl">${priceFormatted} ${currencySymbol}</span>
-            ${oldPriceVal > 0 ? `<span class="text-slate-300 line-through text-sm">${Number(oldPriceVal).toLocaleString()}</span>` : ''}
           </div>
         `}
       </div>
