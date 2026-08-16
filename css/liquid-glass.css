@@ -357,6 +357,54 @@ body {
 @keyframes bubbleIn  { from{transform:scale(0) rotate(-20deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
 
 /* ── Mobile 2-column compact card adaptation ──────────────────────────────
+   New card template uses p-3/px-3 + whitespace-nowrap on price already;
+   these rules handle remaining edge cases for <640px screens.
+   ─────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  #productGrid, #loading { gap: .6rem; }
+
+  /* Card rounding */
+  #productGrid .product-card { border-radius: 1.2rem; }
+
+  /* Title */
+  #productGrid .product-card h3 { font-size: .72rem; }
+
+  /* Status badge */
+  #productGrid .liquid-pill { font-size: .50rem; padding: .16rem .5rem; }
+
+  /* Arrow button */
+  #productGrid .product-card .w-7 { width: 1.6rem; height: 1.6rem; }
+}
+
+@media (max-width: 374px) {
+  #productGrid { gap: .4rem; }
+  #productGrid .product-card h3 { font-size: .65rem; }
+  #productGrid .product-card .text-sm { font-size: .78rem; }
+}
+
+
+/* ── Zoom viewer ────────────────────────────────────────────────────────── */
+@keyframes zoomViewerIn { from{opacity:0} to{opacity:1} }
+#imageZoomViewer.show  { display:block; animation:zoomViewerIn .2s ease both; }
+#zoomViewerStage       { cursor:zoom-in; }
+#zoomViewerStage.zoomed { cursor:grab; }
+#zoomViewerStage.zoomed.dragging { cursor:grabbing; }
+#zoomImg               { transform-origin:0 0; transition:transform .06s linear; }
+#zoomImg.no-transition { transition:none; }
+
+/* ── Keyframes ──────────────────────────────────────────────────────────── */
+@keyframes fadeInUp  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn    { from{opacity:0} to{opacity:1} }
+@keyframes modalPop  { from{opacity:0;transform:scale(.90) translateY(18px)} to{opacity:1;transform:scale(1) translateY(0)} }
+@keyframes shimmer   { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+@keyframes gridFade  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes spin      { to{transform:rotate(360deg)} }
+@keyframes pulseSoft { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+@keyframes rippleAnim{ to{transform:scale(1);opacity:0} }
+@keyframes bubbleIn  { from{transform:scale(0) rotate(-20deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+
+/* ── Mobile 2-column compact card adaptation ──────────────────────────────
    Targets screens narrower than 640px (sm breakpoint).
    Cards are already in a 2-col grid; this block scales internal elements
    down so everything fits without overflow.
