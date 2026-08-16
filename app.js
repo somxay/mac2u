@@ -290,17 +290,17 @@ function renderProducts(products) {
           <div class="p-4">
             <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ${formatKeyboard(p.keyboard || 'TH')}</span>
             <div class="flex items-center gap-1.5 mt-1">
-              <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${p.title}</h3>
+              <h3 class="font-bold text-slate-800 text-sm line-clamp-2">${p.title}</h3>
               ${hasColorStock(p)
                 ? `<span class="shrink-0 text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full whitespace-nowrap"><i class="fas fa-palette"></i> ${Object.keys(getEffectiveColorStock(p)).length} ສີ</span>`
                 : (p.color ? `<span class="shrink-0 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">${colorLabelLao(p.color)}</span>` : '')}
             </div>
             ${p.category === 'Macbook' ? `
-              <p class="text-[11px] text-slate-400 font-medium mt-1.5">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB · ${p.screenSize || '-'}</p>
+              <p class="text-[11px] text-slate-400 font-medium mt-1.5">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB</p>
             ` : ''}
           </div>
         </div>
-        <div class="p-4 pt-3 border-t border-slate-50 flex items-center justify-between">
+        <div class="p-4 pt-3 border-t border-white/30 flex items-center justify-between">
           <div>
             <span class="text-[10px] text-slate-400 block">${currentCurrency === 'THB' ? 'ລາຄາ (บาท)' : 'ລາຄາ (ກີບ)'}</span>
             ${isSold ? `<span class="text-slate-400 font-bold text-sm italic">${stockTotal !== null ? 'ໝົດສະຕັອກ' : 'ສິນຄ້ານີ້ຂາຍແລ້ວ'}</span>` : `
