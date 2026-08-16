@@ -355,3 +355,81 @@ body {
 @keyframes pulseSoft { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
 @keyframes rippleAnim{ to{transform:scale(1);opacity:0} }
 @keyframes bubbleIn  { from{transform:scale(0) rotate(-20deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+
+/* ── Mobile 2-column compact card adaptation ──────────────────────────────
+   Targets screens narrower than 640px (sm breakpoint).
+   Cards are already in a 2-col grid; this block scales internal elements
+   down so everything fits without overflow.
+   ─────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  /* Tighten the grid gap */
+  #productGrid, #loading {
+    gap: .6rem;
+  }
+
+  /* Card: tighter rounding, glass still fully active */
+  #productGrid .product-card {
+    border-radius: 1.25rem;
+  }
+
+  /* Body of card: reduce internal padding */
+  #productGrid .product-card .p-4 {
+    padding: .6rem .65rem;
+  }
+  #productGrid .product-card .p-4.pt-3 {
+    padding: .5rem .65rem .6rem;
+  }
+
+  /* Category · keyboard meta — hide to save vertical space */
+  #productGrid .product-card .text-\[10px\].uppercase {
+    display: none;
+  }
+
+  /* Title: smaller, allow 2 lines on narrow col */
+  #productGrid .product-card h3 {
+    font-size: .72rem;
+    line-height: 1.25;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  /* MacBook specs line: one size smaller */
+  #productGrid .product-card .text-\[11px\] {
+    font-size: .6rem;
+    margin-top: .25rem;
+  }
+
+  /* Price section */
+  #productGrid .product-card .text-lg {  /* price number */
+    font-size: .9rem;
+  }
+  #productGrid .product-card .text-\[10px\].text-slate-400 { /* currency label */
+    font-size: .55rem;
+  }
+
+  /* Arrow button: smaller */
+  #productGrid .product-card .w-9.h-9 {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  /* Status badge (liquid-pill): compact */
+  #productGrid .liquid-pill {
+    font-size: .52rem;
+    padding: .18rem .55rem;
+  }
+
+  /* Color / palette badge: hide to keep header clean */
+  #productGrid .product-card .shrink-0.text-\[9px\] {
+    display: none;
+  }
+}
+
+/* Tighten grid gap on very small phones */
+@media (max-width: 374px) {
+  #productGrid { gap: .4rem; }
+  #productGrid .product-card .p-4 { padding: .5rem .55rem; }
+  #productGrid .product-card h3 { font-size: .65rem; }
+  #productGrid .product-card .text-lg { font-size: .8rem; }
+}
