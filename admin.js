@@ -218,14 +218,14 @@ function renderAdminGrid() {
 
   grid.innerHTML = list.map(p => {
     const statusText = p.status === 'Ready' ? 'ພ້ອມຂາຍ' : (p.status === 'Reserved' ? 'ຈອງແລ້ວ' : 'ຂາຍແລ້ວ');
-    const statusColor = p.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : (p.status === 'Reserved' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600');
+    const statusColor = p.status === 'Ready' ? 'pill-ready' : (p.status === 'Reserved' ? 'pill-low' : 'pill-out');
     const mainImg = (p.images && p.images.length > 0 && p.images[0]) ? p.images[0] : 'https://placehold.co/300x220?text=No+Image';
 
     return `
       <div class="admin-card bg-white rounded-3xl-custom border border-slate-100 shadow-sm overflow-hidden flex flex-col">
         <div class="relative h-36 bg-slate-100">
           <img src="${mainImg}" class="w-full h-full object-cover">
-          <span class="absolute top-2 left-2 px-2.5 py-1 rounded-full text-[10px] font-semibold ${statusColor} bg-white/90 shadow-sm">${statusText}</span>
+          <span class="absolute top-2 left-2 liquid-pill ${statusColor}">${statusText}</span>
         </div>
         <div class="p-3 flex-1 flex flex-col justify-between">
           <div>
@@ -764,10 +764,10 @@ function renderUnitRows() {
     ).join('');
 
     const statusBadge = unit.status === 'Ready'
-      ? '<span class="text-[9px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-600 whitespace-nowrap">ພ້ອມຂາຍ</span>'
+      ? '<span class="liquid-pill pill-ready">ພ້ອມຂາຍ</span>'
       : unit.status === 'Sold'
-        ? '<span class="text-[9px] font-bold px-2 py-1 rounded-full bg-slate-200 text-slate-500 whitespace-nowrap">ຂາຍແລ້ວ</span>'
-        : '<span class="text-[9px] font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-600 whitespace-nowrap">ຝາກຂາຍ</span>';
+        ? '<span class="liquid-pill pill-out">ຂາຍແລ້ວ</span>'
+        : '<span class="liquid-pill pill-low">ຝາກຂາຍ</span>';
 
     let detailLine = '';
     if (unit.status === 'Sold') {

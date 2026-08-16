@@ -272,10 +272,10 @@ function renderProducts(products) {
     let statusText, statusColor;
     if (stockTotal !== null) {
       statusText = stockTotal > 0 ? (currentLang === 'EN' ? `${stockTotal} in stock` : `ຍັງເຫຼືອ ${stockTotal} ເຄື່ອງ`) : (currentLang === 'EN' ? 'Sold Out' : 'ໝົດສະຕັອກ');
-      statusColor = stockTotal > 0 ? 'badge-stock badge-stock-ready' : 'badge-stock badge-stock-out';
+      statusColor = stockTotal > 0 ? 'liquid-pill pill-ready' : 'liquid-pill pill-out';
     } else {
       statusText = p.status === 'Ready' ? (currentLang === 'EN' ? 'Ready' : 'ພ້ອມຂາຍ') : (p.status === 'Reserved' ? (currentLang === 'EN' ? 'Reserved' : 'ຈອງແລ້ວ') : (currentLang === 'EN' ? 'Sold' : 'ຂາຍແລ້ວ'));
-      statusColor = p.status === 'Ready' ? 'badge-stock badge-stock-ready' : (p.status === 'Reserved' ? 'badge-stock badge-stock-low' : 'badge-stock badge-stock-out');
+      statusColor = p.status === 'Ready' ? 'liquid-pill pill-ready' : (p.status === 'Reserved' ? 'liquid-pill pill-low' : 'liquid-pill pill-out');
     }
     let mainImg = (p.images && p.images.length > 0 && p.images[0]) ? p.images[0] : 'https://placehold.co/400x300?text=No+Image';
     const delay = Math.min(idx, 11) * 45;
@@ -285,7 +285,7 @@ function renderProducts(products) {
         <div>
           <div class="relative aspect-square bg-slate-100 overflow-hidden">
             <img src="${mainImg}" alt="${p.title}" class="card-img w-full h-full object-cover">
-            <span class="absolute top-3 left-3 ${statusColor} backdrop-blur-sm">${statusText}</span>
+            <span class="absolute top-3 left-3 liquid-pill ${statusColor}">${statusText}</span>
           </div>
           <div class="p-4">
             <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${p.category} · ${formatKeyboard(p.keyboard || 'TH')}</span>
@@ -339,8 +339,8 @@ function openProductModal(id) {
     ? (stockTotal > 0 ? (currentLang === 'EN' ? `${stockTotal} in stock` : `ຍັງເຫຼືອ ${stockTotal} ເຄື່ອງ`) : (currentLang === 'EN' ? 'Sold Out' : 'ໝົດສະຕັອກ'))
     : (p.status === 'Ready' ? (currentLang === 'EN' ? 'Ready' : 'ພ້ອມຂາຍ') : (p.status === 'Reserved' ? (currentLang === 'EN' ? 'Reserved' : 'ຈອງແລ້ວ') : (currentLang === 'EN' ? 'Sold' : 'ຂາຍແລ້ວ')));
   const statusColor = stockTotal !== null
-    ? (stockTotal > 0 ? 'badge-stock badge-stock-ready' : 'badge-stock badge-stock-out')
-    : (p.status === 'Ready' ? 'badge-stock badge-stock-ready' : (p.status === 'Reserved' ? 'badge-stock badge-stock-low' : 'badge-stock badge-stock-out'));
+    ? (stockTotal > 0 ? 'liquid-pill pill-ready' : 'liquid-pill pill-out')
+    : (p.status === 'Ready' ? 'liquid-pill pill-ready' : (p.status === 'Reserved' ? 'liquid-pill pill-low' : 'liquid-pill pill-out'));
 
   let modalBody = document.getElementById('modalBody');
   modalBody.innerHTML = `
@@ -348,7 +348,7 @@ function openProductModal(id) {
       <div class="relative h-64 bg-slate-100 rounded-2xl overflow-hidden">
         <img id="sliderImg" src="${activeImages[0]}" class="w-full h-full object-cover cursor-zoom-in" onclick="openImageZoom(currentSlideIdx)">
         <span class="absolute bottom-3 left-3 w-8 h-8 rounded-full bg-slate-900/60 text-white flex items-center justify-center text-xs pointer-events-none"><i class="fas fa-magnifying-glass-plus"></i></span>
-        <span class="absolute top-3 left-3 ${statusColor} backdrop-blur-sm">${statusText}</span>
+        <span class="absolute top-3 left-3 liquid-pill ${statusColor}">${statusText}</span>
         ${activeImages.length > 1 ? `
           <button onclick="prevSlide()" class="btn-press absolute left-2 top-1/2 -translate-y-1/2 bg-slate-900/60 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-900"><i class="fas fa-chevron-left text-xs"></i></button>
           <button onclick="nextSlide()" class="btn-press absolute right-2 top-1/2 -translate-y-1/2 bg-slate-900/60 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-900"><i class="fas fa-chevron-right text-xs"></i></button>

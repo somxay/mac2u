@@ -122,14 +122,14 @@ function renderAgentList() {
         byColor[c] = (byColor[c] || 0) + (u.status === 'Ready' ? 1 : 0);
       });
       stockBadges = Object.entries(byColor).map(([color, qty]) =>
-        `<span class="text-[10px] font-semibold px-2.5 py-1 rounded-full ${qty > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-400 line-through'}">
+        `<span class="text-[10px] font-semibold px-2.5 py-1 rounded-full ${qty > 0 ? 'liquid-pill pill-ready' : 'liquid-pill pill-out opacity-70'}">
            ${agentColorLabel(color)}: ${qty > 0 ? qty + ' ເຄື່ອງ' : 'ໝົດ'}
          </span>`
       ).join('');
     } else if (p.colorStock && typeof p.colorStock === 'object' && Object.keys(p.colorStock).length > 0) {
       // colorStock legacy
       stockBadges = Object.entries(p.colorStock).map(([color, qty]) =>
-        `<span class="text-[10px] font-semibold px-2.5 py-1 rounded-full ${Number(qty) > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-400 line-through'}">
+        `<span class="text-[10px] font-semibold px-2.5 py-1 rounded-full ${Number(qty) > 0 ? 'liquid-pill pill-ready' : 'liquid-pill pill-out opacity-70'}">
            ${agentColorLabel(color)}: ${Number(qty) > 0 ? qty + ' ເຄື່ອງ' : 'ໝົດ'}
          </span>`
       ).join('');
@@ -140,7 +140,7 @@ function renderAgentList() {
 
     // ປ້າຍຄີບອດ — ສີໃຫ້ຕ່າງຈາກ stock badge (indigo) ຈັດໄວ້ຂ້າງ stock badges
     const kbBadge = p.keyboard
-      ? `<span class="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700">${formatKeyboard(p.keyboard)}</span>`
+      ? `<span class="liquid-pill pill-indigo">${formatKeyboard(p.keyboard)}</span>`
       : '';
 
     return `
