@@ -292,7 +292,9 @@ function formatPriceInput(el) {
   el.value = raw ? Number(raw).toLocaleString('en-US') : '';
 }
 function parsePriceInput(id) {
-  const raw = document.getElementById(id).value.replace(/[^\d]/g, '');
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const raw = el.value.replace(/[^\d]/g, '');
   return raw ? Number(raw) : 0;
 }
 
@@ -505,10 +507,7 @@ async function handleFormSubmit(e) {
     category: document.getElementById('pCategory').value,
     priceLAK: priceLAK,
     wholesalePriceLAK: parsePriceInput('pWholesalePriceLAK'),
-    oldPriceLAK: parsePriceInput('pOldPriceLAK'),
     priceTHB: priceTHB,
-    wholesalePriceTHB: parsePriceInput('pWholesalePriceTHB'),
-    oldPriceTHB: parsePriceInput('pOldPriceTHB'),
     ram: document.getElementById('pRam').value,
     ssd: document.getElementById('pSsd').value,
     year: document.getElementById('pYear').value,
