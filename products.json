@@ -445,8 +445,42 @@
     "cpu": "Apple M1",
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
-    "images": [],
-    "units": [],
+    "images": [
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786959213821_0_758.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786959221595_1_880.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786959228494_2_37.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786959234547_3_815.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786959240500_4_65.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786959246102_5_368.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786959253481_6_794.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786959259946_7_783.jpg"
+    ],
+    "units": [
+      {
+        "sn": "C026833WQ05N",
+        "color": "Space Gray",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": 18500000,
+        "consignment": null
+      },
+      {
+        "sn": "",
+        "color": "Space Gray",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": "",
+        "consignment": null
+      }
+    ],
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
