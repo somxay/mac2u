@@ -128,7 +128,15 @@
     "cpu": "Intel i7",
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
-    "images": [],
+    "images": [
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786958033469_0_89.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786958049758_1_119.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786958065299_2_378.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786958083528_3_555.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786958112194_4_835.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786958131960_5_29.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786958187607_0_973.jpg"
+    ],
     "units": [
       {
         "sn": "C02FH1TXML85",
