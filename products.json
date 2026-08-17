@@ -624,7 +624,20 @@
       "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937282993_6_269.jpg",
       "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937288774_7_403.jpg"
     ],
-    "units": [],
+    "units": [
+      {
+        "sn": "C02630WCQ6L8",
+        "color": "Silver",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": 11500000,
+        "consignment": null
+      }
+    ],
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
