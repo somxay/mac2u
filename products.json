@@ -117,10 +117,7 @@
     "category": "Macbook",
     "priceLAK": 13500000,
     "wholesalePriceLAK": 11500000,
-    "oldPriceLAK": 0,
     "priceTHB": 0,
-    "wholesalePriceTHB": 0,
-    "oldPriceTHB": 0,
     "ram": "16",
     "ssd": "500",
     "year": "2020",
@@ -146,15 +143,15 @@
         "salePrice": 11500000
       },
       {
-        "sn": "",
+        "sn": "CO2D22F9ML85",
         "color": "Space Gray",
-        "status": "Ready",
-        "saleType": "",
+        "status": "Sold",
+        "saleType": "agent",
         "hasWarranty": false,
-        "soldDate": "",
+        "soldDate": "2026-08-17",
         "warrantyEndDate": "",
         "cycleCount": "",
-        "salePrice": "",
+        "salePrice": 11500000,
         "consignment": null
       },
       {
