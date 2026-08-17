@@ -459,9 +459,7 @@
     "cpu": "Intel i5",
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
-    "images": [
-      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786957351262_0_741.jpg"
-    ],
+    "images": [],
     "units": [],
     "whatsapp": "22258416",
     "status": "Ready",
