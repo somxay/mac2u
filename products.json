@@ -614,7 +614,16 @@
     "cpu": "Apple M1",
     "battery": "",
     "screenSize": "13.3 ນິ້ວ",
-    "images": [],
+    "images": [
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937246335_0_144.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937256436_1_873.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937261671_2_697.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937266300_3_773.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937271831_4_84.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937277401_5_18.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937282993_6_269.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786937288774_7_403.jpg"
+    ],
     "units": [],
     "whatsapp": "22258416",
     "status": "Ready",
