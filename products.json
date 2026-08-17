@@ -128,15 +128,7 @@
     "cpu": "Intel i7",
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
-    "images": [
-      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786957232302_0_825.jpg",
-      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786957244974_1_269.jpg",
-      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786957263830_2_386.jpg",
-      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786957274758_3_680.jpg",
-      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786957285012_4_917.jpg",
-      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786957293498_5_25.jpg",
-      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786957314896_6_504.jpg"
-    ],
+    "images": [],
     "units": [
       {
         "sn": "C02FH1TXML85",
@@ -405,24 +397,19 @@
     "category": "Macbook",
     "priceLAK": 18500000,
     "wholesalePriceLAK": 15500000,
-    "oldPriceLAK": 0,
     "priceTHB": 0,
-    "wholesalePriceTHB": 0,
-    "oldPriceTHB": 0,
     "ram": "16",
     "ssd": "500",
     "year": "2020",
+    "yearFrom": "",
+    "yearTo": "",
     "keyboard": "TH",
     "color": "Space Gray",
     "cpu": "Apple M1",
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
-    "warrantyDays": 30,
-    "repairHistory": "",
     "images": [],
-    "colorStock": {
-      "ສີເທົາ": 2
-    },
+    "units": [],
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
@@ -461,24 +448,21 @@
     "category": "Macbook",
     "priceLAK": 6900000,
     "wholesalePriceLAK": 5500000,
-    "oldPriceLAK": 0,
     "priceTHB": 0,
-    "wholesalePriceTHB": 0,
-    "oldPriceTHB": 0,
     "ram": "8",
     "ssd": "256",
     "year": "2017",
+    "yearFrom": "",
+    "yearTo": "",
     "keyboard": "EN",
     "color": "Space Gray",
     "cpu": "Intel i5",
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
-    "warrantyDays": 34,
-    "repairHistory": "",
-    "images": [],
-    "colorStock": {
-      "ສີເທົາ": 10
-    },
+    "images": [
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786957351262_0_741.jpg"
+    ],
+    "units": [],
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
