@@ -300,11 +300,11 @@ function renderProducts(products) {
             ` : (p.keyboard ? `<span class="inline-block mt-1 liquid-pill pill-indigo">${formatKeyboard(p.keyboard)}</span>` : '')}
           </div>
         </div>
-        <div class="px-3 py-2.5 border-t border-white/30 flex items-center justify-between">
-          <div class="min-w-0 overflow-hidden">
+        <div class="px-3 py-2.5 border-t border-white/30 flex items-center gap-2">
+          <div class="flex-1 min-w-0">
             <span class="text-[9px] text-slate-400 block">${currentCurrency === 'THB' ? 'ລາຄາ (บาท)' : 'ລາຄາ (ກີບ)'}</span>
             ${isSold ? `<span class="text-slate-400 font-bold text-xs italic">${stockTotal !== null ? 'ໝົດສະຕັອກ' : 'ຂາຍແລ້ວ'}</span>` : `
-              <p class="text-rose-600 font-bold text-[0.82rem] leading-tight whitespace-nowrap">${priceFormatted} ${currencySymbol}</p>
+              <span class="inline-flex items-baseline gap-0.5 text-rose-600 font-bold text-[0.8rem] leading-tight whitespace-nowrap">${priceFormatted}&nbsp;${currencySymbol}</span>
             `}
           </div>
           <div class="shrink-0 w-7 h-7 rounded-full bg-slate-50/80 text-slate-400 flex items-center justify-center transition-all duration-300 group-hover:bg-slate-900 group-hover:text-white">
