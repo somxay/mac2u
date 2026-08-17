@@ -304,7 +304,7 @@ function renderProducts(products) {
           <div class="flex-1 min-w-0">
             <span class="text-[9px] text-slate-400 block">${currentCurrency === 'THB' ? 'ລາຄາ (บาท)' : 'ລາຄາ (ກີບ)'}</span>
             ${isSold ? `<span class="text-slate-400 font-bold text-xs italic">${stockTotal !== null ? 'ໝົດສະຕັອກ' : 'ຂາຍແລ້ວ'}</span>` : `
-              <span class="inline-flex items-baseline gap-0.5 text-rose-600 font-bold text-[0.8rem] leading-tight whitespace-nowrap">${priceFormatted}&nbsp;${currencySymbol}</span>
+              <span class="inline-flex items-baseline gap-0.5 text-rose-600 font-bold text-[0.95rem] leading-tight whitespace-nowrap">${priceFormatted}&nbsp;${currencySymbol}</span>
             `}
           </div>
           <div class="shrink-0 w-7 h-7 rounded-full bg-slate-50/80 text-slate-400 flex items-center justify-center transition-all duration-300 group-hover:bg-slate-900 group-hover:text-white">

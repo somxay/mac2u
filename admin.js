@@ -371,10 +371,10 @@ function openEditModal(id) {
     document.getElementById('pTitle').value = p.title;
     document.getElementById('pPriceLAK').value = p.priceLAK ? Number(p.priceLAK).toLocaleString('en-US') : '';
     document.getElementById('pWholesalePriceLAK').value = p.wholesalePriceLAK ? Number(p.wholesalePriceLAK).toLocaleString('en-US') : '';
-    document.getElementById('pOldPriceLAK').value = p.oldPriceLAK ? Number(p.oldPriceLAK).toLocaleString('en-US') : '';
-    document.getElementById('pWholesalePriceTHB').value = p.wholesalePriceTHB ? Number(p.wholesalePriceTHB).toLocaleString('en-US') : '';
+    // pOldPriceLAK removed from form — skip silently
+    // pWholesalePriceTHB removed from form — skip silently
     document.getElementById('pPriceTHB').value = p.priceTHB ? Number(p.priceTHB).toLocaleString('en-US') : '';
-    document.getElementById('pOldPriceTHB').value = p.oldPriceTHB ? Number(p.oldPriceTHB).toLocaleString('en-US') : '';
+    // pOldPriceTHB removed from form — skip silently
     document.getElementById('pRam').value = p.ram || '';
     document.getElementById('pSsd').value = p.ssd || '';
     document.getElementById('pYear').value = p.year || '';
