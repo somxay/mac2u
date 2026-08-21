@@ -1244,10 +1244,7 @@
     "category": "Macbook",
     "priceLAK": 23800000,
     "wholesalePriceLAK": 19300000,
-    "oldPriceLAK": 0,
     "priceTHB": 0,
-    "wholesalePriceTHB": 0,
-    "oldPriceTHB": 0,
     "ram": "16",
     "ssd": "500",
     "year": "2021",
@@ -1258,8 +1255,6 @@
     "cpu": "Apple M1 Pro",
     "battery": "64",
     "screenSize": "14 ນິ້ວ",
-    "warrantyDays": 30,
-    "repairHistory": "",
     "images": [
       "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/undefined/1786533928517_83.jpg",
       "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/undefined/1786605382197_957.jpg",
@@ -1269,10 +1264,32 @@
       "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786607672428_3_457.jpg",
       "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1786607677706_4_720.jpg"
     ],
-    "colorStock": {
-      "Space Gray": 1,
-      "Silver": 1
-    },
+    "units": [
+      {
+        "sn": "",
+        "color": "Silver",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": "",
+        "consignment": null
+      },
+      {
+        "sn": "",
+        "color": "Space Gray",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": "",
+        "consignment": null
+      }
+    ],
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
