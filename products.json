@@ -17,7 +17,68 @@
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
     "images": [],
-    "units": [],
+    "units": [
+      {
+        "sn": "",
+        "color": "Space Gray",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": "",
+        "consignment": null
+      },
+      {
+        "sn": "",
+        "color": "Space Gray",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": "",
+        "consignment": null
+      },
+      {
+        "sn": "",
+        "color": "Space Gray",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": "",
+        "consignment": null
+      },
+      {
+        "sn": "",
+        "color": "Space Gray",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": "",
+        "consignment": null
+      },
+      {
+        "sn": "",
+        "color": "Space Gray",
+        "status": "Ready",
+        "saleType": "",
+        "hasWarranty": false,
+        "soldDate": "",
+        "warrantyEndDate": "",
+        "cycleCount": "",
+        "salePrice": "",
+        "consignment": null
+      }
+    ],
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": "2026-08-11T20:27:03.374Z"
