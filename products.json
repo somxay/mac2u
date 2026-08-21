@@ -1466,7 +1466,17 @@
     "cpu": "Intel i5",
     "battery": "80-90",
     "screenSize": "13.3 ນິ້ວ",
-    "images": [],
+    "images": [
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787299626115_0_287.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787299631386_1_993.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787299638027_2_279.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787299644449_3_927.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787299649147_4_848.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787299653873_5_134.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787299657501_6_294.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787299661250_7_848.jpg",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787299664865_8_857.jpg"
+    ],
     "units": [
       {
         "sn": "",
