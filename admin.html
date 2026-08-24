@@ -12,6 +12,10 @@
     /* admin-specific: category form toggle */
     #productForm.category-nonmacbook .field-macbook-only { display: none !important; }
     #productForm.category-macbook .field-nonmacbook-only { display: none !important; }
+    /* DJ: hide both macbook-only AND year-range (accessories-only), show dj-only */
+    #productForm.category-dj .field-macbook-only { display: none !important; }
+    #productForm.category-dj .field-nonmacbook-only { display: none !important; }
+    #productForm:not(.category-dj) .field-dj-only { display: none !important; }
   </style>
 </head>
 <body class="text-slate-800 antialiased">
@@ -197,6 +201,20 @@
             <select id="pYearEnd" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs"></select>
           </div>
           <p class="text-[10px] text-slate-400 ml-1 col-span-2">ຕົວຢ່າງ: ສາຍສາກນີ້ໃຊ້ໄດ້ກັບ MacBook ປີ 2012 ຮອດ 2015 → ເລືອກ "ຕັ້ງແຕ່ປີ" = 2012, "ຮອດປີ" = 2015</p>
+        </div>
+
+        <!-- ຊ່ອງຂໍ້ມູນສະເພາະ ເຄື່ອງ DJ -->
+        <div class="field-dj-only">
+          <label class="text-[10px] font-bold text-purple-600 block mb-1 ml-1"><i class="fas fa-barcode"></i> ID / Serial Number (SN)</label>
+          <input id="pDjSn" type="text" placeholder="ຕົວຢ່າງ: Pioneer DDJ-REV7 #SN12345" class="w-full bg-purple-50 border border-purple-200 p-2.5 rounded-xl text-xs font-mono">
+        </div>
+        <div class="field-dj-only">
+          <label class="text-[10px] font-bold text-purple-600 block mb-1 ml-1"><i class="fas fa-circle-half-stroke"></i> ສະພາບເຄື່ອງ (%)</label>
+          <div class="flex items-center gap-2">
+            <input id="pDjCondition" type="number" min="1" max="100" step="1" placeholder="ຕົວຢ່າງ: 95" class="flex-1 bg-purple-50 border border-purple-200 p-2.5 rounded-xl text-xs">
+            <span class="text-sm text-slate-500 font-bold">%</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1 ml-1">ລະດັບຄວາມສົມບູນຂອງເຄື່ອງ (100% = ຄາຍຄຸ, 90-95% = ໃຊ້ດີ, ຕ່ຳກວ່ານັ້ນ = ຊ່ຳ)</p>
         </div>
 
         <div class="field-macbook-only">
