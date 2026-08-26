@@ -1710,5 +1710,34 @@
     "whatsapp": "22258416",
     "status": "Ready",
     "soldDate": ""
+  },
+  {
+    "id": "196158",
+    "title": "FL Studio 2026 ເຊັບງານ/ລົບສຽງຄົນຮ້ອງ-ສຽງເພງໄດ້",
+    "category": "Software",
+    "priceLAK": 1390000,
+    "wholesalePriceLAK": 800000,
+    "priceTHB": 0,
+    "ram": "",
+    "ssd": "",
+    "year": "",
+    "yearFrom": "",
+    "yearTo": "",
+    "djSn": "",
+    "djCondition": "",
+    "programYear": 2026,
+    "keyboard": "TH",
+    "color": "",
+    "cpu": "",
+    "battery": "",
+    "screenSize": "",
+    "images": [
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787734244993_0_917.webp",
+      "https://cdn.jsdelivr.net/gh/somxay/mac2u@main/images/1787734251531_0_850.avif"
+    ],
+    "units": [],
+    "whatsapp": "22258416",
+    "status": "Ready",
+    "soldDate": ""
   }
 ]
