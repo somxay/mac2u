@@ -367,6 +367,9 @@ function openEditModal(id) {
     document.getElementById('pDjSn').value = '';
     document.getElementById('pDjCondition').value = '';
     document.getElementById('pProgramYear').value = '';
+    document.getElementById('pSoftwareOs').value = '';
+    document.getElementById('pSoftwareLifetime').value = '';
+    document.getElementById('pSoftwareDesc').value = '';
   } else {
     const p = allProducts.find(x => x.id.toString() === id.toString());
     if (!p) return;
@@ -391,6 +394,9 @@ function openEditModal(id) {
     document.getElementById('pDjSn').value = p.djSn || '';
     document.getElementById('pDjCondition').value = p.djCondition || '';
     document.getElementById('pProgramYear').value = p.programYear || '';
+    document.getElementById('pSoftwareOs').value = p.softwareOs || '';
+    document.getElementById('pSoftwareLifetime').value = p.softwareLifetime || '';
+    document.getElementById('pSoftwareDesc').value = p.softwareDesc || '';
     document.getElementById('pKeyboard').value = p.keyboard || 'TH';
     setSelectOrOtherValue('pColorSelect', 'pColorOther', p.color || '');
     setSelectOrOtherValue('pCpuSelect', 'pCpuOther', p.cpu || '');
@@ -524,7 +530,10 @@ async function handleFormSubmit(e) {
     yearTo: document.getElementById('pYearEnd').value,
     djSn: document.getElementById('pDjSn')?.value || '',
     djCondition: document.getElementById('pDjCondition')?.value ? Number(document.getElementById('pDjCondition').value) : '',
-    programYear: document.getElementById('pProgramYear')?.value ? Number(document.getElementById('pProgramYear').value) : '',
+    programYear: document.getElementById('pProgramYear')?.value || '',
+    softwareOs: document.getElementById('pSoftwareOs')?.value || '',
+    softwareLifetime: document.getElementById('pSoftwareLifetime')?.value || '',
+    softwareDesc: document.getElementById('pSoftwareDesc')?.value || '',
     keyboard: document.getElementById('pKeyboard').value,
     color: getSelectOrOtherValue('pColorSelect', 'pColorOther'),
     cpu: getSelectOrOtherValue('pCpuSelect', 'pCpuOther'),

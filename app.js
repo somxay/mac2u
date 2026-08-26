@@ -297,6 +297,9 @@ function renderProducts(products) {
             ${p.category === 'Macbook' ? `
               <p class="text-[10px] text-slate-400 font-medium mt-1 leading-snug">${p.cpu ? p.cpu + ' · ' : ''}RAM ${p.ram || '-'}GB · SSD ${p.ssd || '-'}GB${p.screenSize ? ' · ' + p.screenSize : ''}</p>
               <span class="inline-block mt-1 liquid-pill pill-indigo">${formatKeyboard(p.keyboard || 'TH')}</span>
+            ` : p.category === 'Software' ? `
+              ${p.programYear ? `<p class="text-[10px] text-teal-600 font-semibold mt-1">Version ${p.programYear}${p.softwareOs ? ' · ' + p.softwareOs : ''}${p.softwareLifetime ? ' · ' + p.softwareLifetime : ''}</p>` : ''}
+              ${p.softwareDesc ? `<p class="text-[10px] text-slate-400 mt-1 line-clamp-2 leading-snug">${p.softwareDesc}</p>` : ''}
             ` : (p.keyboard ? `<span class="inline-block mt-1 liquid-pill pill-indigo">${formatKeyboard(p.keyboard)}</span>` : '')}
           </div>
         </div>
@@ -379,15 +382,41 @@ function openProductModal(id) {
             <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-calendar-days"></i> ປີຜະລິດ</span>
             <p class="font-semibold text-xs text-slate-700 mt-1">${p.year || '-'}</p>
           </div>
-        ` : ''}
-        <div class="bg-slate-50 rounded-2xl p-3">
-          <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-display"></i> ຂະໜາດໜ້າຈໍ</span>
-          <p class="font-semibold text-xs text-slate-700 mt-1">${p.screenSize || '-'}</p>
-        </div>
-        <div class="bg-slate-50 rounded-2xl p-3">
-          <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-battery-half"></i> ແບັດ / ຮອບສາກ</span>
-          <p class="font-semibold text-xs text-slate-700 mt-1">${p.battery || '-'}</p>
-        </div>
+          <div class="bg-slate-50 rounded-2xl p-3">
+            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-display"></i> ຂະໜາດໜ້າຈໍ</span>
+            <p class="font-semibold text-xs text-slate-700 mt-1">${p.screenSize || '-'}</p>
+          </div>
+          <div class="bg-slate-50 rounded-2xl p-3">
+            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-battery-half"></i> ແບັດ / ຮອບສາກ</span>
+            <p class="font-semibold text-xs text-slate-700 mt-1">${p.battery || '-'}</p>
+          </div>
+        ` : p.category === 'Software' ? `
+          ${p.programYear ? `<div class="bg-teal-50 rounded-2xl p-3">
+            <span class="text-[10px] text-teal-600 flex items-center gap-1.5"><i class="fas fa-code-branch"></i> Version / ປີ</span>
+            <p class="font-semibold text-xs text-teal-700 mt-1">${p.programYear}</p>
+          </div>` : ''}
+          ${p.softwareOs ? `<div class="bg-teal-50 rounded-2xl p-3">
+            <span class="text-[10px] text-teal-600 flex items-center gap-1.5"><i class="fas fa-display"></i> ລະບົບທີ່ຮອງຮັບ</span>
+            <p class="font-semibold text-xs text-teal-700 mt-1">${p.softwareOs}</p>
+          </div>` : ''}
+          ${p.softwareLifetime ? `<div class="bg-teal-50 rounded-2xl p-3 col-span-2">
+            <span class="text-[10px] text-teal-600 flex items-center gap-1.5"><i class="fas fa-infinity"></i> ອາຍຸການໃຊ້ງານ</span>
+            <p class="font-semibold text-xs text-teal-700 mt-1">${p.softwareLifetime}</p>
+          </div>` : ''}
+          ${p.softwareDesc ? `<div class="bg-slate-50 rounded-2xl p-3 col-span-2">
+            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-align-left"></i> ລາຍລະອຽດ</span>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">${p.softwareDesc}</p>
+          </div>` : ''}
+        ` : `
+          <div class="bg-slate-50 rounded-2xl p-3">
+            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-display"></i> ຂະໜາດໜ້າຈໍ</span>
+            <p class="font-semibold text-xs text-slate-700 mt-1">${p.screenSize || '-'}</p>
+          </div>
+          <div class="bg-slate-50 rounded-2xl p-3">
+            <span class="text-[10px] text-slate-400 flex items-center gap-1.5"><i class="fas fa-battery-half"></i> ແບັດ / ຮອບສາກ</span>
+            <p class="font-semibold text-xs text-slate-700 mt-1">${p.battery || '-'}</p>
+          </div>
+        `}
       </div>
 
       ${p.category === 'Macbook' ? `

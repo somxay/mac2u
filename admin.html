@@ -223,10 +223,27 @@
         </div>
 
         <!-- ຊ່ອງຂໍ້ມູນສະເພາະ ລົງໂປຣແກຣມ -->
+        <div class="field-software-only">
+          <label class="text-[10px] font-bold text-teal-600 block mb-1 ml-1"><i class="fas fa-code-branch"></i> ປີ / Version ໂປຣແກຣມ</label>
+          <input id="pProgramYear" type="text" placeholder="ຕົວຢ່າງ: 2025 ຫຼື v24.1" class="w-full bg-teal-50 border border-teal-200 p-2.5 rounded-xl text-xs">
+          <p class="text-[10px] text-slate-400 mt-1 ml-1">ໃສ່ປີ ຫຼື ເລກ version (ຕົວຢ່າງ: 2025, v24, Creative Cloud 2024)</p>
+        </div>
+        <div class="field-software-only">
+          <label class="text-[10px] font-bold text-teal-600 block mb-1 ml-1"><i class="fas fa-display"></i> ລະບົບທີ່ຮອງຮັບ</label>
+          <select id="pSoftwareOs" class="w-full bg-teal-50 border border-teal-200 p-2.5 rounded-xl text-xs">
+            <option value="">-- ເລືອກລະບົບ --</option>
+            <option value="macOS">macOS</option>
+            <option value="Windows">Windows</option>
+            <option value="macOS & Windows">ທັງ macOS ແລະ Windows</option>
+          </select>
+        </div>
+        <div class="field-software-only">
+          <label class="text-[10px] font-bold text-teal-600 block mb-1 ml-1"><i class="fas fa-infinity"></i> ອາຍຸການໃຊ້ງານ</label>
+          <input id="pSoftwareLifetime" type="text" placeholder="ຕົວຢ່າງ: ຕະຫຼອດຊີບ, 1 ປີ" class="w-full bg-teal-50 border border-teal-200 p-2.5 rounded-xl text-xs">
+        </div>
         <div class="field-software-only md:col-span-2">
-          <label class="text-[10px] font-bold text-teal-600 block mb-1 ml-1"><i class="fas fa-code-branch"></i> ລຸ້ນປີ / Version ຂອງໂປຣແກຣມ</label>
-          <input id="pProgramYear" type="number" min="2010" max="2035" step="1" placeholder="ຕົວຢ່າງ: 2025" class="w-full bg-teal-50 border border-teal-200 p-2.5 rounded-xl text-xs">
-          <p class="text-[10px] text-slate-400 mt-1 ml-1">ໃສ່ປີ ຂອງ version ໂປຣແກຣມ ທີ່ໃຫ້ບໍລິການ (ຕົວຢ່າງ: MacOS 2024, Adobe 2025)</p>
+          <label class="text-[10px] font-bold text-teal-600 block mb-1 ml-1"><i class="fas fa-align-left"></i> ລາຍລະອຽດໂປຣແກຣມ</label>
+          <textarea id="pSoftwareDesc" rows="3" placeholder="ອະທິບາຍໂປຣແກຣມ, ຄວາມສາມາດ, ຂໍ້ດີ ຫຼື ລາຍລະອຽດສຳຄັນ..." class="w-full bg-teal-50 border border-teal-200 p-2.5 rounded-xl text-xs resize-none"></textarea>
         </div>
 
         <div class="field-macbook-only">
