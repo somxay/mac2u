@@ -16,6 +16,11 @@
     #productForm.category-dj .field-macbook-only { display: none !important; }
     #productForm.category-dj .field-nonmacbook-only { display: none !important; }
     #productForm:not(.category-dj) .field-dj-only { display: none !important; }
+    /* Software: hide macbook + year-range + SN/bulk, show software-only */
+    #productForm.category-software .field-macbook-only { display: none !important; }
+    #productForm.category-software .field-nonmacbook-only { display: none !important; }
+    #productForm.category-software .field-no-sn { display: none !important; }
+    #productForm:not(.category-software) .field-software-only { display: none !important; }
   </style>
 </head>
 <body class="text-slate-800 antialiased">
@@ -217,6 +222,13 @@
           <p class="text-[10px] text-slate-400 mt-1 ml-1">ລະດັບຄວາມສົມບູນຂອງເຄື່ອງ (100% = ຄາຍຄຸ, 90-95% = ໃຊ້ດີ, ຕ່ຳກວ່ານັ້ນ = ຊ່ຳ)</p>
         </div>
 
+        <!-- ຊ່ອງຂໍ້ມູນສະເພາະ ລົງໂປຣແກຣມ -->
+        <div class="field-software-only md:col-span-2">
+          <label class="text-[10px] font-bold text-teal-600 block mb-1 ml-1"><i class="fas fa-code-branch"></i> ລຸ້ນປີ / Version ຂອງໂປຣແກຣມ</label>
+          <input id="pProgramYear" type="number" min="2010" max="2035" step="1" placeholder="ຕົວຢ່າງ: 2025" class="w-full bg-teal-50 border border-teal-200 p-2.5 rounded-xl text-xs">
+          <p class="text-[10px] text-slate-400 mt-1 ml-1">ໃສ່ປີ ຂອງ version ໂປຣແກຣມ ທີ່ໃຫ້ບໍລິການ (ຕົວຢ່າງ: MacOS 2024, Adobe 2025)</p>
+        </div>
+
         <div class="field-macbook-only">
           <label class="text-[10px] font-bold text-slate-400 block mb-1 ml-1">ຄີບອດ</label>
           <select id="pKeyboard" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs">
@@ -275,7 +287,7 @@
           </select>
           <p class="text-[10px] text-slate-400 mt-1 ml-1">ຖ້າສິນຄ້ານີ້ໃສ່ SN ຢູ່ລຸ່ມ, ສະຖານະຈະຄິດໄລ່ຈາກ SN ແທນ</p>
         </div>
-        <div>
+        <div class="field-no-sn">
           <label class="text-[10px] font-bold text-indigo-600 block mb-1 ml-1"><i class="fas fa-layer-group"></i> ເພີ່ມສະຕັອກແບບກຸ່ມ</label>
           <div class="flex items-center gap-2">
             <input id="bulkAddQty" type="number" min="1" step="1" value="10" placeholder="ຈຳນວນ" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl text-xs px-3 py-2.5">
@@ -284,7 +296,7 @@
           <p class="text-[10px] text-slate-400 mt-1 ml-1">ເພີ່ມໄດ້ຫຼາຍເຄື່ອງໂດຍຍັງບໍ່ຕ້ອງໃສ່ SN (ໃສ່ SN ຕອນຂາຍ)</p>
         </div>
 
-        <div class="md:col-span-2">
+        <div class="md:col-span-2 field-no-sn">
           <label class="text-[10px] font-bold text-indigo-600 block mb-1 ml-1"><i class="fas fa-barcode"></i> ຈັດການ Serial Number (SN) ແຕ່ລະເຄື່ອງ</label>
           <p class="text-[10px] text-slate-400 mb-2 ml-1">SN ໃຊ້ສຳລັບ<b>ກວດສອບການຮັບປະກັນ</b>ເທົ່ານັ້ນ — ຈຳນວນທີ່ໂຊໃນໜ້າຮ້ານຄຳນວນຈາກ <b>ຈຳນວນ unit ທັງໝົດ ລົບ ທີ່ຂາຍ/ຝາກ</b>. ກົດ "ຂາຍ" ຫຼື "ຝາກຂາຍ" ເພື່ອຕັດສະຕັອກ, SN ຈະບໍ່ໂຊໃຫ້ລູກຄ້າ.</p>
           <div id="unitRows" class="space-y-2 mb-2"></div>

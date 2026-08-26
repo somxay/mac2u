@@ -259,12 +259,13 @@ function renderAdminGrid() {
 function toggleCategoryFields() {
   const category = document.getElementById('pCategory').value;
   const form = document.getElementById('productForm');
-  // Reset all category classes first
-  form.classList.remove('category-macbook', 'category-nonmacbook', 'category-dj');
+  form.classList.remove('category-macbook', 'category-nonmacbook', 'category-dj', 'category-software');
   if (category === 'Macbook') {
     form.classList.add('category-macbook');
   } else if (category === 'DJ') {
     form.classList.add('category-dj');
+  } else if (category === 'Software') {
+    form.classList.add('category-software');
   } else {
     form.classList.add('category-nonmacbook');
   }
@@ -365,6 +366,7 @@ function openEditModal(id) {
     document.getElementById('pYearEnd').value = '';
     document.getElementById('pDjSn').value = '';
     document.getElementById('pDjCondition').value = '';
+    document.getElementById('pProgramYear').value = '';
   } else {
     const p = allProducts.find(x => x.id.toString() === id.toString());
     if (!p) return;
@@ -388,6 +390,7 @@ function openEditModal(id) {
     document.getElementById('pYearEnd').value = p.yearTo || '';
     document.getElementById('pDjSn').value = p.djSn || '';
     document.getElementById('pDjCondition').value = p.djCondition || '';
+    document.getElementById('pProgramYear').value = p.programYear || '';
     document.getElementById('pKeyboard').value = p.keyboard || 'TH';
     setSelectOrOtherValue('pColorSelect', 'pColorOther', p.color || '');
     setSelectOrOtherValue('pCpuSelect', 'pCpuOther', p.cpu || '');
@@ -521,6 +524,7 @@ async function handleFormSubmit(e) {
     yearTo: document.getElementById('pYearEnd').value,
     djSn: document.getElementById('pDjSn')?.value || '',
     djCondition: document.getElementById('pDjCondition')?.value ? Number(document.getElementById('pDjCondition').value) : '',
+    programYear: document.getElementById('pProgramYear')?.value ? Number(document.getElementById('pProgramYear').value) : '',
     keyboard: document.getElementById('pKeyboard').value,
     color: getSelectOrOtherValue('pColorSelect', 'pColorOther'),
     cpu: getSelectOrOtherValue('pCpuSelect', 'pCpuOther'),
