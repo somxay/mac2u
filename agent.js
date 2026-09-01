@@ -139,11 +139,15 @@ function renderAgentList() {
       ).join('');
     }
 
-    const specs = [p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.year, p.screenSize]
-      .filter(Boolean).join(' · ');
+    const isSoftware = (p.category || '').toLowerCase() === 'software';
 
-    // ປ້າຍຄີບອດ — ສີໃຫ້ຕ່າງຈາກ stock badge (indigo) ຈັດໄວ້ຂ້າງ stock badges
-    const kbBadge = p.keyboard
+    const specs = !isSoftware
+      ? [p.cpu, p.ram ? p.ram + ' GB' : '', p.ssd ? p.ssd + ' GB' : '', p.year, p.screenSize]
+          .filter(Boolean).join(' · ')
+      : [p.programYear ? 'Version ' + p.programYear : '', p.softwareOs, p.softwareLifetime]
+          .filter(Boolean).join(' · ');
+
+    const kbBadge = (!isSoftware && p.keyboard)
       ? `<span class="liquid-pill pill-indigo">${formatKeyboard(p.keyboard)}</span>`
       : '';
 
